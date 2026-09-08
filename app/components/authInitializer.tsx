@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/zustand/auth-store";
 
-export function AuthInitializer({ children }: { children: React.ReactNode }) {
-  const { checkAuth } = useAuth();
-  const isLoading = useAuthStore((s) => s.isLoading);
+export function AuthInitializer({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   if (isLoading) {
     return (
