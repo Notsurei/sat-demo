@@ -1,5 +1,3 @@
-"use server";
-
 import { NextRequest, NextResponse } from "next/server";
 import {
   requireAdmin,
@@ -9,11 +7,17 @@ import {
 import { getUserFromRequest } from "../../util/auth";
 import { prisma } from "../../util/prisma";
 import { z, ZodError } from "zod";
+import type { BankPurpose, Difficulty } from "@prisma/client";
+
+const BankPurposeEnum = z.enum(["PRACTICE", "FULL_TEST", "MIXED"]);
+const DifficultyEnum = z.enum(["EASY", "MEDIUM", "HARD"]);
 
 const ImportBankSchema = z.object({
   title: z.string().min(1),
   version: z.string().optional(),
   description: z.string().optional(),
+
+  purpose: BankPurposeEnum.optional().default("MIXED"),
 
   sections: z.array(
     z.object({
@@ -31,26 +35,20 @@ const ImportBankSchema = z.object({
           audioUrl: z.string().optional(),
           order: z.number(),
 
+          difficulty: DifficultyEnum.nullable().optional(),
+
           questions: z.array(
             z.object({
               externalId: z.string().optional(),
-
               prompt: z.string(),
-
               passage: z.string().nullable().optional(),
-
               domain: z.string().optional(),
               subtopic: z.string().optional(),
-
-              difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
-
+              difficulty: DifficultyEnum,
               type: z.enum(["MCQ", "GRID_IN"]),
-
               correctAnswer: z.string().optional(),
               correctTextAnswer: z.string().optional(),
-
               explanation: z.string().optional(),
-
               order: z.number(),
 
               options: z.array(
@@ -68,7 +66,7 @@ const ImportBankSchema = z.object({
   ),
 });
 
-type Difficulty = "EASY" | "MEDIUM" | "HARD";
+type ParsedBank = z.infer<typeof ImportBankSchema>;
 
 function transformLegacyFormat(raw: any) {
   const { metadata, sections } = raw;
@@ -77,6 +75,13 @@ function transformLegacyFormat(raw: any) {
     math: "SAT_MATH",
     rw: "SAT_RW",
   };
+
+  const purposeRaw = String(metadata?.purpose ?? "").toUpperCase();
+  const purpose: BankPurpose = ["PRACTICE", "FULL_TEST", "MIXED"].includes(
+    purposeRaw,
+  )
+    ? (purposeRaw as BankPurpose)
+    : "MIXED";
 
   const transformedSections = Object.entries(sections || {}).map(
     ([key, data]: [string, any], sectionIndex) => {
@@ -89,10 +94,18 @@ function transformLegacyFormat(raw: any) {
 
           const modulePassage =
             qs.find(
-              (question: any) =>
-                typeof question.text === "string" &&
-                question.text.trim().length > 0,
+              (q: any) =>
+                typeof q.text === "string" && q.text.trim().length > 0,
             )?.text ?? null;
+
+          // 👇 Detect difficulty của module từ modKey
+          const modKeyLower = modKey.toLowerCase();
+          let moduleDifficulty: Difficulty | null = null;
+
+          if (modKeyLower.includes("easy")) moduleDifficulty = "EASY";
+          else if (modKeyLower.includes("hard")) moduleDifficulty = "HARD";
+          else if (modKeyLower.includes("medium")) moduleDifficulty = "MEDIUM";
+          else if (modKeyLower.includes("advanced")) moduleDifficulty = "HARD";
 
           return {
             key: modKey,
@@ -101,11 +114,12 @@ function transformLegacyFormat(raw: any) {
               .replace("_easy", " Easy")
               .replace("_hard", " Hard")}`,
             order: moduleIndex + 1,
-
             passage: modulePassage,
+            difficulty: moduleDifficulty,
 
             questions: qs.map((question: any, questionIndex: number) => {
-              const isMCQ = question.type === "mcq" || question.type === "MCQ";
+              const isMCQ =
+                question.type === "mcq" || question.type === "MCQ";
               const isGridIn =
                 question.type === "grid-in" ||
                 question.type === "GRID_IN" ||
@@ -146,12 +160,13 @@ function transformLegacyFormat(raw: any) {
               }
 
               if (isGridIn) {
-                // Ưu tiên correctTextAnswer, fallback sang correctAnswer
                 correctTextAnswer =
                   question.correctTextAnswer || question.correctAnswer;
               }
 
-              let difficulty: Difficulty = "MEDIUM";
+              // Difficulty per-question
+              let difficulty: Difficulty = moduleDifficulty ?? "MEDIUM";
+
               if (question.level) {
                 const levelMap: Record<string, Difficulty> = {
                   easy: "EASY",
@@ -160,23 +175,16 @@ function transformLegacyFormat(raw: any) {
                   "2026 advanced": "HARD",
                   advanced: "HARD",
                 };
-                const key =
+                const levelKey =
                   typeof question.level === "string"
                     ? question.level.toLowerCase()
                     : "";
-                if (levelMap[key]) difficulty = levelMap[key];
+                if (levelMap[levelKey]) difficulty = levelMap[levelKey];
               } else {
                 const id = String(question.id || "").toLowerCase();
-                const moduleKey = modKey.toLowerCase();
-                if (moduleKey.includes("easy") || id.includes("easy")) {
-                  difficulty = "EASY";
-                } else if (
-                  moduleKey.includes("hard") ||
-                  id.includes("hard") ||
-                  moduleKey.includes("advanced")
-                ) {
+                if (id.includes("easy")) difficulty = "EASY";
+                else if (id.includes("hard") || id.includes("advanced"))
                   difficulty = "HARD";
-                }
               }
 
               const prompt =
@@ -200,25 +208,16 @@ function transformLegacyFormat(raw: any) {
               return {
                 externalId:
                   question.id || `${key}-${modKey}-${questionIndex + 1}`,
-
                 prompt,
-
                 passage,
-
                 domain: question.domain || "General",
                 subtopic: question.subtopic || "General",
-
                 difficulty,
-
                 type: isMCQ ? "MCQ" : "GRID_IN",
-
                 correctAnswer,
                 correctTextAnswer,
-
                 explanation: question.explanation || "",
-
                 order: questionIndex + 1,
-
                 options,
               };
             }),
@@ -240,6 +239,7 @@ function transformLegacyFormat(raw: any) {
     title: metadata?.title || "Imported Question Bank",
     version: metadata?.version || "1.0.0",
     description: metadata?.description || "",
+    purpose,
     sections: transformedSections,
   };
 }
@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    let parsed;
+    let parsed: ParsedBank;
 
     try {
       parsed = ImportBankSchema.parse(body);
@@ -271,6 +271,7 @@ export async function POST(req: NextRequest) {
     }
 
     const allExternalIds: string[] = [];
+
     for (const section of parsed.sections) {
       for (const module of section.modules) {
         for (const question of module.questions) {
@@ -284,11 +285,7 @@ export async function POST(req: NextRequest) {
     const existingQuestions =
       allExternalIds.length > 0
         ? await prisma.question.findMany({
-            where: {
-              externalId: {
-                in: allExternalIds,
-              },
-            },
+            where: { externalId: { in: allExternalIds } },
             select: { externalId: true },
           })
         : [];
@@ -298,6 +295,7 @@ export async function POST(req: NextRequest) {
         .map((q) => q.externalId)
         .filter((id): id is string => typeof id === "string"),
     );
+
     const seenIds = new Set<string>();
     let skippedExisting = 0;
     let skippedDuplicate = 0;
@@ -373,6 +371,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const purpose = (parsed.purpose ?? "MIXED") as BankPurpose;
+
     const bank = await prisma.questionBank.create({
       data: {
         title: parsed.title,
@@ -380,6 +380,7 @@ export async function POST(req: NextRequest) {
         description: parsed.description,
         generatedAt: new Date(),
         totalQuestions,
+        purpose,
 
         sections: {
           create: filteredSections.map((section, sectionIndex) => ({
@@ -397,28 +398,36 @@ export async function POST(req: NextRequest) {
                 audioUrl: module.audioUrl,
                 order: moduleIndex + 1,
 
-                questions: {
-                  create: module.questions.map((question, questionIndex) => ({
-                    externalId: question.externalId,
-                    prompt: question.prompt,
-                    passage: question.passage,
-                    domain: question.domain,
-                    subtopic: question.subtopic,
-                    difficulty: question.difficulty,
-                    type: question.type,
-                    correctAnswer: question.correctAnswer,
-                    correctTextAnswer: question.correctTextAnswer,
-                    explanation: question.explanation,
-                    order: questionIndex + 1,
+                // 👇 Gán difficulty cho module
+                difficulty: module.difficulty ?? null,
 
-                    options: {
-                      create: question.options.map((option) => ({
-                        label: option.label,
-                        content: option.content,
-                        isCorrect: option.isCorrect,
-                      })),
-                    },
-                  })),
+                questions: {
+                  create: module.questions.map(
+                    (question, questionIndex) => ({
+                      externalId: question.externalId,
+                      prompt: question.prompt,
+                      passage: question.passage,
+                      domain: question.domain,
+                      subtopic: question.subtopic,
+                      difficulty: question.difficulty,
+                      type: question.type,
+                      correctAnswer: question.correctAnswer,
+                      correctTextAnswer: question.correctTextAnswer,
+                      explanation: question.explanation,
+                      order: questionIndex + 1,
+
+                      // 👇 Denormalize purpose cho Question
+                      bankPurpose: purpose,
+
+                      options: {
+                        create: question.options.map((option) => ({
+                          label: option.label,
+                          content: option.content,
+                          isCorrect: option.isCorrect,
+                        })),
+                      },
+                    }),
+                  ),
                 },
               })),
             },
@@ -430,6 +439,7 @@ export async function POST(req: NextRequest) {
         id: true,
         title: true,
         version: true,
+        purpose: true,
         totalQuestions: true,
         generatedAt: true,
       },
@@ -445,6 +455,7 @@ export async function POST(req: NextRequest) {
           skippedExisting,
           skippedDuplicate,
           originalTotal: allExternalIds.length,
+          purpose,
         },
       },
       { status: 201 },
@@ -480,7 +491,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Internal Server Error",
+        error:
+          error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 },
     );

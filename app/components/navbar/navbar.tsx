@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Chip } from "@heroui/react";
+import { Button, Chip, Skeleton } from "@heroui/react";
 import NextLink from "next/link";
 import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
@@ -19,7 +19,8 @@ export const Navbar = () => {
 
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const { isAuthenticated, isLoading, user, logout } = useAuthStore();
 
   const handleLogout = async () => {
     setIsLogoutLoading(true);
@@ -90,7 +91,7 @@ export const Navbar = () => {
             </div>
           </NextLink>
 
-          {isAuthenticated && (
+          {!isLoading && isAuthenticated && (
             <ul className="hidden items-center gap-1 lg:flex">
               {siteConfig.navItems.map((item) => {
                 const active = isActive(item.href);
@@ -143,13 +144,24 @@ export const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 md:flex">
-            {isAuthenticated ? (
+            {isLoading ? (
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl border border-accent/20 px-3 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-20 rounded-md" />
+                    <Skeleton className="h-5 w-12 rounded-full" />
+                  </div>
+                  <Skeleton className="mt-1 h-3 w-32 rounded-md" />
+                </div>
+                <Skeleton className="h-9 w-24 rounded-xl" />
+              </div>
+            ) : isAuthenticated ? (
               <>
                 {user && (
                   <div
                     className={clsx(
                       "rounded-xl border border-accent/20",
-                      " px-3 py-1.5",
+                      "px-3 py-1.5",
                     )}
                   >
                     <div className="flex items-center gap-2">
@@ -216,7 +228,7 @@ export const Navbar = () => {
       {isMenuOpen && (
         <div className="border-t border-primary/10 bg-background md:hidden">
           <div className="mx-auto max-w-7xl px-5 py-4">
-            {isAuthenticated && user && (
+            {isLoading ? (
               <div
                 className={clsx(
                   "mb-4 rounded-2xl border border-primary/15",
@@ -224,29 +236,47 @@ export const Navbar = () => {
                 )}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-primary">
-                      {user.firstName || "Student"}
-                    </p>
-
-                    <p className="truncate text-xs text-default-400">
-                      {user.email}
-                    </p>
+                  <div className="min-w-0 flex-1">
+                    <Skeleton className="h-4 w-24 rounded-md" />
+                    <Skeleton className="mt-1 h-3 w-40 rounded-md" />
                   </div>
-
-                  <Chip
-                    size="sm"
-                    color="accent"
-                    variant="primary"
-                    className="shrink-0 font-bold"
-                  >
-                    {planLabel}
-                  </Chip>
+                  <Skeleton className="h-6 w-14 rounded-full" />
                 </div>
               </div>
+            ) : (
+              isAuthenticated &&
+              user && (
+                <div
+                  className={clsx(
+                    "mb-4 rounded-2xl border border-primary/15",
+                    "bg-primary/5 px-4 py-3",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-primary">
+                        {user.firstName || "Student"}
+                      </p>
+
+                      <p className="truncate text-xs text-default-400">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <Chip
+                      size="sm"
+                      color="accent"
+                      variant="primary"
+                      className="shrink-0 font-bold"
+                    >
+                      {planLabel}
+                    </Chip>
+                  </div>
+                </div>
+              )
             )}
 
-            {isAuthenticated && (
+            {!isLoading && isAuthenticated && (
               <ul className="space-y-1">
                 {siteConfig.navItems.map((item) => (
                   <li key={item.href}>
@@ -271,7 +301,10 @@ export const Navbar = () => {
             )}
 
             <div className="mt-4 border-t border-default-200 pt-4">
-              {isAuthenticated ? (
+              {isLoading ? (
+                // Đang load auth → skeleton thay vì nút Logout / Sign in
+                <Skeleton className="h-11 w-full rounded-xl" />
+              ) : isAuthenticated ? (
                 <Button
                   variant="danger-soft"
                   onPress={handleLogout}

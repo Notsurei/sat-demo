@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useAuthStore } from "@/zustand/auth-store";
 import { usePracticeStore } from "@/zustand/practice-store";
 import { usePracticeTimerStore } from "@/zustand/practice-timer";
 import { usePracticeConfigStore } from "@/zustand/practice-config";
@@ -67,6 +68,17 @@ export default function PracticeScreen() {
   const currentQ = questions[currentQuestion] || null;
 
   const total = questions.length;
+  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
+  
+  React.useEffect(() => {
+    checkAuth();
+  }, []);
+
+  React.useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   const saveCurrentQuestionTime = () => {
     if (!currentQ) return;
@@ -375,10 +387,6 @@ export default function PracticeScreen() {
 
     full: "Full Test",
   };
-
-  const displaySubject = subject
-    ? subjectNameMap[subject] || subject
-    : "SAT Practice";
 
   return (
     <div className="flex h-screen flex-col bg-default-50 dark:bg-default-900">

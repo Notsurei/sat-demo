@@ -30,6 +30,9 @@ export interface FullTestModule {
   title: string;
   duration: number;
   questionCount: number;
+  breakAfter: number | null;
+  variant: "EASY" | "MEDIUM" | "HARD" | null;
+  moduleNumber: number;
   questions: FullTestQuestion[];
 }
 
@@ -50,29 +53,45 @@ interface FullTestStore {
   loading: boolean;
   error: string | null;
   initialized: boolean;
+
   fetchTest: (testId: string) => Promise<void>;
+
+  loadFromSession: (data: {
+    examId: string;
+    title: string;
+    sections: any[];
+  }) => void;
+
   setPhase: (phase: FullTestPhase) => void;
+
   startReadingWriting: () => void;
   startBreak: () => void;
   startMath: () => void;
   finishTest: () => void;
+
   setCurrentModule: (index: number) => void;
   nextQuestion: () => void;
   prevQuestion: () => void;
   goToQuestion: (index: number) => void;
+
   setOptionAnswer: (questionId: string, optionId: string) => void;
   setTextAnswer: (questionId: string, textAnswer: string) => void;
   clearAnswer: (questionId: string) => void;
+
   toggleFlagQuestion: (questionId: string) => void;
   flagQuestion: (questionId: string) => void;
   unflagQuestion: (questionId: string) => void;
+
   getCurrentModule: () => FullTestModule | null;
   getCurrentQuestion: () => FullTestQuestion | null;
   getCurrentQuestions: () => FullTestQuestion[];
+
   getAnsweredCount: (moduleIndex?: number) => number;
   getFlaggedCount: (moduleIndex?: number) => number;
+
   isQuestionAnswered: (questionId: string) => boolean;
   isQuestionFlagged: (questionId: string) => boolean;
+
   reset: () => void;
 }
 
@@ -90,15 +109,100 @@ const initialState = {
   initialized: false,
 };
 
+/* -------------------------------------------------------------------------- */
+/*                                HELPERS                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Gán moduleNumber theo thứ tự trong từng subject.
+ * R&W: 1, 2 ; Math: 1, 2
+ */
+function assignModuleNumbers(mods: FullTestModule[]): FullTestModule[] {
+  const counter: Record<string, number> = {};
+  return mods.map((m) => {
+    counter[m.subject] = (counter[m.subject] ?? 0) + 1;
+    return { ...m, moduleNumber: counter[m.subject] };
+  });
+}
+
+/**
+ * Suy ra variant từ độ khó trung bình của câu hỏi.
+ * CHỈ dùng cho Module 2 — Module 1 luôn null.
+ */
+function deriveVariant(qs: FullTestQuestion[]): FullTestModule["variant"] {
+  if (!qs.length) return null;
+
+  const score: Record<string, number> = { EASY: 1, MEDIUM: 2, HARD: 3 };
+  const total = qs.reduce((s, q) => {
+    const d = q.difficulty ?? "MEDIUM";
+    return s + (score[d] ?? 2);
+  }, 0);
+  const avg = total / qs.length;
+
+  if (avg < 1.67) return "EASY";
+  if (avg > 2.33) return "HARD";
+  return "MEDIUM";
+}
+
+/**
+ * Map 1 question raw (từ API / session) -> FullTestQuestion
+ */
+function mapQuestion(question: any): FullTestQuestion {
+  return {
+    id: question.id,
+    prompt: question.prompt,
+    type: question.type,
+    passage: question.passage ?? null,
+    explanation: question.explanation ?? null,
+    options:
+      question.options?.map((option: any) => ({
+        id: option.id,
+        label: option.label,
+        content: option.content,
+      })) ?? [],
+    difficulty: question.difficulty ?? null,
+    domain: question.domain ?? null,
+    subtopic: question.subtopic ?? null,
+  };
+}
+
+/**
+ * Sau khi đã gán moduleNumber (1, 2 theo từng subject), resolve variant:
+ * - Nếu API đã trả variant hợp lệ (EASY/MEDIUM/HARD) → giữ nguyên.
+ * - Ngược lại, nếu là Module 2 → derive từ difficulty câu hỏi.
+ * - Module 1 → luôn null.
+ */
+function resolveVariantForModule(
+  module: FullTestModule,
+): FullTestModule["variant"] {
+  const apiVariant = module.variant;
+
+  if (
+    apiVariant === "EASY" ||
+    apiVariant === "MEDIUM" ||
+    apiVariant === "HARD"
+  ) {
+    return apiVariant;
+  }
+
+  if (module.moduleNumber === 2) {
+    return deriveVariant(module.questions);
+  }
+
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   STORE                                    */
+/* -------------------------------------------------------------------------- */
+
 export const useFullTestStore = create<FullTestStore>((set, get) => ({
   ...initialState,
 
   fetchTest: async (testId) => {
     set({
       ...initialState,
-
       loading: true,
-
       error: null,
     });
 
@@ -113,73 +217,53 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
 
       const test = res.data.test;
 
-      const modules: FullTestModule[] = test.modules.map(
-        (module: any): FullTestModule => ({
-          id: module.id,
+      // 1) sort theo order
+      const sortedModules = (test.modules ?? [])
+        .slice()
+        .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
 
-          order: module.order,
+      // 2) map raw -> FullTestModule (chưa resolve variant, moduleNumber = 0)
+      const rawModules: FullTestModule[] = sortedModules.map(
+        (module: any): FullTestModule => {
+          const mappedQuestions: FullTestQuestion[] =
+            module.questions?.map(mapQuestion) ?? [];
 
-          subject: module.subject,
-
-          title: module.title,
-
-          duration: module.duration,
-
-          questionCount: module.questions?.length ?? 0,
-
-          questions:
-            module.questions?.map(
-              (question: any): FullTestQuestion => ({
-                id: question.id,
-
-                prompt: question.prompt,
-
-                type: question.type,
-
-                passage: question.passage ?? null,
-
-                explanation: question.explanation ?? null,
-
-                options:
-                  question.options?.map((option: any) => ({
-                    id: option.id,
-
-                    label: option.label,
-
-                    content: option.content,
-                  })) ?? [],
-
-                difficulty: question.difficulty ?? null,
-
-                domain: question.domain ?? null,
-
-                subtopic: question.subtopic ?? null,
-              }),
-            ) ?? [],
-        }),
+          return {
+            id: module.id,
+            order: module.order,
+            subject: module.subject,
+            title: module.title,
+            duration: module.duration,
+            questionCount: mappedQuestions.length,
+            breakAfter: module.breakAfter ?? null,
+            // Lưu tạm variant từ API (nếu có) — sẽ resolve sau
+            variant: module.variant ?? null,
+            moduleNumber: 0, // sẽ gán ở bước 3
+            questions: mappedQuestions,
+          };
+        },
       );
+
+      // 3) gán moduleNumber theo từng subject (1, 2)
+      const modulesWithNumbers = assignModuleNumbers(rawModules);
+
+      // 4) resolve variant — dùng moduleNumber ĐÃ GÁN, không dùng từ API
+      const modules: FullTestModule[] = modulesWithNumbers.map((m) => ({
+        ...m,
+        variant: resolveVariantForModule(m),
+      }));
 
       set({
         testId: test.id,
-
         title: test.title,
-
         modules,
-
         phase: "READING_WRITING",
-
         currentModuleIndex: 0,
-
         currentQuestionIndex: 0,
-
         answers: {},
-
         flaggedQuestions: {},
-
         loading: false,
-
         error: null,
-
         initialized: true,
       });
     } catch (error: any) {
@@ -187,9 +271,7 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
 
       set({
         loading: false,
-
         initialized: false,
-
         error:
           error.response?.data?.error ||
           error.message ||
@@ -200,6 +282,59 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     }
   },
 
+  loadFromSession: ({ examId, title, sections }) => {
+    // 1) sort theo order của section
+    const sortedSections = (sections ?? [])
+      .slice()
+      .sort((a, b) => (a.section?.order ?? 0) - (b.section?.order ?? 0));
+
+    // 2) map -> FullTestModule (chưa resolve variant, moduleNumber = 0)
+    const rawModules: FullTestModule[] = sortedSections.map(
+      (section: any): FullTestModule => {
+        const mappedQuestions: FullTestQuestion[] =
+          section.questions?.map((item: any) => mapQuestion(item.question)) ??
+          [];
+
+        return {
+          id: section.id,
+          order: section.section.order,
+          subject: section.section.subject,
+          title: section.section.title,
+          duration: section.section.duration,
+          questionCount: mappedQuestions.length,
+          breakAfter: section.section.breakAfter ?? null,
+          // Lưu tạm variant từ API (nếu có)
+          variant: section.section.variant ?? null,
+          moduleNumber: 0, // gán ở bước 3
+          questions: mappedQuestions,
+        };
+      },
+    );
+
+    // 3) gán moduleNumber theo từng subject (1, 2)
+    const modulesWithNumbers = assignModuleNumbers(rawModules);
+
+    // 4) resolve variant — dùng moduleNumber ĐÃ GÁN
+    const modules: FullTestModule[] = modulesWithNumbers.map((m) => ({
+      ...m,
+      variant: resolveVariantForModule(m),
+    }));
+
+    set({
+      testId: examId,
+      title,
+      modules,
+      phase: "READING_WRITING",
+      currentModuleIndex: 0,
+      currentQuestionIndex: 0,
+      answers: {},
+      flaggedQuestions: {},
+      loading: false,
+      error: null,
+      initialized: true,
+    });
+  },
+
   setPhase: (phase) =>
     set({
       phase,
@@ -208,9 +343,7 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
   startReadingWriting: () =>
     set({
       phase: "READING_WRITING",
-
       currentModuleIndex: 0,
-
       currentQuestionIndex: 0,
     }),
 
@@ -227,9 +360,7 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
 
       return {
         phase: "MATH",
-
         currentModuleIndex: mathModuleIndex >= 0 ? mathModuleIndex : 1,
-
         currentQuestionIndex: 0,
       };
     }),
@@ -247,7 +378,6 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
 
       return {
         currentModuleIndex: index,
-
         currentQuestionIndex: 0,
       };
     }),
@@ -294,10 +424,8 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     set((state) => ({
       answers: {
         ...state.answers,
-
         [questionId]: {
           optionId,
-
           textAnswer: undefined,
         },
       },
@@ -307,10 +435,8 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     set((state) => ({
       answers: {
         ...state.answers,
-
         [questionId]: {
           optionId: undefined,
-
           textAnswer,
         },
       },
@@ -329,7 +455,6 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     set((state) => ({
       flaggedQuestions: {
         ...state.flaggedQuestions,
-
         [questionId]: !state.flaggedQuestions[questionId],
       },
     })),
@@ -338,7 +463,6 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     set((state) => ({
       flaggedQuestions: {
         ...state.flaggedQuestions,
-
         [questionId]: true,
       },
     })),
@@ -347,20 +471,17 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     set((state) => ({
       flaggedQuestions: {
         ...state.flaggedQuestions,
-
         [questionId]: false,
       },
     })),
 
   getCurrentModule: () => {
     const state = get();
-
     return state.modules[state.currentModuleIndex] ?? null;
   },
 
   getCurrentQuestions: () => {
     const state = get();
-
     return state.modules[state.currentModuleIndex]?.questions ?? [];
   },
 
@@ -380,7 +501,6 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     const state = get();
 
     const index = moduleIndex ?? state.currentModuleIndex;
-
     const module = state.modules[index];
 
     if (!module) {
@@ -402,7 +522,6 @@ export const useFullTestStore = create<FullTestStore>((set, get) => ({
     const state = get();
 
     const index = moduleIndex ?? state.currentModuleIndex;
-
     const module = state.modules[index];
 
     if (!module) {

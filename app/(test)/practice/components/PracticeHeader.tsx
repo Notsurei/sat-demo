@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Button, Chip, Modal } from "@heroui/react";
+import { Button, Modal } from "@heroui/react";
 import { usePracticeTimerStore } from "@/zustand/practice-timer";
 import {
   Book,

@@ -1,4 +1,3 @@
-// components/annotator/hooks/useDragToolbar.ts
 import { useEffect, useRef } from "react";
 
 export function useDragToolbar(
@@ -22,10 +21,8 @@ export function useDragToolbar(
     }
     console.log("✅ Drag handle found");
 
-    // ─── Sự kiện mousedown trên toàn bộ toolbar ────────────────────────────
     const onMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // Nếu click vào button thì không kéo
       if (target.tagName === "BUTTON" || target.closest("button")) {
         console.log("mousedown on button, skipping drag");
         return;
@@ -35,7 +32,6 @@ export function useDragToolbar(
       e.preventDefault();
 
       const rect = bar.getBoundingClientRect();
-      // Chuyển sang position: fixed
       bar.style.left = rect.left + "px";
       bar.style.top = rect.top + "px";
       bar.style.transform = "none";
@@ -77,7 +73,6 @@ export function useDragToolbar(
       }
     };
 
-    // ─── Gắn sự kiện vào toolbar ────────────────────────────────────────────
     bar.addEventListener("mousedown", onMouseDown);
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);

@@ -119,5 +119,7 @@ export default async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: [
+    "/api/((?!admin/import-bank).*)",
+  ],
 };

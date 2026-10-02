@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Check } from "@gravity-ui/icons";
+import { ArrowLeft, Check, Bulb } from "@gravity-ui/icons";
 import { Button } from "@heroui/react";
 
 interface PracticeFooterProps {
@@ -41,9 +41,15 @@ export default function PracticeFooter({
         >
           <Check className="inline-block" /> <span>Check Answer</span>
         </Button>
-        {/* <Button variant="outline" onPress={onHint} isDisabled={!hasHint}>
-                    💡 {showHint ? 'Hide Hint' : 'Show Hint'}
-                </Button> */}
+        <Button
+          variant="outline"
+          onPress={onHint}
+          isDisabled={!hasHint}
+          className="flex items-center gap-2"
+        >
+          <Bulb className="inline-block" />
+          <span>{showHint ? 'Hide Hint' : 'Show Hint'}</span>
+        </Button>
       </div>
 
       <div className="flex gap-3">
