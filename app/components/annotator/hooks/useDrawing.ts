@@ -1,7 +1,5 @@
-// components/annotator/hooks/useDrawing.ts
 import { useRef, useEffect, useCallback } from 'react';
 
-// ✅ Cho phép canvasRef có thể là null
 export function useDrawing(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const isDrawing = useRef(false);

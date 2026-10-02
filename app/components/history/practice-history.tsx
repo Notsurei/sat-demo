@@ -108,7 +108,7 @@ export default function RecentPracticeHistory({
         <Button
           size="sm"
           variant="ghost"
-          onPress={() => router.push("/pages/report-history")}
+          onPress={() => router.push("/pages/practice-report-history")}
         >
           View All
           <ArrowRight width={15} />

@@ -1,4 +1,3 @@
-// components/annotator/hooks/useAnnotator.ts
 import { useState, useCallback } from "react";
 import { AnnotatorState, AnnotMode, HighlightColor, DrawColor } from "../types";
 

@@ -1,225 +1,165 @@
-"use client";
-
 import { create } from "zustand";
 
 export type FullTestTimerPhase =
   | "IDLE"
-  | "READING_WRITING"
+  | "RW_M1"
+  | "RW_M2"
   | "BREAK"
-  | "MATH"
+  | "MATH_M1"
+  | "MATH_M2"
   | "FINISHED";
+
+export const FULL_TEST_TIME = {
+  RW_MODULE: 32 * 60,
+  BREAK: 10 * 60,
+  MATH_MODULE: 35 * 60,
+} as const;
 
 interface FullTestTimerStore {
   phase: FullTestTimerPhase;
+
   remainingTime: number;
   initialTime: number;
+
   isRunning: boolean;
   isPaused: boolean;
-  startReadingWriting: () => void;
+
+  startRwM1: () => void;
+  startRwM2: () => void;
+
   startBreak: () => void;
-  startMath: () => void;
-  start: () => void;
+
+  startMathM1: () => void;
+  startMathM2: () => void;
+
   pause: () => void;
   resume: () => void;
+
   tick: () => void;
-  reset: () => void;
+
   finish: () => void;
-  setRemainingTime: (
-    seconds: number,
-  ) => void;
+  reset: () => void;
+
+  setRemainingTime: (seconds: number) => void;
 
   getProgress: () => number;
 }
 
-export const FULL_TEST_TIME = {
-  READING_WRITING: 32 * 60,
-
-  BREAK: 10 * 60,
-
-  MATH: 32 * 60,
-} as const;
-
 const initialState = {
   phase: "IDLE" as FullTestTimerPhase,
-
   remainingTime: 0,
-
   initialTime: 0,
-
   isRunning: false,
-
   isPaused: false,
 };
 
-export const useFullTestTimerStore =
-  create<FullTestTimerStore>((set, get) => ({
-    ...initialState,
+function createPhaseState(phase: FullTestTimerPhase, seconds: number) {
+  return {
+    phase,
+    remainingTime: seconds,
+    initialTime: seconds,
+    isRunning: true,
+    isPaused: false,
+  };
+}
 
-    startReadingWriting: () => {
+export const useFullTestTimerStore = create<FullTestTimerStore>((set, get) => ({
+  ...initialState,
+
+  startRwM1: () => {
+    set(createPhaseState("RW_M1", FULL_TEST_TIME.RW_MODULE));
+  },
+
+  startRwM2: () => {
+    set(createPhaseState("RW_M2", FULL_TEST_TIME.RW_MODULE));
+  },
+
+  startBreak: () => {
+    set(createPhaseState("BREAK", FULL_TEST_TIME.BREAK));
+  },
+
+  startMathM1: () => {
+    set(createPhaseState("MATH_M1", FULL_TEST_TIME.MATH_MODULE));
+  },
+
+  startMathM2: () => {
+    set(createPhaseState("MATH_M2", FULL_TEST_TIME.MATH_MODULE));
+  },
+
+  pause: () => {
+    set({
+      isRunning: false,
+      isPaused: true,
+    });
+  },
+
+  resume: () => {
+    const { phase, remainingTime } = get();
+
+    if (phase === "IDLE" || phase === "FINISHED" || remainingTime <= 0) {
+      return;
+    }
+
+    set({
+      isRunning: true,
+      isPaused: false,
+    });
+  },
+
+  tick: () => {
+    const { isRunning, remainingTime } = get();
+
+    if (!isRunning) {
+      return;
+    }
+
+    if (remainingTime <= 1) {
       set({
-        phase: "READING_WRITING",
-
-        remainingTime:
-          FULL_TEST_TIME.READING_WRITING,
-
-        initialTime:
-          FULL_TEST_TIME.READING_WRITING,
-
-        isRunning: true,
-
-        isPaused: false,
-      });
-    },
-
-    startBreak: () => {
-      set({
-        phase: "BREAK",
-
-        remainingTime:
-          FULL_TEST_TIME.BREAK,
-
-        initialTime:
-          FULL_TEST_TIME.BREAK,
-
-        isRunning: true,
-
-        isPaused: false,
-      });
-    },
-
-    startMath: () => {
-      set({
-        phase: "MATH",
-
-        remainingTime:
-          FULL_TEST_TIME.MATH,
-
-        initialTime:
-          FULL_TEST_TIME.MATH,
-
-        isRunning: true,
-
-        isPaused: false,
-      });
-    },
-
-    start: () => {
-      set({
-        isRunning: true,
-
-        isPaused: false,
-      });
-    },
-
-    pause: () => {
-      set({
-        isRunning: false,
-
-        isPaused: true,
-      });
-    },
-
-    resume: () => {
-      const {
-        remainingTime,
-        phase,
-      } = get();
-
-      if (
-        remainingTime <= 0 ||
-        phase === "FINISHED" ||
-        phase === "IDLE"
-      ) {
-        return;
-      }
-
-      set({
-        isRunning: true,
-
-        isPaused: false,
-      });
-    },
-
-    tick: () => {
-      const {
-        isRunning,
-        remainingTime,
-      } = get();
-
-      if (!isRunning) {
-        return;
-      }
-
-      if (remainingTime <= 1) {
-        set({
-          remainingTime: 0,
-
-          isRunning: false,
-
-          isPaused: false,
-        });
-
-        return;
-      }
-
-      set({
-        remainingTime:
-          remainingTime - 1,
-      });
-    },
-
-    setRemainingTime: (
-      seconds,
-    ) => {
-      set({
-        remainingTime:
-          Math.max(0, seconds),
-      });
-    },
-
-    finish: () => {
-      set({
-        phase: "FINISHED",
-
         remainingTime: 0,
-
-        initialTime: 0,
-
         isRunning: false,
-
         isPaused: false,
       });
-    },
 
-    // ==========================================
-    // RESET
-    // ==========================================
+      return;
+    }
 
-    reset: () => {
-      set({
-        ...initialState,
-      });
-    },
+    set({
+      remainingTime: remainingTime - 1,
+    });
+  },
 
-    getProgress: () => {
-      const {
-        remainingTime,
-        initialTime,
-      } = get();
+  setRemainingTime: (seconds) => {
+    set({
+      remainingTime: Math.max(0, seconds),
+    });
+  },
 
-      if (initialTime <= 0) {
-        return 0;
-      }
+  finish: () => {
+    set({
+      phase: "FINISHED",
+      remainingTime: 0,
+      initialTime: 0,
+      isRunning: false,
+      isPaused: false,
+    });
+  },
 
-      return Math.min(
-        100,
-        Math.max(
-          0,
-          ((initialTime -
-            remainingTime) /
-            initialTime) *
-            100,
-        ),
-      );
-    },
-  }));
+  reset: () => {
+    set({
+      ...initialState,
+    });
+  },
+
+  getProgress: () => {
+    const { remainingTime, initialTime } = get();
+
+    if (initialTime <= 0) {
+      return 0;
+    }
+
+    return Math.min(
+      100,
+      Math.max(0, ((initialTime - remainingTime) / initialTime) * 100),
+    );
+  },
+}));

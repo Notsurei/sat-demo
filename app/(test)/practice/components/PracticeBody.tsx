@@ -4,11 +4,11 @@ import React from "react";
 import { Button, Input, TextArea } from "@heroui/react";
 import { Bulb, Check, Xmark } from "@gravity-ui/icons";
 import Annotator from "@/app/components/annotator";
-import MathText from "@/app/components/LaText/MathJax";
 import { hintLibrary } from "@/config/hint_library";
 import { rwProTips, mathCommonTraps } from "@/config/knowledge_db";
 import clsx from "clsx";
 import ParsedMathText from "@/app/components/LaText/ParsedText";
+import MathText from "@/app/components/LaText/MathJax";
 
 interface Option {
   id: string;
@@ -341,8 +341,8 @@ export default function PracticeMain({
         </div>
 
         <div className="mb-4 text-lg font-semibold text-foreground">
-          <ParsedMathText text={prompt} />
-        </div>
+          <MathText text={prompt} />
+        </div> 
 
         <div className="mb-4">{renderInput()}</div>
 

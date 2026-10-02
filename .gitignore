@@ -28,7 +28,6 @@ yarn-error.log*
 .env*.local
 .env
 .env.*
-!.env.example
 
 # vercel
 .vercel
@@ -36,6 +35,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/prisma/
 
 pnpm-lock.yaml
 yarn.lock

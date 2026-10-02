@@ -3,7 +3,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/api/util/prisma";
 import { headers } from "next/headers";
-import { PracticeMode, Subject } from "@prisma/client";
+import { PracticeMode, Subject, Difficulty } from "@prisma/client";
+
+function shuffle<T>(items: T[]): T[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,75 +21,49 @@ export async function POST(request: NextRequest) {
     const { subject, domain, subtopic, questionCount = 10, mode } = body;
 
     const h = await headers();
-
     const userId = h.get("x-user-id");
 
     if (!userId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        },
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
-
 
     const count = Number(questionCount);
 
     if (!Number.isInteger(count) || count <= 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "questionCount must be a positive integer",
-        },
-        {
-          status: 400,
-        },
+        { success: false, error: "questionCount must be a positive integer" },
+        { status: 400 },
       );
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-
-      select: {
-        subscriptionPlan: true,
-      },
+      where: { id: userId },
+      select: { subscriptionPlan: true },
     });
 
     if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "User not found",
-        },
-        {
-          status: 404,
-        },
+        { success: false, error: "User not found" },
+        { status: 404 },
       );
     }
 
-
-    const where: any = {};
+    const where: any = {
+      bankPurpose: { in: ["PRACTICE", "MIXED"] },
+    };
 
     if (subject) {
       where.bankModule = {
-        section: {
-          subject: subject as Subject,
-        },
+        section: { subject: subject as Subject },
       };
     }
+
     if (domain) {
       if (Array.isArray(domain)) {
-        if (domain.length > 0) {
-          where.domain = {
-            in: domain,
-          };
-        }
+        if (domain.length > 0) where.domain = { in: domain };
       } else {
         where.domain = domain;
       }
@@ -88,11 +71,7 @@ export async function POST(request: NextRequest) {
 
     if (subtopic) {
       if (Array.isArray(subtopic)) {
-        if (subtopic.length > 0) {
-          where.subtopic = {
-            in: subtopic,
-          };
-        }
+        if (subtopic.length > 0) where.subtopic = { in: subtopic };
       } else {
         where.subtopic = subtopic;
       }
@@ -105,34 +84,26 @@ export async function POST(request: NextRequest) {
         );
 
         if (validDifficulties.length > 0) {
-          where.difficulty = {
-            in: validDifficulties,
-          };
+          where.difficulty = { in: validDifficulties };
         }
       } else if (
         mode !== "ALL_LEVEL" &&
         ["EASY", "MEDIUM", "HARD"].includes(mode)
       ) {
-        where.difficulty = mode;
+        where.difficulty = mode as Difficulty;
       }
     }
 
-    const totalMatchingQuestions = await prisma.question.count({
-      where,
-    });
+    const totalMatchingQuestions = await prisma.question.count({ where });
 
     if (totalMatchingQuestions === 0) {
       return NextResponse.json(
         {
           success: false,
-
           error: "No questions found matching the selected criteria.",
-
           code: "NO_QUESTIONS",
         },
-        {
-          status: 404,
-        },
+        { status: 404 },
       );
     }
 
@@ -140,55 +111,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-
           error: `Only ${totalMatchingQuestions} questions are available for the selected criteria.`,
-
           availableQuestions: totalMatchingQuestions,
-
           requestedQuestions: count,
-
           code: "NOT_ENOUGH_QUESTIONS",
         },
-        {
-          status: 400,
-        },
+        { status: 400 },
       );
     }
 
     let candidates = await prisma.question.findMany({
       where: {
         ...where,
-
         smartMemories: {
-          none: {
-            userId,
-          },
+          none: { userId },
         },
       },
-
-      include: {
-        options: true,
-      },
+      include: { options: true },
     });
+
     let smartMemoryReset = false;
 
     if (candidates.length < count) {
       const matchingQuestions = await prisma.question.findMany({
         where,
-
-        select: {
-          id: true,
-        },
+        select: { id: true },
       });
 
-      const questionIds = matchingQuestions.map((question) => question.id);
+      const questionIds = matchingQuestions.map((q) => q.id);
+
       await prisma.smartMemory.deleteMany({
         where: {
           userId,
-
-          questionId: {
-            in: questionIds,
-          },
+          questionId: { in: questionIds },
         },
       });
 
@@ -196,15 +151,11 @@ export async function POST(request: NextRequest) {
 
       candidates = await prisma.question.findMany({
         where,
-
-        include: {
-          options: true,
-        },
+        include: { options: true },
       });
     }
 
-    const shuffled = [...candidates].sort(() => Math.random() - 0.5);
-
+    const shuffled = shuffle(candidates);
     const selectedQuestions = shuffled.slice(0, count);
 
     let modeToSave: PracticeMode = PracticeMode.ALL_LEVEL;
@@ -226,91 +177,55 @@ export async function POST(request: NextRequest) {
     const practice = await prisma.practice.create({
       data: {
         userId,
-
         subject: subject as Subject,
-
         domain: Array.isArray(domain) ? domain.join(",") : domain || null,
-
         subtopic: Array.isArray(subtopic)
           ? subtopic.join(",")
           : subtopic || null,
-
         totalQuestions: selectedQuestions.length,
-
-        mode: modeToSave as PracticeMode,
+        mode: modeToSave,
       },
     });
-
-    // ========================================
-    // CREATE PRACTICE ANSWERS
-    // ========================================
 
     await prisma.practiceAnswer.createMany({
       data: selectedQuestions.map((question) => ({
         practiceId: practice.id,
-
         questionId: question.id,
-
         isCorrect: false,
-
         timeSpent: 0,
       })),
-
       skipDuplicates: true,
     });
-
-    // ========================================
-    // SAVE SMART MEMORY
-    // ========================================
 
     await prisma.smartMemory.createMany({
       data: selectedQuestions.map((question) => ({
         userId,
-
         questionId: question.id,
       })),
-
       skipDuplicates: true,
     });
 
-
     if (user.subscriptionPlan === "FREE") {
       const allPractices = await prisma.practice.findMany({
-        where: {
-          userId,
-        },
-
-        orderBy: {
-          startedAt: "desc",
-        },
-
-        select: {
-          id: true,
-        },
+        where: { userId },
+        orderBy: { startedAt: "desc" },
+        select: { id: true },
       });
 
       if (allPractices.length > 5) {
-        const toDelete = allPractices.slice(5).map((practice) => practice.id);
+        const toDelete = allPractices.slice(5).map((p) => p.id);
 
         await prisma.practice.deleteMany({
-          where: {
-            id: {
-              in: toDelete,
-            },
-          },
+          where: { id: { in: toDelete } },
         });
       }
     }
 
     return NextResponse.json({
       success: true,
-
       practiceId: practice.id,
-
       totalQuestions: selectedQuestions.length,
-
       questions: selectedQuestions,
-
       smartMemoryReset,
     });
   } catch (error) {
@@ -319,12 +234,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-
         error: error instanceof Error ? error.message : "Internal Server Error",
       },
-      {
-        status: 500,
-      },
+      { status: 500 },
     );
   }
 }
