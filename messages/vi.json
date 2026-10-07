@@ -1,0 +1,461 @@
+{
+  "landing": {
+    "badge": "Nền tảng luyện thi SAT",
+    "title": "Tự tin chuẩn bị cho kỳ thi SAT.",
+    "subtitle": "Luyện tập với hệ thống câu hỏi chất lượng, hiểu rõ lỗi sai và xây dựng những kỹ năng cần thiết để đạt kết quả tốt nhất trong ngày thi.",
+
+    "actions": {
+      "startLearning": "Bắt đầu học",
+      "explorePrepTools": "Khám phá bài luyện tập",
+      "getStarted": "Bắt đầu ngay",
+      "viewFeatures": "Xem tính năng"
+    },
+
+    "trustBadges": {
+      "realisticTestFormat": "Luyện tập thực tế",
+      "trustedStudyExperience": "Học tập tập trung",
+      "clearScoreGrowth": "Theo dõi tiến bộ"
+    },
+
+    "examFocused": {
+      "label": "Luyện SAT tập trung",
+      "title": "Mọi thứ bạn cần để luyện tập, xem lại và cải thiện.",
+      "items": {
+        "practice": "Luyện tập với những câu hỏi SAT được chọn lọc trong một môi trường tập trung.",
+        "review": "Xem lại câu trả lời và hiểu tại sao một đáp án đúng hoặc sai.",
+        "progress": "Theo dõi kết quả và xác định những phần bạn cần cải thiện."
+      }
+    },
+
+    "stats": {
+      "questions": "câu hỏi",
+      "mockTests": "bài thi thử",
+      "studentSatisfaction": "mức độ hài lòng",
+      "aiTutorSupport": "hỗ trợ gia sư AI"
+    },
+
+    "featuresSection": {
+      "label": "Bạn nhận được gì",
+      "title": "Nền tảng đầy đủ cho quá trình luyện thi SAT.",
+
+      "digitalSatPractice": {
+        "title": "Luyện SAT",
+        "description": "Luyện Reading and Writing và Math với kho câu hỏi SAT đa dạng."
+      },
+
+      "guidedExplanations": {
+        "title": "Lời giải rõ ràng",
+        "description": "Xem lời giải chi tiết để hiểu cách suy luận đằng sau mỗi đáp án và học từ những lỗi sai."
+      },
+
+      "fullLengthMockExams": {
+        "title": "Bài thi đầy đủ",
+        "description": "Thực hiện các bài thi thử hoàn chỉnh trong điều kiện giới hạn thời gian và làm quen với toàn bộ quá trình thi."
+      }
+    },
+
+    "howItWorks": {
+      "label": "Cách hoạt động",
+
+      "practice": {
+        "title": "1. Luyện tập",
+        "text": "Làm các câu hỏi SAT và xây dựng sự quen thuộc với các dạng câu hỏi và kiến thức cần thiết."
+      },
+
+      "review": {
+        "title": "2. Xem lại",
+        "text": "Phân tích câu trả lời, xem lời giải và hiểu rõ những lỗi bạn đã mắc phải."
+      },
+
+      "improve": {
+        "title": "3. Cải thiện",
+        "text": "Sử dụng kết quả luyện tập để tập trung vào những phần cần cải thiện và nâng cao hiệu suất theo thời gian."
+      }
+    },
+
+    "whyStudents": {
+      "label": "Được xây dựng để luyện tập hiệu quả hơn",
+      "title": "Học thông minh hơn. Luyện tập đều đặn. Cải thiện từng ngày.",
+      "description": "Kết hợp luyện tập có cấu trúc, phản hồi chi tiết và theo dõi kết quả để mỗi buổi học trở nên hiệu quả hơn.",
+
+      "badges": {
+        "clearLearningGoals": "Mục tiêu học tập rõ ràng",
+        "strongProgressTracking": "Theo dõi tiến bộ",
+        "calmExamPreparation": "Chuẩn bị tập trung"
+      }
+    },
+
+    "cta": {
+      "title": "Sẵn sàng bắt đầu luyện thi SAT?",
+      "description": "Bắt đầu luyện tập ngay hôm nay và tiến thêm một bước tới mục tiêu điểm số của bạn."
+    },
+
+    "loading": "Đang tải..."
+  },
+
+  "home": {
+    "loading": "Đang tải...",
+
+    "hero": {
+      "badge": "Luyện thi Digital SAT",
+      "titleLine1": "Chuẩn bị thông minh hơn.",
+      "titleLine2": "Đạt điểm cao hơn.",
+      "subtitle": "Luyện tập với câu hỏi SAT thực tế, hiểu rõ lỗi sai và tập trung vào những kỹ năng quan trọng nhất.",
+      "startPracticing": "Bắt đầu luyện tập",
+      "explorePlans": "Khám phá gói học",
+      "stats": {
+        "averagePracticeScore": "Điểm luyện tập trung bình",
+        "averageAccuracy": "Độ chính xác trung bình",
+        "practiceAnytime": "Luyện tập mọi lúc"
+      },
+      "preview": {
+        "sessionLabel": "Buổi luyện tập",
+        "sessionTitle": "Reading & Writing",
+        "practiceChip": "Luyện tập",
+        "domain": "Craft and Structure",
+        "prompt": "Lựa chọn nào mô tả đúng nhất mối quan hệ giữa đoạn văn và lập luận của tác giả?",
+        "answerChoicePlaceholder": "Ví dụ đáp án",
+        "submitAnswer": "Nộp đáp án",
+        "instantFeedback": "Phản hồi tức thì",
+        "learnFromEveryAnswer": "Học từ mọi câu trả lời"
+      }
+    },
+
+    "features": {
+      "label": "Mọi thứ bạn cần",
+      "title": "Cách luyện thi SAT hiệu quả hơn",
+      "subtitle": "Đừng đoán mò nên học gì. Luyện tập, hiểu rõ lỗi sai và tập trung vào những phần quan trọng nhất.",
+      "items": {
+        "adaptiveLearning": {
+          "title": "Học thích ứng",
+          "description": "Bài luyện tập cá nhân hóa dựa trên điểm yếu của bạn."
+        },
+        "realisticTests": {
+          "title": "Đề thi thực tế",
+          "description": "Bài thi thử đầy đủ với tính giờ và chấm điểm."
+        },
+        "aiExplanations": {
+          "title": "Lời giải AI",
+          "description": "Giải thích từng bước cho mọi câu hỏi."
+        },
+        "progressDashboard": {
+          "title": "Bảng điều khiển tiến bộ",
+          "description": "Theo dõi điểm mạnh và đo lường sự tiến bộ theo thời gian."
+        }
+      }
+    },
+
+    "whyStudyBuddy": {
+      "label": "Vì sao chọn StudyBuddy",
+      "title": "Mọi thứ bạn cần để chuẩn bị một cách tự tin.",
+      "subtitle": "Thay vì chỉ đưa thêm câu hỏi, StudyBuddy giúp bạn hiểu rõ kết quả của mình và tận dụng tối đa mỗi buổi luyện tập.",
+      "items": {
+        "focusedPractice": {
+          "title": "Luyện tập tập trung",
+          "description": "Luyện theo môn, domain, subtopic và độ khó để bạn dành nhiều thời gian hơn cho những kỹ năng cần cải thiện."
+        },
+        "understandMistakes": {
+          "title": "Hiểu rõ lỗi sai",
+          "description": "Xem lại câu trả lời và lời giải để hiểu tại sao một đáp án đúng, thay vì chỉ nhìn thấy điểm số."
+        },
+        "actionableReports": {
+          "title": "Báo cáo hành động được",
+          "description": "Xem độ chính xác theo domain, subtopic và độ khó để biết nên luyện gì tiếp theo."
+        }
+      },
+      "improvement": {
+        "label": "Được xây dựng để cải thiện",
+        "title": "Biết mình cần tập trung vào đâu tiếp theo.",
+        "description": "Kết quả luyện tập được tổ chức thành những insight hữu ích thay vì chỉ để lại một con số điểm. Xác định điểm yếu, xem lại lỗi sai và dùng thông tin đó để định hướng buổi luyện tập tiếp theo.",
+        "chips": {
+          "domainAnalysis": "Phân tích Domain",
+          "accuracyTracking": "Theo dõi độ chính xác",
+          "difficultyBreakdown": "Phân tích độ khó"
+        },
+        "examplePerformance": "Ví dụ kết quả"
+      }
+    },
+
+    "testimonials": {
+      "quote1": "StudyBuddy giúp tôi tăng 150 điểm chỉ trong hai tháng — phần lời giải AI thực sự rất giá trị.",
+      "author1": "Sarah J.",
+      "quote2": "Lộ trình thích ứng giúp tôi tập trung luyện tập và tiết kiệm hàng giờ đồng hồ.",
+      "author2": "Michael T."
+    },
+
+    "contact": {
+      "label": "Liên hệ với chúng tôi",
+      "titleLine1": "Bạn có câu hỏi?",
+      "titleLine2": "Chúng tôi luôn sẵn sàng hỗ trợ.",
+      "subtitle": "Dù bạn có câu hỏi về luyện tập, gói đăng ký, tính năng hay phát hiện lỗi, hãy thoải mái liên hệ với chúng tôi.",
+      "contactUs": "Liên hệ",
+      "viewPlans": "Xem các gói",
+      "infoLabel": "Thông tin liên hệ",
+      "email": "Email",
+      "support": "Hỗ trợ",
+      "supportDescription": "Câu hỏi, yêu cầu tính năng hoặc báo lỗi luôn được chào đón.",
+      "responseNote": "Chúng tôi thường phản hồi trong thời gian sớm nhất."
+    },
+
+    "cta": {
+      "label": "Sẵn sàng cải thiện?",
+      "title": "Bước tiến điểm số tiếp theo của bạn bắt đầu từ hôm nay.",
+      "description": "Bắt đầu luyện tập miễn phí và xây dựng lộ trình ôn tập theo mục tiêu của bạn.",
+      "startForFree": "Bắt đầu miễn phí"
+    },
+
+    "footer": {
+      "brand": "StudyBuddy",
+      "tagline": "Luyện thi SAT tập trung cho học sinh nhiều tham vọng.",
+      "copyright": "© {year} StudyBuddy",
+      "slogan": "Luyện tập thông minh hơn. Điểm số cao hơn."
+    }
+  },
+
+  "nav": {
+    "home": "Trang chủ",
+    "dashboard": "Bảng điều khiển",
+    "plans": "Gói học",
+    "brand": "StudyBuddy",
+    "brandTagline": "Luyện thi SAT",
+    "language": "Ngôn ngữ",
+    "logout": "Đăng xuất",
+    "loggingOut": "Đang đăng xuất...",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "exitFullTest": "Thoát bài thi",
+    "student": "Học sinh",
+    "freePlan": "Miễn phí"
+  },
+
+  "dashboard": {
+    "loading": "Đang tải bảng điều khiển...",
+
+    "header": {
+      "badge": "Bảng điều khiển SAT",
+      "greeting": "Xin chào, {name} 👋",
+      "greetingFallback": "Xin chào 👋",
+      "description": "Tiếp tục luyện tập và xem lại kết quả gần đây để cải thiện điểm SAT của bạn.",
+      "knowledgeReview": "Ôn tập kiến thức"
+    },
+
+    "stats": {
+      "sectionLabel": "Thống kê",
+      "currentScore": "Điểm hiện tại",
+      "accuracy": "Độ chính xác",
+      "practiceSessions": "Buổi luyện tập",
+      "studyStreak": "Chuỗi ngày học",
+
+      "trends": {
+        "latestPractice": "Buổi luyện tập gần nhất",
+        "noCompletedTests": "Chưa có bài nào hoàn thành",
+        "correctFraction": "Đúng {correct}/{total}",
+        "noData": "Chưa có dữ liệu",
+        "completedCount": "Đã hoàn thành {count}",
+        "noSessions": "Chưa có buổi nào",
+        "comingSoon": "Sắp ra mắt",
+        "keepPracticing": "Tiếp tục luyện tập nhé!"
+      }
+    },
+
+    "recommended": {
+      "title": "Bài luyện tập gợi ý",
+      "subtitle": "Chọn nội dung bạn muốn tập trung tiếp theo.",
+      "startPractice": "Bắt đầu luyện tập",
+      "items": {
+        "practiceMath": {
+          "title": "Luyện Math",
+          "description": "Cải thiện kỹ năng giải quyết vấn đề của bạn."
+        },
+        "practiceReadingWriting": {
+          "title": "Luyện Reading & Writing",
+          "description": "Củng cố kỹ năng đọc hiểu và ngữ pháp."
+        },
+        "takeFullPractice": {
+          "title": "Làm bài thi thử đầy đủ",
+          "description": "Kiểm tra tổng thể năng lực SAT của bạn."
+        }
+      }
+    },
+
+    "tasks": {
+      "title": "Nhiệm vụ hôm nay",
+      "subtitle": "Duy trì sự đều đặn trong quá trình ôn luyện."
+    },
+
+    "upgradeBanner": {
+      "title": "Bạn đang dùng gói Miễn phí",
+      "description": "Bảng điều khiển chỉ lưu 5 buổi luyện tập gần nhất của bạn.",
+      "upgradeButton": "Nâng cấp gói"
+    },
+
+    "history": {
+      "practiceTab": "Lịch sử luyện tập",
+      "fullTestTab": "Lịch sử thi thử",
+      "tabsAriaLabel": "Các tab lịch sử luyện tập"
+    },
+
+    "progressChart": {
+      "title": "Tổng quan tiến bộ",
+      "subtitle": "Kết quả luyện tập và thi thử gần đây của bạn.",
+      "empty": "Hoàn thành một bài luyện tập hoặc thi thử để xem tiến bộ của bạn.",
+      "practice": "Luyện tập",
+      "fullTest": "Thi thử"
+    }
+  },
+  "resetPassword": {
+    "verify": {
+      "title": "Xác minh mã đặt lại",
+      "description": "Nhập mã xác minh 6 chữ số mà chúng tôi đã gửi tới email của bạn.",
+      "verifyButton": "Xác minh mã",
+      "resendPrompt": "Không nhận được mã? Gửi lại",
+      "resendModalTitle": "Gửi lại mã xác minh"
+    },
+    "createPassword": {
+      "title": "Tạo mật khẩu mới",
+      "description": "Danh tính của bạn đã được xác minh. Vui lòng chọn mật khẩu mới.",
+      "newPasswordLabel": "Mật khẩu mới",
+      "newPasswordPlaceholder": "Nhập mật khẩu mới",
+      "confirmPasswordLabel": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Xác nhận mật khẩu",
+      "resetButton": "Đặt lại mật khẩu"
+    },
+    "toast": {
+      "passwordMismatch": "Mật khẩu không khớp",
+      "passwordChanged": "Đổi mật khẩu thành công."
+    }
+  },
+
+  "auth": {
+    "signIn": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "ban@example.com",
+      "passwordLabel": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu của bạn",
+      "signInButton": "Đăng nhập",
+      "noAccountPrompt": "Chưa có tài khoản? Đăng ký",
+      "forgotPasswordPrompt": "Quên mật khẩu?"
+    },
+
+    "signUp": {
+      "fields": {
+        "firstNameLabel": "Họ",
+        "firstNamePlaceholder": "Nguyễn",
+        "lastNameLabel": "Tên",
+        "lastNamePlaceholder": "Văn A",
+        "emailLabel": "Địa chỉ email",
+        "emailPlaceholder": "ban@example.com",
+        "phoneLabel": "Số điện thoại",
+        "phonePlaceholder": "0912 345 678",
+        "phoneRegionsPlaceholder": "Quốc gia",
+        "passwordLabel": "Mật khẩu",
+        "passwordPlaceholder": "Tối thiểu 6 ký tự",
+        "confirmPasswordLabel": "Xác nhận mật khẩu",
+        "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+        "genderLabel": "Giới tính",
+        "genderPlaceholder": "Chọn giới tính"
+      },
+      "genderOptions": {
+        "male": "Nam",
+        "female": "Nữ",
+        "others": "Khác"
+      },
+      "phonePreview": "📱 Sẽ được lưu dưới dạng:",
+      "createButton": "Tạo tài khoản",
+      "creatingButton": "Đang tạo tài khoản...",
+      "haveAccountPrompt": "Đã có tài khoản? Đăng nhập",
+      "forgotPasswordPrompt": "Quên mật khẩu?"
+    },
+
+    "forgotPassword": {
+      "emailLabel": "Địa chỉ email",
+      "emailPlaceholder": "ban@example.com",
+      "submitButton": "Gửi liên kết đặt lại",
+      "sendingButton": "Đang gửi...",
+      "successMessage": "✅ Nếu tài khoản tồn tại, hướng dẫn đã được gửi tới email của bạn.",
+      "backToSignIn": "← Quay lại đăng nhập",
+      "noAccountPrompt": "Chưa có tài khoản? Đăng ký"
+    },
+
+    "errors": {
+      "emailRequired": "Vui lòng nhập email",
+      "passwordRequired": "Vui lòng nhập mật khẩu",
+      "invalidCredentials": "Email hoặc mật khẩu không đúng"
+    },
+
+    "signUpErrors": {
+      "firstNameRequired": "Vui lòng nhập họ",
+      "lastNameRequired": "Vui lòng nhập tên",
+      "phoneRequired": "Vui lòng nhập số điện thoại",
+      "phoneInvalid": "Số điện thoại không hợp lệ",
+      "emailRequired": "Vui lòng nhập email",
+      "emailInvalid": "Địa chỉ email không hợp lệ",
+      "passwordRequired": "Vui lòng nhập mật khẩu",
+      "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+      "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu",
+      "passwordsDoNotMatch": "Mật khẩu không khớp",
+      "genderRequired": "Vui lòng chọn giới tính",
+      "signupFailed": "Đăng ký thất bại"
+    },
+
+    "forgotPasswordErrors": {
+      "requestFailed": "Không thể yêu cầu đặt lại mật khẩu",
+      "networkError": "Lỗi mạng. Vui lòng thử lại.",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+  },
+
+  "practiceSetup": {
+    "subjects": {
+      "rw": "Reading & Writing",
+      "math": "Math"
+    },
+
+    "levels": {
+      "easy": "Dễ",
+      "medium": "Trung bình",
+      "hard": "Khó"
+    },
+
+    "questionCounts": {
+      "15": "15 câu hỏi",
+      "25": "25 câu hỏi",
+      "50": "50 câu hỏi"
+    },
+
+    "labels": {
+      "subject": "Môn học",
+      "categories": "Chuyên đề",
+      "subtopics": "Chủ đề nhỏ",
+      "difficulty": "Độ khó",
+      "questions": "Số câu hỏi"
+    },
+
+    "placeholders": {
+      "selectSubject": "Chọn môn học",
+      "selectSubjectFirst": "Chọn môn học trước",
+      "selectCategories": "Chọn chuyên đề",
+      "selectCategoryFirst": "Chọn chuyên đề trước",
+      "loadingSubtopics": "Đang tải chủ đề nhỏ...",
+      "noSubtopics": "Không có chủ đề nhỏ",
+      "selectSubtopics": "Chọn chủ đề nhỏ",
+      "selectDifficulty": "Chọn độ khó",
+      "questions": "Số câu hỏi"
+    },
+
+    "upgrade": "🔒 Nâng cấp",
+
+    "startButton": "Bắt đầu",
+    "startingButton": "Đang bắt đầu...",
+
+    "toast": {
+      "subjectRequiredTitle": "Vui lòng chọn môn học",
+      "subjectRequiredDescription": "Không thể bắt đầu luyện tập khi chưa chọn môn học",
+      "okButton": "OK",
+      "startFailedTitle": "Không thể bắt đầu luyện tập",
+      "startFailedDescription": "Vui lòng thử lại sau",
+      "genericError": "Đã xảy ra lỗi",
+      "gotItButton": "Đã hiểu"
+    }
+  }
+}
