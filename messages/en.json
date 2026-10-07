@@ -1,0 +1,472 @@
+{
+  "landing": {
+    "badge": "SAT Preparation Platform",
+    "title": "Prepare for the SAT with confidence.",
+    "subtitle": "Practice with high-quality questions, understand your mistakes, and build the skills you need to perform your best on test day.",
+
+    "actions": {
+      "startLearning": "Start Learning",
+      "explorePrepTools": "Explore Practice",
+      "getStarted": "Get Started",
+      "viewFeatures": "View Features"
+    },
+
+    "trustBadges": {
+      "realisticTestFormat": "Realistic Practice",
+      "trustedStudyExperience": "Focused Learning",
+      "clearScoreGrowth": "Track Your Progress"
+    },
+
+    "examFocused": {
+      "label": "Focused SAT Practice",
+      "title": "Everything you need to practice, review, and improve.",
+      "items": {
+        "practice": "Practice with carefully selected SAT questions in a focused environment.",
+        "review": "Review your answers and understand why each answer is correct or incorrect.",
+        "progress": "Track your performance and identify the areas where you need to improve."
+      }
+    },
+
+    "stats": {
+      "questions": "questions",
+      "mockTests": "mock tests",
+      "studentSatisfaction": "student satisfaction",
+      "aiTutorSupport": "AI tutor support"
+    },
+
+    "featuresSection": {
+      "label": "What You Get",
+      "title": "A complete platform for your SAT preparation.",
+
+      "digitalSatPractice": {
+        "title": "SAT Practice",
+        "description": "Practice Reading and Writing and Math with a large collection of SAT-style questions."
+      },
+
+      "guidedExplanations": {
+        "title": "Clear Explanations",
+        "description": "Review detailed explanations to understand the reasoning behind each answer and learn from your mistakes."
+      },
+
+      "fullLengthMockExams": {
+        "title": "Full-Length Tests",
+        "description": "Take complete practice tests under timed conditions and experience the full test-taking process."
+      }
+    },
+
+    "howItWorks": {
+      "label": "How It Works",
+
+      "practice": {
+        "title": "1. Practice",
+        "text": "Solve SAT questions and build familiarity with the concepts and question types."
+      },
+
+      "review": {
+        "title": "2. Review",
+        "text": "Analyze your answers, review explanations, and understand your mistakes."
+      },
+
+      "improve": {
+        "title": "3. Improve",
+        "text": "Use your results to focus your study and gradually improve your performance."
+      }
+    },
+
+    "whyStudents": {
+      "label": "Built for Better Practice",
+      "title": "Study smarter. Practice consistently. Improve over time.",
+      "description": "Use structured practice, detailed feedback, and performance tracking to make every study session more effective.",
+
+      "badges": {
+        "clearLearningGoals": "Clear Learning Goals",
+        "strongProgressTracking": "Progress Tracking",
+        "calmExamPreparation": "Focused Preparation"
+      }
+    },
+
+    "cta": {
+      "title": "Ready to start your SAT preparation?",
+      "description": "Start practicing today and take the next step toward your target score."
+    },
+
+    "loading": "Loading..."
+  },
+
+  "home": {
+    "loading": "Loading...",
+
+    "hero": {
+      "badge": "Digital SAT Preparation",
+      "titleLine1": "Prepare smarter.",
+      "titleLine2": "Score higher.",
+      "subtitle": "Practice realistic SAT questions, understand your mistakes, and focus on the skills that matter most.",
+      "startPracticing": "Start Practicing",
+      "explorePlans": "Explore Plans",
+      "stats": {
+        "averagePracticeScore": "Average practice score",
+        "averageAccuracy": "Average accuracy",
+        "practiceAnytime": "Practice anytime"
+      },
+      "preview": {
+        "sessionLabel": "Practice Session",
+        "sessionTitle": "Reading & Writing",
+        "practiceChip": "Practice",
+        "domain": "Craft and Structure",
+        "prompt": "Which choice best describes the relationship between the passage and the author's argument?",
+        "answerChoicePlaceholder": "Answer choice example",
+        "submitAnswer": "Submit Answer",
+        "instantFeedback": "Instant feedback",
+        "learnFromEveryAnswer": "Learn from every answer"
+      }
+    },
+
+    "features": {
+      "label": "Everything you need",
+      "title": "A better way to prepare for the SAT",
+      "subtitle": "Stop guessing what to study. Practice, understand your mistakes, and focus on the areas that matter most.",
+      "items": {
+        "adaptiveLearning": {
+          "title": "Adaptive Learning",
+          "description": "Personalized drills based on your weaknesses."
+        },
+        "realisticTests": {
+          "title": "Realistic Tests",
+          "description": "Full-length mocks with timing and scoring."
+        },
+        "aiExplanations": {
+          "title": "AI Explanations",
+          "description": "Step-by-step reasoning for every question."
+        },
+        "progressDashboard": {
+          "title": "Progress Dashboard",
+          "description": "Track strengths and measure growth over time."
+        }
+      }
+    },
+
+    "whyStudyBuddy": {
+      "label": "Why StudyBuddy",
+      "title": "Everything you need to prepare with confidence.",
+      "subtitle": "Instead of simply giving you more questions, StudyBuddy helps you understand your performance and make every practice session count.",
+      "items": {
+        "focusedPractice": {
+          "title": "Focused Practice",
+          "description": "Practice by subject, domain, subtopic, and difficulty so you can spend more time on the skills that need attention."
+        },
+        "understandMistakes": {
+          "title": "Understand Your Mistakes",
+          "description": "Review your answers and explanations to understand why an answer is correct instead of simply seeing a score."
+        },
+        "actionableReports": {
+          "title": "Actionable Reports",
+          "description": "See your accuracy across domains, subtopics, and difficulty levels so you know what to practice next."
+        }
+      },
+      "improvement": {
+        "label": "Built for improvement",
+        "title": "Know what to work on next.",
+        "description": "Your practice results are organized into useful insights instead of leaving you with a single score. Identify weak areas, review your mistakes, and use that information to guide your next practice session.",
+        "chips": {
+          "domainAnalysis": "Domain Analysis",
+          "accuracyTracking": "Accuracy Tracking",
+          "difficultyBreakdown": "Difficulty Breakdown"
+        },
+        "examplePerformance": "Example performance"
+      }
+    },
+
+    "testimonials": {
+      "quote1": "StudyBuddy helped me raise my score by 150 points in two months — the AI explanations are gold.",
+      "author1": "Sarah J.",
+      "quote2": "The adaptive plan focused my practice and saved hours.",
+      "author2": "Michael T."
+    },
+
+    "contact": {
+      "label": "Get in touch",
+      "titleLine1": "Have a question?",
+      "titleLine2": "We're here to help.",
+      "subtitle": "Whether you have a question about practice, subscriptions, features, or found a problem, feel free to reach out to us.",
+      "contactUs": "Contact us",
+      "viewPlans": "View plans",
+      "infoLabel": "Contact information",
+      "email": "Email",
+      "support": "Support",
+      "supportDescription": "Questions, feature requests, or bug reports are always welcome.",
+      "responseNote": "We'll usually respond as soon as possible."
+    },
+
+    "cta": {
+      "label": "Ready to improve?",
+      "title": "Your next score improvement starts today.",
+      "description": "Start practicing for free and build a preparation plan around your goals.",
+      "startForFree": "Start For Free"
+    },
+
+    "footer": {
+      "brand": "StudyBuddy",
+      "tagline": "Focused SAT preparation for ambitious students.",
+      "copyright": "© {year} StudyBuddy",
+      "slogan": "Practice smarter. Score higher."
+    }
+  },
+
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "plans": "Plans",
+    "brand": "StudyBuddy",
+    "brandTagline": "SAT Preparation",
+    "language": "Language",
+    "logout": "Logout",
+    "loggingOut": "Logging out...",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "exitFullTest": "Exit full test",
+    "student": "Student",
+    "freePlan": "Free"
+  },
+
+  "navMenu": {
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "team": "Team",
+    "calendar": "Calendar",
+    "settings": "Settings",
+    "helpFeedback": "Help & Feedback",
+    "logout": "Logout"
+  },
+
+  "dashboard": {
+    "loading": "Loading your dashboard...",
+
+    "header": {
+      "badge": "SAT Dashboard",
+      "greeting": "Hello, {name} 👋",
+      "greetingFallback": "Hello, there 👋",
+      "description": "Keep practicing and review your recent performance to improve your SAT score.",
+      "knowledgeReview": "Knowledge Review"
+    },
+    "stats": {
+      "sectionLabel": "Statistics",
+      "currentScore": "Current Score",
+      "accuracy": "Accuracy",
+      "practiceSessions": "Practice Sessions",
+      "studyStreak": "Study Streak",
+
+      "trends": {
+        "latestPractice": "Latest practice",
+        "noCompletedTests": "No completed tests",
+        "correctFraction": "{correct}/{total} correct",
+        "noData": "No data yet",
+        "completedCount": "{count} completed",
+        "noSessions": "No sessions yet",
+        "comingSoon": "Coming soon",
+        "keepPracticing": "Keep practicing!"
+      }
+    },
+
+    "recommended": {
+      "title": "Recommended Practice",
+      "subtitle": "Choose what you want to work on next.",
+      "startPractice": "Start Practice",
+      "items": {
+        "practiceMath": {
+          "title": "Practice Math",
+          "description": "Improve your problem-solving skills."
+        },
+        "practiceReadingWriting": {
+          "title": "Practice Reading & Writing",
+          "description": "Strengthen your reading and grammar."
+        },
+        "takeFullPractice": {
+          "title": "Take a Full Practice",
+          "description": "Test your overall SAT performance."
+        }
+      }
+    },
+
+    "tasks": {
+      "title": "Today's Tasks",
+      "subtitle": "Stay consistent with your preparation."
+    },
+
+    "upgradeBanner": {
+      "title": "You're using the Free plan",
+      "description": "Your dashboard keeps your 5 most recent practice sessions.",
+      "upgradeButton": "Upgrade Plan"
+    },
+
+    "history": {
+      "practiceTab": "Practice History",
+      "fullTestTab": "Full Test History",
+      "tabsAriaLabel": "Practice history tabs"
+    },
+
+    "progressChart": {
+      "title": "Progress Overview",
+      "subtitle": "Your recent Practice and Full Test performance.",
+      "empty": "Complete a Practice or Full Test to see your progress.",
+      "practice": "Practice",
+      "fullTest": "Full Test"
+    }
+  },
+
+  "resetPassword": {
+    "verify": {
+      "title": "Verify Reset Code",
+      "description": "Enter the 6-digit verification code that we sent to your email.",
+      "verifyButton": "Verify Code",
+      "resendPrompt": "Didn't receive the code? Resend",
+      "resendModalTitle": "Resend Verification Code"
+    },
+    "createPassword": {
+      "title": "Create New Password",
+      "description": "Your identity has been verified. Please choose a new password.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm password",
+      "resetButton": "Reset Password"
+    },
+    "toast": {
+      "passwordMismatch": "Passwords do not match",
+      "passwordChanged": "Password changed successfully."
+    }
+  },
+
+  "auth": {
+    "signIn": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "signInButton": "Sign In",
+      "noAccountPrompt": "Don't have an account? Sign up",
+      "forgotPasswordPrompt": "Forgot password?"
+    },
+
+    "signUp": {
+      "fields": {
+        "firstNameLabel": "First Name",
+        "firstNamePlaceholder": "John",
+        "lastNameLabel": "Last Name",
+        "lastNamePlaceholder": "Doe",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "john@example.com",
+        "phoneLabel": "Phone Number",
+        "phonePlaceholder": "+1 234 567 8900",
+        "phoneRegionsPlaceholder": "Regions",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Minimum 6 characters",
+        "confirmPasswordLabel": "Confirm Password",
+        "confirmPasswordPlaceholder": "Re-enter password",
+        "genderLabel": "Gender",
+        "genderPlaceholder": "Select gender"
+      },
+      "genderOptions": {
+        "male": "Male",
+        "female": "Female",
+        "others": "Others"
+      },
+      "phonePreview": "📱 Will be saved as:",
+      "createButton": "Create Account",
+      "creatingButton": "Creating account...",
+      "haveAccountPrompt": "Already have an account? Sign in",
+      "forgotPasswordPrompt": "Forgot password?"
+    },
+
+    "forgotPassword": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "submitButton": "Send reset link",
+      "sendingButton": "Sending...",
+      "successMessage": "✅ If an account exists, instructions were sent to your email.",
+      "backToSignIn": "← Back to sign in",
+      "noAccountPrompt": "Don't have an account? Sign up"
+    },
+
+    "errors": {
+      "emailRequired": "Email is required",
+      "passwordRequired": "Password is required",
+      "invalidCredentials": "Invalid email or password"
+    },
+
+    "signUpErrors": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Invalid phone number format",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email address",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "genderRequired": "Please select your gender",
+      "signupFailed": "Signup failed"
+    },
+
+    "forgotPasswordErrors": {
+      "requestFailed": "Failed to request reset",
+      "networkError": "Network error. Please try again.",
+      "genericError": "An error occurred. Please try again."
+    }
+  },
+
+  "practiceSetup": {
+    "subjects": {
+      "rw": "Reading & Writing",
+      "math": "Math"
+    },
+
+    "levels": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+
+    "questionCounts": {
+      "15": "15 Questions",
+      "25": "25 Questions",
+      "50": "50 Questions"
+    },
+
+    "labels": {
+      "subject": "Subject",
+      "categories": "Categories",
+      "subtopics": "Subtopics",
+      "difficulty": "Difficulty",
+      "questions": "Questions"
+    },
+
+    "placeholders": {
+      "selectSubject": "Select subject",
+      "selectSubjectFirst": "Select subject first",
+      "selectCategories": "Select categories",
+      "selectCategoryFirst": "Select category first",
+      "loadingSubtopics": "Loading subtopics...",
+      "noSubtopics": "No subtopics",
+      "selectSubtopics": "Select subtopics",
+      "selectDifficulty": "Select difficulty",
+      "questions": "Questions"
+    },
+
+    "upgrade": "🔒 Upgrade",
+
+    "startButton": "Start",
+    "startingButton": "Starting...",
+
+    "toast": {
+      "subjectRequiredTitle": "Please select a subject",
+      "subjectRequiredDescription": "Cannot start practice without selecting a subject",
+      "okButton": "OK",
+      "startFailedTitle": "Failed to start practice",
+      "startFailedDescription": "Please try again later",
+      "genericError": "Something went wrong",
+      "gotItButton": "I got it"
+    }
+  }
+}
