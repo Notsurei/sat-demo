@@ -80,7 +80,7 @@
 
       "badges": {
         "clearLearningGoals": "Mục tiêu học tập rõ ràng",
-        "strongProgressTracking": "Theo dõi tiến bộ",
+        "strongProgressTracking": "Theo dõi tiến độ",
         "calmExamPreparation": "Chuẩn bị tập trung"
       }
     },
@@ -176,13 +176,6 @@
       }
     },
 
-    "testimonials": {
-      "quote1": "StudyBuddy giúp tôi tăng 150 điểm chỉ trong hai tháng — phần lời giải AI thực sự rất giá trị.",
-      "author1": "Sarah J.",
-      "quote2": "Lộ trình thích ứng giúp tôi tập trung luyện tập và tiết kiệm hàng giờ đồng hồ.",
-      "author2": "Michael T."
-    },
-
     "contact": {
       "label": "Liên hệ với chúng tôi",
       "titleLine1": "Bạn có câu hỏi?",
@@ -214,7 +207,7 @@
 
   "nav": {
     "home": "Trang chủ",
-    "dashboard": "Bảng điều khiển",
+    "dashboard": "Thống kê",
     "plans": "Gói học",
     "brand": "StudyBuddy",
     "brandTagline": "Luyện thi SAT",
@@ -226,6 +219,17 @@
     "exitFullTest": "Thoát bài thi",
     "student": "Học sinh",
     "freePlan": "Miễn phí"
+  },
+
+  "navMenu": {
+    "profile": "Trang cá nhân",
+    "dashboard": "Bảng điều khiển",
+    "projects": "Dự án",
+    "team": "Nhóm",
+    "calendar": "Lịch",
+    "settings": "Cài đặt",
+    "helpFeedback": "Trợ giúp & Phản hồi",
+    "logout": "Đăng xuất"
   },
 
   "dashboard": {
@@ -242,45 +246,74 @@
     "stats": {
       "sectionLabel": "Thống kê",
       "currentScore": "Điểm hiện tại",
-      "accuracy": "Độ chính xác",
+      "practiceAccuracy": "Độ chính xác luyện tập",
       "practiceSessions": "Buổi luyện tập",
-      "studyStreak": "Chuỗi ngày học",
+      "fullTestSessions": "Bài thi thử",
 
       "trends": {
         "latestPractice": "Buổi luyện tập gần nhất",
+        "latestFullTest": "Bài thi thử gần nhất",
         "noCompletedTests": "Chưa có bài nào hoàn thành",
         "correctFraction": "Đúng {correct}/{total}",
+        "noPracticeData": "Hoàn thành một bài luyện tập để xem độ chính xác",
         "noData": "Chưa có dữ liệu",
         "completedCount": "Đã hoàn thành {count}",
-        "noSessions": "Chưa có buổi nào",
-        "comingSoon": "Sắp ra mắt",
-        "keepPracticing": "Tiếp tục luyện tập nhé!"
+        "noSessions": "Chưa có buổi nào"
       }
     },
 
     "recommended": {
       "title": "Bài luyện tập gợi ý",
       "subtitle": "Chọn nội dung bạn muốn tập trung tiếp theo.",
+      "subtitleWeak": "Tập trung vào những domain yếu nhất trước.",
       "startPractice": "Bắt đầu luyện tập",
+
       "items": {
         "practiceMath": {
           "title": "Luyện Math",
-          "description": "Cải thiện kỹ năng giải quyết vấn đề của bạn."
+          "description": "Cải thiện kỹ năng giải quyết vấn đề của bạn.",
+          "duration": "20 phút"
         },
         "practiceReadingWriting": {
           "title": "Luyện Reading & Writing",
-          "description": "Củng cố kỹ năng đọc hiểu và ngữ pháp."
+          "description": "Củng cố kỹ năng đọc hiểu và ngữ pháp.",
+          "duration": "25 phút"
         },
         "takeFullPractice": {
           "title": "Làm bài thi thử đầy đủ",
-          "description": "Kiểm tra tổng thể năng lực SAT của bạn."
+          "description": "Kiểm tra tổng thể năng lực SAT của bạn.",
+          "duration": "45 phút"
         }
+      },
+
+      "domainTips": {
+        "craftAndStructure": "Tập trung vào Words in Context & Text Structure. Đọc 1 đoạn văn SAT mỗi ngày.",
+        "informationAndIdeas": "Luyện câu hỏi dựa trên bằng chứng. Drill Inference và Command of Evidence.",
+        "standardEnglishConventions": "Ôn quy tắc dấu phẩy, hòa hợp chủ ngữ - động từ, cấu trúc song song.",
+        "expressionOfIdeas": "Luyện Rhetorical Synthesis — kết hợp ghi chú thành câu có mục đích.",
+        "algebra": "Học lại phương trình tuyến tính & hệ phương trình. Tập trung thiết lập phương trình từ bài toán chữ.",
+        "advancedMath": "Drill phân tích đa thức bậc hai, hoàn thành bình phương, biến đổi hàm số.",
+        "geometry": "Ôn định lý đường tròn, lượng giác tam giác vuông (SOHCAHTOA), hình học tọa độ.",
+        "problemSolvingAndData": "Luyện bài toán tỷ lệ/tốc độ và đọc biểu đồ/bảng."
       }
     },
 
     "tasks": {
       "title": "Nhiệm vụ hôm nay",
       "subtitle": "Duy trì sự đều đặn trong quá trình ôn luyện."
+    },
+
+    "todoList": {
+      "eyebrow": "Danh sách học tập",
+      "title": "Việc cần làm",
+      "progressComplete": "Hoàn thành {progress}%",
+      "taskCount": "{count} công việc",
+      "subjectTaskCount": "{count} việc",
+      "selectSubject": "Chọn môn học",
+      "selectFolder": "Chọn chuyên đề",
+      "addPlaceholder": "Thêm việc nhanh",
+      "addButton": "Thêm",
+      "noTasks": "Chưa có việc nào"
     },
 
     "upgradeBanner": {
@@ -303,6 +336,7 @@
       "fullTest": "Thi thử"
     }
   },
+
   "resetPassword": {
     "verify": {
       "title": "Xác minh mã đặt lại",
@@ -375,6 +409,37 @@
       "successMessage": "✅ Nếu tài khoản tồn tại, hướng dẫn đã được gửi tới email của bạn.",
       "backToSignIn": "← Quay lại đăng nhập",
       "noAccountPrompt": "Chưa có tài khoản? Đăng ký"
+    },
+    "verifyEmail": {
+      "success": {
+        "title": "Xác minh email thành công!",
+        "description": "Email của bạn đã được xác minh thành công. Bạn có thể đăng nhập vào tài khoản ngay bây giờ."
+      },
+      "already": {
+        "title": "Đã xác minh trước đó",
+        "description": "Email của bạn đã được xác minh rồi. Bạn có thể đăng nhập bình thường."
+      },
+      "expired": {
+        "title": "Liên kết xác minh đã hết hạn",
+        "description": "Liên kết xác minh của bạn đã hết hạn. Vui lòng yêu cầu email xác minh mới."
+      },
+      "invalid": {
+        "title": "Liên kết xác minh không hợp lệ",
+        "description": "Liên kết xác minh không hợp lệ hoặc đã được sử dụng trước đó."
+      },
+
+      "buttons": {
+        "signIn": "Đăng nhập",
+        "requestNewLink": "Yêu cầu liên kết mới",
+        "goHome": "Về trang chủ"
+      },
+
+      "support": {
+        "text": "Cần hỗ trợ?",
+        "link": "Liên hệ hỗ trợ"
+      },
+
+      "loading": "Đang tải..."
     },
 
     "errors": {
@@ -457,5 +522,643 @@
       "genericError": "Đã xảy ra lỗi",
       "gotItButton": "Đã hiểu"
     }
+  },
+
+  "practiceReport": {
+    "title": "Báo cáo luyện tập",
+    "subtitle": "Phân tích chi tiết kết quả làm bài của bạn",
+    "backHome": "← Về trang chủ",
+    "loading": "Đang tải báo cáo luyện tập...",
+    "notFound": "Không tìm thấy báo cáo",
+    "goHome": "Về trang chủ",
+
+    "recentPracticeHistory": {
+      "title": "Lịch sử luyện tập gần đây",
+      "subtitle": "5 buổi luyện tập gần nhất của bạn",
+      "viewAll": "Xem tất cả",
+      "loading": "Đang tải lịch sử...",
+
+      "emptyTitle": "Chưa có lịch sử luyện tập",
+      "emptyDescription": "Hãy bắt đầu buổi luyện tập đầu tiên, kết quả của bạn sẽ xuất hiện tại đây.",
+
+      "unknownDate": "Không rõ ngày",
+      "correctFraction": "Đúng {correct}/{total}",
+      "accuracyLabel": "độ chính xác",
+
+      "subjects": {
+        "SAT_MATH": "SAT Math",
+        "SAT_READING_WRITING": "Reading & Writing"
+      },
+
+      "modes": {
+        "PRACTICE": "Luyện tập",
+        "FULL_TEST": "Bài thi đầy đủ",
+        "TARGETED": "Luyện tập theo mục tiêu"
+      },
+
+      "time": {
+        "minutes": "{count} phút",
+        "hoursMinutes": "{hours} giờ {minutes} phút"
+      }
+    },
+
+    "practiceHistory": {
+      "brand": "StudyBuddy",
+      "title": "Lịch sử luyện tập",
+      "subtitle": "Xem lại các buổi luyện tập và theo dõi tiến bộ của bạn theo thời gian.",
+      "loading": "Đang tải lịch sử luyện tập...",
+
+      "summary": {
+        "totalPractices": "Tổng số buổi",
+        "completed": "Đã hoàn thành",
+        "avgAccuracy": "Độ chính xác TB",
+        "avgScore": "Điểm TB"
+      },
+
+      "sessions": {
+        "title": "Các buổi luyện tập",
+        "subtitle": "Hoạt động luyện tập gần đây của bạn."
+      },
+
+      "list": {
+        "emptyTitle": "Chưa có lịch sử luyện tập",
+        "emptyDescription": "Hoàn thành buổi luyện tập đầu tiên để xem tại đây."
+      },
+
+      "card": {
+        "defaultDomain": "Buổi luyện tập",
+        "scoreLabel": "Điểm",
+        "accuracyLabel": "Độ chính xác",
+        "questionsLabel": "Câu hỏi",
+        "correctLabel": "Đúng {count}",
+        "minutesLabel": "{count} phút",
+        "statusLabels": {
+          "done": "Đã hoàn thành",
+          "inProgress": "Đang làm",
+          "abandoned": "Đã bỏ"
+        },
+        "buttons": {
+          "continue": "Tiếp tục luyện tập",
+          "viewDetails": "Xem chi tiết"
+        }
+      }
+    },
+
+    "summary": {
+      "accuracy": "Độ chính xác",
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "timeSpent": "Thời gian"
+    },
+
+    "overall": {
+      "title": "Tổng quan hiệu suất",
+      "score": "Điểm"
+    },
+
+    "practiceInfo": {
+      "title": "📊 Thông tin bài luyện tập",
+      "subject": "Môn học",
+      "mode": "Chế độ",
+      "answered": "Đã trả lời",
+      "unanswered": "Chưa trả lời"
+    },
+
+    "byDifficulty": {
+      "title": "📈 Hiệu suất theo độ khó",
+      "correctFraction": "✓ Đúng {correct} / {total}",
+      "labels": {
+        "EASY": "DỄ",
+        "MEDIUM": "TRUNG BÌNH",
+        "HARD": "KHÓ"
+      }
+    },
+
+    "byDomain": {
+      "title": "🎯 Hiệu suất theo Domain"
+    },
+
+    "questionReview": {
+      "title": "📋 Chi tiết câu hỏi & Xem lại",
+      "subtitle": "Xem lại từng câu hỏi với tất cả đáp án, câu trả lời của bạn và đáp án đúng",
+      "showPassage": "📖 Xem đoạn văn",
+      "allOptions": "Tất cả đáp án",
+      "yourChoice": "(Bạn chọn)",
+      "correctOption": "✓ Đáp án đúng",
+      "yourAnswer": "Câu trả lời của bạn",
+      "correctAnswer": "Đáp án đúng",
+      "explanation": "💡 Lời giải",
+      "proTip": "💡 Mẹo",
+      "questionTypes": {
+        "MCQ": "📝 Trắc nghiệm",
+        "GRID_IN": "🔢 Điền đáp án",
+        "TEXT": "📄 Văn bản"
+      }
+    },
+
+    "priorityFocus": {
+      "title": "Khu vực cần tập trung",
+      "nextStep": "Vào Luyện tập theo chủ đề, chọn từng domain yếu ở trên và làm 15–25 câu ở mức Trung bình rồi Khó.",
+      "excellentTitle": "Buổi học xuất sắc!",
+      "excellentDescription": "Bạn đạt ≥75% ở tất cả các domain. Hãy thử thách bản thân: làm mức Khó trong Luyện tập theo chủ đề hoặc thử một bài Thi thử đầy đủ.",
+      "tips": {
+        "craftAndStructure": "Tập trung vào Words in Context & Text Structure. Đọc 1 đoạn văn SAT mỗi ngày, ghi chú mục đích tác giả.",
+        "informationAndIdeas": "Luyện câu hỏi dựa trên bằng chứng. Drill subtopic Inference và Command of Evidence.",
+        "standardEnglishConventions": "Ôn quy tắc dấu phẩy, hòa hợp chủ ngữ - động từ, và cấu trúc song song. Làm bài tập ngữ pháp.",
+        "expressionOfIdeas": "Luyện Rhetorical Synthesis — kết hợp ghi chú thành câu có mục đích.",
+        "algebra": "Học lại phương trình tuyến tính & hệ phương trình. Tập trung vào việc thiết lập phương trình từ bài toán chữ.",
+        "advancedMath": "Drill phân tích đa thức bậc hai, hoàn thành bình phương, và biến đổi hàm số.",
+        "geometry": "Ôn định lý đường tròn, lượng giác tam giác vuông (SOHCAHTOA), và hình học tọa độ.",
+        "problemSolvingAndData": "Luyện bài toán tỷ lệ/tốc độ và đọc biểu đồ/bảng. Làm quen với chuyển đổi đơn vị."
+      }
+    },
+
+    "domainAdvice": {
+      "title": "Chiến lược theo từng domain",
+
+      "craftAndStructure": {
+        "title": "Cấu trúc và Ngôn ngữ",
+        "description": "Hiểu cách tác giả dùng từ ngữ và cấu trúc để xây dựng ý nghĩa.",
+        "strategies": [
+          {
+            "title": "Words in Context",
+            "description": "Dùng các câu xung quanh để suy ra nghĩa của từ lạ. Loại các lựa chọn làm thay đổi sắc thái hoặc phạm vi của câu."
+          },
+          {
+            "title": "Cấu trúc văn bản",
+            "description": "Theo dõi cách đoạn văn chuyển từ ý này sang ý khác. Chú ý các từ tương phản: however, although, yet."
+          },
+          {
+            "title": "Mục đích tác giả",
+            "description": "Tự hỏi: tác giả viết để làm gì? Thông tin? Thuyết phục? Phê bình? Mục đích quyết định đáp án đúng."
+          }
+        ]
+      },
+
+      "informationAndIdeas": {
+        "title": "Thông tin và Ý tưởng",
+        "description": "Định vị, giải thích và đánh giá thông tin từ đoạn văn và biểu đồ.",
+        "strategies": [
+          {
+            "title": "Command of Evidence",
+            "description": "Với câu hỏi ghép đôi, chọn lựa chọn trực tiếp hỗ trợ đáp án trước đó — không phải một sự kiện liên quan."
+          },
+          {
+            "title": "Suy luận",
+            "description": "Suy luận đúng được hỗ trợ bởi văn bản nhưng không được nói trực tiếp. Tránh kết luận đi quá xa."
+          },
+          {
+            "title": "Ý chính",
+            "description": "Xác định luận điểm chính và các chi tiết hỗ trợ. Đáp án sai thường khái quát quá mức hoặc quá hẹp."
+          }
+        ]
+      },
+
+      "standardEnglishConventions": {
+        "title": "Quy tắc Tiếng Anh Chuẩn",
+        "description": "Nắm vững ngữ pháp, dấu câu và cấu trúc câu được kiểm tra trong SAT.",
+        "strategies": [
+          {
+            "title": "Quy tắc dấu phẩy",
+            "description": "Không bao giờ đặt một dấu phẩy giữa hai mệnh đề độc lập. Dùng dấu chấm phẩy, dấu chấm hoặc dấu phẩy + liên từ."
+          },
+          {
+            "title": "Hòa hợp chủ ngữ - động từ",
+            "description": "Tìm chủ ngữ thật, bỏ qua các cụm giới từ. Chủ ngữ số ít đi với động từ số ít."
+          },
+          {
+            "title": "Cấu trúc song song",
+            "description": "Các mục trong danh sách hoặc so sánh phải cùng dạng ngữ pháp (cùng -ing, cùng nguyên thể, v.v.)."
+          }
+        ]
+      },
+
+      "expressionOfIdeas": {
+        "title": "Diễn đạt Ý tưởng",
+        "description": "Cải thiện độ rõ ràng, tập trung và hiệu quả của lập luận viết.",
+        "strategies": [
+          {
+            "title": "Rhetorical Synthesis",
+            "description": "Đọc các ghi chú, sau đó chọn câu đạt được mục tiêu đã nêu bằng cách dùng những ghi chú liên quan nhất."
+          },
+          {
+            "title": "Từ chuyển tiếp",
+            "description": "Xác định mối quan hệ logic giữa các câu trước. Sau đó chọn từ chuyển tiếp phù hợp: tương phản, nguyên nhân, bổ sung, ví dụ."
+          },
+          {
+            "title": "Độ chính xác",
+            "description": "Chọn từ nói đúng điều câu cần — tránh các lựa chọn mơ hồ hoặc quá kịch tính."
+          }
+        ]
+      },
+
+      "algebra": {
+        "title": "Đại số",
+        "description": "Phương trình tuyến tính, bất đẳng thức và hệ phương trình — domain toán SAT có điểm cao nhất.",
+        "strategies": [
+          {
+            "title": "Thiết lập phương trình",
+            "description": "Chuyển bài toán chữ thành phương trình trước khi giải. Định nghĩa biến rõ ràng: gọi x = cái gì?"
+          },
+          {
+            "title": "Hệ phương trình",
+            "description": "Dùng thế hoặc khử. Chú ý trường hợp 'vô nghiệm' (song song) và 'vô số nghiệm' (cùng đường thẳng)."
+          },
+          {
+            "title": "Độ dốc & Giao điểm",
+            "description": "Độ dốc = rise/run = (y₂−y₁)/(x₂−x₁). Giao điểm y là giá trị khi x = 0. Nắm cả dạng chuẩn và dạng độ dốc-giao điểm."
+          }
+        ]
+      },
+
+      "advancedMath": {
+        "title": "Toán nâng cao",
+        "description": "Phương trình bậc hai, hàm mũ và biến đổi hàm số.",
+        "strategies": [
+          {
+            "title": "Phân tích bậc hai",
+            "description": "Tìm nhân tử chung trước. Với ax² + bx + c, tìm hai số nhân ra ac và cộng ra b."
+          },
+          {
+            "title": "Hoàn thành bình phương",
+            "description": "x² + bx → (x + b/2)² − (b/2)². Hữu ích để tìm dạng đỉnh và giải mà không cần phân tích."
+          },
+          {
+            "title": "Biến đổi hàm số",
+            "description": "f(x) + k dịch lên/xuống; f(x + h) dịch trái/phải (ngược dấu); −f(x) phản chiếu qua trục x."
+          }
+        ]
+      },
+
+      "geometry": {
+        "title": "Hình học",
+        "description": "Đường tròn, tam giác và hình học tọa độ — chủ yếu dùng công thức.",
+        "strategies": [
+          {
+            "title": "Định lý đường tròn",
+            "description": "Một đường tròn đầy đủ là 360°. Độ dài cung và diện tích hình quạt là phân số của toàn bộ dựa trên góc ở tâm."
+          },
+          {
+            "title": "Lượng giác tam giác vuông",
+            "description": "SOH CAH TOA: sin = đối/huyền, cos = kề/huyền, tan = đối/kề. Nhớ tỷ lệ 30-60-90 và 45-45-90."
+          },
+          {
+            "title": "Hình học tọa độ",
+            "description": "Khoảng cách = √((x₂−x₁)² + (y₂−y₁)²). Trung điểm = trung bình cộng tọa độ. Độ dốc = rise/run."
+          }
+        ]
+      },
+
+      "problemSolvingAndData": {
+        "title": "Giải quyết vấn đề và Phân tích dữ liệu",
+        "description": "Tỷ lệ, phần trăm, tốc độ và đọc hiểu dữ liệu.",
+        "strategies": [
+          {
+            "title": "Tỷ lệ & Tỷ lệ thức",
+            "description": "Thiết lập tỷ lệ thức với đơn vị khớp nhau. Nhân chéo để giải. Luôn ghi nhãn đơn vị để tránh sai sót."
+          },
+          {
+            "title": "Chuyển đổi đơn vị",
+            "description": "Dùng phân tích thứ nguyên: nhân với phân số để đơn vị không mong muốn bị triệt tiêu. Theo dõi đơn vị suốt bài toán."
+          },
+          {
+            "title": "Biểu đồ & Bảng",
+            "description": "Đọc nhãn trục và đơn vị trước. Tìm xu hướng, ngoại lệ và xem biểu đồ hiển thị tốc độ hay tổng."
+          }
+        ]
+      }
+    }
+  },
+
+  "fullTestReport": {
+    "title": "Báo cáo bài thi thử",
+    "backHome": "← Về trang chủ",
+    "backToHome": "← Về trang chủ",
+    "loading": "Đang tải báo cáo bài thi...",
+    "notFound": "Không tìm thấy báo cáo",
+    "goHome": "Về trang chủ",
+
+    "history": {
+      "brand": "StudyBuddy",
+      "title": "Lịch sử bài thi thử",
+      "subtitle": "Xem lại các bài thi thử và theo dõi tiến bộ SAT của bạn theo thời gian.",
+      "loading": "Đang tải lịch sử bài thi...",
+
+      "summary": {
+        "totalTests": "Tổng số bài thi",
+        "completed": "Đã hoàn thành",
+        "avgAccuracy": "Độ chính xác TB",
+        "avgScaledScore": "Điểm SAT TB"
+      },
+
+      "sessions": {
+        "title": "Các bài thi",
+        "subtitle": "Hoạt động thi thử gần đây của bạn."
+      },
+
+      "list": {
+        "emptyTitle": "Chưa có lịch sử bài thi thử",
+        "emptyDescription": "Hoàn thành bài thi thử đầu tiên để xem tại đây."
+      },
+
+      "card": {
+        "metaLine": "Bài thi thử • {count} phần",
+        "scaledScoreLabel": "Điểm scaled",
+        "accuracyLabel": "Độ chính xác",
+        "correctLabel": "Đúng",
+        "sectionProgress": "Phần {current}/{total}",
+        "correctCount": "Đúng {count}",
+        "minutesLabel": "{count} phút",
+        "statusLabels": {
+          "completed": "Đã hoàn thành",
+          "inProgress": "Đang làm",
+          "break": "Đang nghỉ",
+          "expired": "Đã hết hạn"
+        },
+        "buttons": {
+          "continue": "Tiếp tục bài thi",
+          "viewReport": "Xem báo cáo"
+        }
+      }
+    },
+
+    "summary": {
+      "satScore": "Điểm SAT",
+      "accuracy": "Độ chính xác",
+      "correct": "Đúng",
+      "timeSpent": "Thời gian"
+    },
+
+    "overall": {
+      "title": "Tổng quan hiệu suất",
+      "subtitle": "Kết quả SAT của bạn qua cả hai phần thi",
+      "satScoreLabel": "Điểm SAT / {max}",
+      "overallAccuracy": "Độ chính xác tổng thể",
+      "readingWriting": "Reading & Writing",
+      "math": "Math",
+      "correctFraction": "Đúng {correct}/{total} · {accuracy}%",
+      "hardPath": "Nhánh Khó",
+      "easyPath": "Nhánh Dễ"
+    },
+
+    "moduleScores": {
+      "title": "🧩 Điểm từng Module",
+      "subtitle": "Đóng góp của mỗi module vào điểm scaled của section (200–{max}). M1 + M2 = điểm section.",
+      "moduleLabel": "Module {number}",
+      "hardBadge": "🔥 KHÓ",
+      "easyBadge": "🌱 DỄ",
+      "correctFraction": "Đúng {correct}/{total} · {accuracy}%",
+      "notAttempted": "Chưa làm",
+      "pts": "điểm",
+      "totalBothModules": "Tổng 2 module",
+      "howCalculated": "💡 Cách tính:",
+      "howCalculatedDesc": "Điểm scaled mỗi section (200–800) dùng bảng conversion chính thức của Digital SAT. Đóng góp mỗi module tỷ lệ theo số câu đúng, nên M1 + M2 = điểm section. Tổng SAT = R&W + Math → 400–1600."
+    },
+
+    "info": {
+      "title": "📊 Thông tin bài thi",
+      "subject": "Môn thi",
+      "questions": "Câu hỏi",
+      "answered": "Đã trả lời",
+      "unanswered": "Chưa trả lời",
+      "fullSat": "Full SAT"
+    },
+
+    "bySection": {
+      "title": "📚 Hiệu suất theo Section",
+      "questionsCount": "{count} câu hỏi",
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "skipped": "Bỏ qua",
+      "accuracy": "Độ chính xác",
+      "answeredLabel": "Đã trả lời: {answered}/{total}",
+      "timeLabel": "Thời gian: {time}"
+    },
+
+    "byDifficulty": {
+      "title": "📈 Hiệu suất theo độ khó",
+      "correctFraction": "✓ Đúng {correct} / {total}",
+      "labels": {
+        "EASY": "DỄ",
+        "MEDIUM": "TRUNG BÌNH",
+        "HARD": "KHÓ"
+      }
+    },
+
+    "byDomain": {
+      "title": "🎯 Hiệu suất theo Domain",
+      "answeredFraction": "{correct}/{answered} đã trả lời ({accuracy}%)",
+      "totalUnanswered": "{total} tổng · {unanswered} chưa làm"
+    },
+
+    "questionReview": {
+      "title": "📋 Chi tiết & Xem lại câu hỏi",
+      "subtitle": "Xem lại từng câu hỏi với câu trả lời, đáp án đúng và lời giải.",
+      "showPassage": "📖 Xem đoạn văn",
+      "allOptions": "Tất cả đáp án",
+      "yourChoice": "(Bạn chọn)",
+      "correctOption": "✓ Đáp án đúng",
+      "yourAnswer": "Câu trả lời của bạn",
+      "correctAnswer": "Đáp án đúng",
+      "explanation": "💡 Lời giải",
+      "proTip": "💡 Mẹo",
+      "status": {
+        "correct": "Đúng",
+        "incorrect": "Sai",
+        "skipped": "Bỏ qua"
+      },
+      "questionTypes": {
+        "MCQ": "📝 Trắc nghiệm",
+        "GRID_IN": "🔢 Điền đáp án",
+        "TEXT": "📄 Văn bản"
+      }
+    }
+  },
+
+  "checkout": {
+    "back": "Quay lại",
+    "stripeBadge": "Thanh toán qua Stripe",
+    "title": "Xem lại gói đăng ký của bạn",
+    "subtitle": "Bạn sẽ được chuyển đến Stripe để hoàn tất thanh toán một cách an toàn.",
+
+    "planCard": {
+      "priceSuffix": "/ tháng",
+      "includedTitle": "Bao gồm trong gói đăng ký",
+      "totalLabel": "Tổng cộng"
+    },
+
+    "billing": {
+      "title": "Thanh toán",
+      "subtitle": "Xem lại tài khoản của bạn trước khi tiếp tục.",
+      "accountLabel": "Tài khoản",
+      "securePayment": {
+        "title": "Thanh toán an toàn",
+        "description": "Thông tin thanh toán của bạn được Stripe xử lý an toàn. Chúng tôi không bao giờ lưu trữ chi tiết thẻ tín dụng hoặc thẻ ghi nợ của bạn."
+      },
+      "whatHappensNext": {
+        "title": "Điều gì xảy ra tiếp theo?",
+        "items": {
+          "redirect": "Bạn sẽ được chuyển đến Stripe.",
+          "enterPayment": "Nhập thông tin thanh toán của bạn.",
+          "startImmediately": "Gói đăng ký bắt đầu ngay sau khi thanh toán.",
+          "cancelAnytime": "Bạn có thể hủy bất cứ lúc nào từ tài khoản của mình."
+        }
+      }
+    },
+
+    "plans": {
+      "BASIC": {
+        "name": "Basic",
+        "features": [
+          "1 bài thi SAT đầy đủ / tháng",
+          "Câu hỏi luyện tập không giới hạn",
+          "Lời giải chi tiết"
+        ]
+      },
+      "PREMIUM": {
+        "name": "Premium",
+        "features": [
+          "4 bài thi SAT đầy đủ / tháng",
+          "Luyện tập không giới hạn",
+          "Phân tích AI",
+          "Theo dõi hiệu suất"
+        ]
+      },
+      "VIP": {
+        "name": "VIP",
+        "features": [
+          "Bài thi SAT không giới hạn",
+          "Luyện tập không giới hạn",
+          "Insight AI",
+          "Hỗ trợ ưu tiên",
+          "Luyện tập tùy chỉnh"
+        ]
+      }
+    },
+
+    "continueButton": "Tiếp tục đến Stripe • {price}",
+    "loadingFallback": "Đang tải trang thanh toán...",
+
+    "errors": {
+      "notLoggedIn": "Vui lòng đăng nhập trước khi tiếp tục.",
+      "checkoutFailed": "Không thể bắt đầu thanh toán."
+    }
+  },
+  "pricing": {
+    "badge": "Luyện thi SAT",
+    "title": "Chọn <highlight>gói SAT</highlight> của bạn",
+    "subtitle": "Dù bạn mới bắt đầu hay đang hướng tới <score>1500+</score>, hãy chọn gói phù hợp với hành trình ôn luyện của bạn.",
+
+    "featureChips": {
+      "practiceQuestions": "Câu hỏi luyện tập",
+      "detailedAnalytics": "Phân tích chi tiết",
+      "satFocused": "Tập trung SAT"
+    },
+
+    "mostPopular": "Phổ biến nhất",
+    "periodSuffix": "/tháng",
+
+    "buttons": {
+      "getStarted": "Bắt đầu ngay",
+      "choosePlan": "Chọn gói"
+    },
+
+    "cta": {
+      "badge": "Bắt đầu ôn luyện ngay hôm nay",
+      "title": "Chưa chắc gói nào phù hợp với bạn?",
+      "description": "Bắt đầu với gói Miễn phí và nâng cấp bất cứ khi nào bạn cần thêm bài luyện tập, phân tích chi tiết và bài thi SAT đầy đủ.",
+      "startFree": "Bắt đầu học miễn phí",
+      "explorePractice": "Khám phá bài luyện tập"
+    },
+
+    "tiers": {
+      "FREE": {
+        "name": "Miễn phí",
+        "description": "Bắt đầu luyện tập và xây dựng nền tảng SAT hoàn toàn miễn phí.",
+        "features": [
+          "Luyện tập giới hạn",
+          "Bài thi thử mini",
+          "Chỉ có báo cáo điểm"
+        ]
+      },
+      "BASIC": {
+        "name": "Cơ bản",
+        "description": "Mọi thứ bạn cần để bắt đầu ôn luyện SAT nghiêm túc.",
+        "features": [
+          "1 bài thi đầy đủ/tháng",
+          "Truy cập toàn bộ câu hỏi luyện tập",
+          "Lời giải cho mọi câu hỏi"
+        ]
+      },
+      "PREMIUM": {
+        "name": "Cao cấp",
+        "description": "Phân tích nâng cao và nhiều bài thi hơn cho học sinh nhiều tham vọng.",
+        "features": [
+          "4 bài thi đầy đủ/tháng",
+          "Phân tích nâng cao",
+          "Truy cập toàn bộ câu hỏi luyện tập",
+          "Lời giải cho mọi câu hỏi"
+        ]
+      },
+      "VIP": {
+        "name": "VIP",
+        "description": "Trải nghiệm SAT trọn vẹn với luyện tập và phân tích không giới hạn.",
+        "features": [
+          "Bài thi không giới hạn/tháng",
+          "Truy cập toàn bộ câu hỏi luyện tập",
+          "Phân tích nâng cao",
+          "Tạo bài thi tùy chỉnh",
+          "Chấm điểm và đánh giá",
+          "Phản hồi tùy chỉnh"
+        ]
+      }
+    }
+  },
+  "resetSmartMemory": {
+    "title": "Bộ nhớ thông minh",
+    "activeBadge": "Đang bật",
+    "description": "Các câu hỏi đã luyện sẽ được ghi nhớ và không xuất hiện lại trong các buổi luyện tập sau.",
+    "resetButton": "Đặt lại bộ nhớ",
+
+    "modal": {
+      "title": "Đặt lại Bộ nhớ thông minh?",
+      "subtitle": "Các câu hỏi đã ghi nhớ sẽ bị xóa."
+    },
+
+    "warnings": {
+      "reappearTitle": "Câu hỏi sẽ xuất hiện trở lại",
+      "reappearDescription": "Những câu hỏi đã luyện trước đây có thể xuất hiện lại trong các buổi luyện tập tiếp theo."
+    },
+
+    "safety": {
+      "title": "Lịch sử của bạn vẫn an toàn",
+      "description": "Lịch sử luyện tập, câu trả lời, điểm số và kết quả sẽ không bị xóa."
+    },
+
+    "success": {
+      "title": "Đặt lại bộ nhớ thành công",
+      "description": "Những câu hỏi đã luyện trước đây đã có thể xuất hiện trở lại."
+    },
+
+    "buttons": {
+      "cancel": "Hủy",
+      "reset": "Đặt lại bộ nhớ",
+      "resetting": "Đang đặt lại...",
+      "completed": "Hoàn tất"
+    },
+
+    "errors": {
+      "resetFailed": "Không thể đặt lại Bộ nhớ thông minh.",
+      "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+  },
+
+  "notFound": {
+    "code": "404 — KHÔNG TÌM THẤY TRANG",
+    "title": "Có vẻ bạn đã đi lạc!",
+    "description": "Trang bạn đang tìm kiếm không tồn tại, đã được di chuyển hoặc đường dẫn không chính xác.",
+    "home": "Về trang chủ",
+    "back": "Quay lại",
+    "footer": "Đừng lo, hành trình học tập của bạn vẫn tiếp tục."
   }
 }

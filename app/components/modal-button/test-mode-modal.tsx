@@ -200,7 +200,6 @@ export default function TestModeModal() {
   };
 
   const handleModeSelect = (mode: string) => {
-    // ⛔ Chặn mọi tương tác khi full test đang chuẩn bị
     if (isBusy) return;
 
     if (

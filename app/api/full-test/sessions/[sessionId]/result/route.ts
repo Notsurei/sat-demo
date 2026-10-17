@@ -370,18 +370,6 @@ export async function GET(request: Request, context: RouteContext) {
       );
     }
 
-    if (session.status !== "COMPLETED") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Test result is not available until the test is completed",
-          status: session.status,
-        },
-        { status: 409 },
-      );
-    }
-
-    /* ── Build questions ──────────────────────────────────────────── */
     const questions = session.sections.flatMap((section) =>
       section.examSection.questions.map((examQuestion) => {
         const question = examQuestion.question;
@@ -476,7 +464,6 @@ export async function GET(request: Request, context: RouteContext) {
       }),
     );
 
-    /* ── Summary ──────────────────────────────────────────────────── */
     const totalQuestions = questions.length;
 
     const answeredQuestions = questions.filter(
@@ -494,7 +481,6 @@ export async function GET(request: Request, context: RouteContext) {
         ? Number(((correctAnswers / answeredQuestions) * 100).toFixed(2))
         : 0;
 
-    /* ── Sections ─────────────────────────────────────────────────── */
     const sections = session.sections.map((section) => {
       const sectionQuestions = questions.filter(
         (q) => q.sectionId === section.examSection.id,
@@ -546,7 +532,6 @@ export async function GET(request: Request, context: RouteContext) {
       };
     });
 
-    /* ── Difficulty ───────────────────────────────────────────────── */
     const difficultyStats = {
       EASY: { total: 0, correct: 0, accuracy: 0 },
       MEDIUM: { total: 0, correct: 0, accuracy: 0 },
@@ -570,7 +555,6 @@ export async function GET(request: Request, context: RouteContext) {
         answered > 0 ? Number(((stat.correct / answered) * 100).toFixed(2)) : 0;
     });
 
-    /* ── Domains ──────────────────────────────────────────────────── */
     const domainMap = new Map<
       string,
       { domain: string; total: number; answered: number; correct: number }
@@ -604,7 +588,6 @@ export async function GET(request: Request, context: RouteContext) {
       }))
       .sort((a, b) => b.accuracy - a.accuracy);
 
-    /* ── Scores ───────────────────────────────────────────────────── */
     const isRw = (subject: string) => {
       const s = subject.toUpperCase();
       return s === "SAT_RW" || s.includes("RW") || s.includes("READING");

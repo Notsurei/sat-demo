@@ -2,6 +2,7 @@
 
 import React from "react";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 
 import { Button, Modal, Spinner } from "@heroui/react";
 
@@ -12,6 +13,8 @@ import {
 } from "@gravity-ui/icons";
 
 export default function ResetSmartMemory() {
+  const t = useTranslations("resetSmartMemory");
+
   const [isResetting, setIsResetting] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -29,11 +32,10 @@ export default function ResetSmartMemory() {
 
       if (axios.isAxiosError(error)) {
         setError(
-          error.response?.data?.error ??
-          "Failed to reset Smart Memory.",
+          error.response?.data?.error ?? t("errors.resetFailed"),
         );
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(t("errors.generic"));
       }
     } finally {
       setIsResetting(false);
@@ -62,7 +64,6 @@ export default function ResetSmartMemory() {
           "sm:p-5",
         ].join(" ")}
       >
-        {/* Left */}
         <div className="flex min-w-0 items-start gap-3">
           <div
             className={[
@@ -76,7 +77,7 @@ export default function ResetSmartMemory() {
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold text-foreground">
-                Smart Memory
+                {t("title")}
               </h3>
 
               <span
@@ -87,13 +88,12 @@ export default function ResetSmartMemory() {
                   "uppercase tracking-wide text-success",
                 ].join(" ")}
               >
-                Active
+                {t("activeBadge")}
               </span>
             </div>
 
             <p className="mt-1 text-sm leading-6 text-default-500">
-              Practiced questions are remembered and won't appear again in
-              future practice sessions.
+              {t("description")}
             </p>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function ResetSmartMemory() {
           >
             <ArrowRotateLeft className="size-4" />
 
-            Reset Memory
+            {t("resetButton")}
           </Button>
 
           <Modal.Backdrop>
@@ -135,11 +135,11 @@ export default function ResetSmartMemory() {
 
                     <div>
                       <Modal.Heading className="text-lg font-semibold">
-                        Reset Smart Memory?
+                        {t("modal.title")}
                       </Modal.Heading>
 
                       <p className="mt-1 text-sm text-default-500">
-                        Your remembered questions will be cleared.
+                        {t("modal.subtitle")}
                       </p>
                     </div>
                   </div>
@@ -158,12 +158,11 @@ export default function ResetSmartMemory() {
 
                       <div>
                         <p className="text-sm font-medium text-foreground">
-                          Questions will appear again
+                          {t("warnings.reappearTitle")}
                         </p>
 
                         <p className="mt-1 text-sm leading-6 text-default-500">
-                          Previously practiced questions can become available
-                          again in future practice sessions.
+                          {t("warnings.reappearDescription")}
                         </p>
                       </div>
                     </div>
@@ -187,12 +186,11 @@ export default function ResetSmartMemory() {
 
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        Your history is safe
+                        {t("safety.title")}
                       </p>
 
                       <p className="mt-1 text-sm leading-6 text-default-500">
-                        Practice history, answers, scores, and results will not
-                        be deleted.
+                        {t("safety.description")}
                       </p>
                     </div>
                   </div>
@@ -229,11 +227,11 @@ export default function ResetSmartMemory() {
 
                       <div>
                         <p className="text-sm font-medium text-success">
-                          Memory reset successfully
+                          {t("success.title")}
                         </p>
 
                         <p className="mt-1 text-xs text-default-500">
-                          Previously practiced questions are available again.
+                          {t("success.description")}
                         </p>
                       </div>
                     </div>
@@ -247,7 +245,7 @@ export default function ResetSmartMemory() {
                     slot="close"
                     isDisabled={isResetting}
                   >
-                    Cancel
+                    {t("buttons.cancel")}
                   </Button>
 
                   <Button
@@ -259,17 +257,17 @@ export default function ResetSmartMemory() {
                     {isResetting ? (
                       <>
                         <Spinner size="sm" />
-                        Resetting...
+                        {t("buttons.resetting")}
                       </>
                     ) : success ? (
                       <>
                         <Check className="size-4" />
-                        Completed
+                        {t("buttons.completed")}
                       </>
                     ) : (
                       <>
                         <ArrowRotateLeft className="size-4" />
-                        Reset Memory
+                        {t("buttons.reset")}
                       </>
                     )}
                   </Button>

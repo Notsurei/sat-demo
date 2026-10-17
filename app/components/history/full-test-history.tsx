@@ -15,7 +15,7 @@ import {
 
 import TestModeModal from "../modal-button/test-mode-modal";
 
-import type { FullTestHistory } from "@/app/(main)/pages/full-test-report-history/components/type";
+import type { FullTestHistory } from "@/app/[locale]/(main)/pages/full-test-report-history/components/type";
 
 interface RecentFullTestHistoryProps {
   history: FullTestHistory[];

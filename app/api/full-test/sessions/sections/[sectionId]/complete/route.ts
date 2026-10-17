@@ -109,14 +109,14 @@ function diffWeight(difficulty: string | null | undefined): number {
 function selectByBlueprint(
   pool: QuestionStub[],
   blueprint: Record<string, number>,
-  targetCount: number
+  targetCount: number,
 ): QuestionStub[] {
   const subtopicCounts: Record<string, number> = {};
   const selected: QuestionStub[] = [];
 
   for (const [dom, targetPerDom] of Object.entries(blueprint)) {
     const domQs = shuffle(
-      pool.filter((q) => normalizeDomain(q.domain) === dom)
+      pool.filter((q) => normalizeDomain(q.domain) === dom),
     );
 
     let addedFromDom = 0;
@@ -150,7 +150,7 @@ function selectByBlueprint(
 
 function sortForDisplay(
   questions: QuestionStub[],
-  subject: Subject
+  subject: Subject,
 ): QuestionStub[] {
   const arr = [...questions];
 
@@ -216,19 +216,19 @@ async function fillAdaptiveModule2(params: {
   let selected = selectByBlueprint(
     primaryPool as QuestionStub[],
     blueprint,
-    targetCount
+    targetCount,
   );
 
   if (selected.length < targetCount) {
     const usedIds = new Set(selected.map((q) => q.id));
     const fallbackPool = shuffle(
-      pool.filter((q) => !usedIds.has(q.id))
+      pool.filter((q) => !usedIds.has(q.id)),
     ) as QuestionStub[];
 
     const extra = selectByBlueprint(
       fallbackPool,
       blueprint,
-      targetCount - selected.length
+      targetCount - selected.length,
     );
 
     const seen = new Set(selected.map((q) => q.id));
@@ -243,7 +243,7 @@ async function fillAdaptiveModule2(params: {
   if (selected.length < targetCount) {
     console.warn(
       `[ADAPTIVE] Not enough questions for ${subject} variant ${variant}. ` +
-        `Have ${selected.length}, need ${targetCount}.`
+        `Have ${selected.length}, need ${targetCount}.`,
     );
   }
 
@@ -277,7 +277,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!userId) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -305,7 +305,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!sectionSession) {
       return NextResponse.json(
         { success: false, message: "Section session not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -320,7 +320,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           success: false,
           message: "Full test session is no longer active",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -350,7 +350,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       .map((examQuestion) => {
         const question = examQuestion.question;
         const answer = sectionSession.answers.find(
-          (item) => item.questionId === question.id
+          (item) => item.questionId === question.id,
         );
 
         if (!answer) return null;
@@ -360,12 +360,12 @@ export async function POST(req: NextRequest, { params }: Params) {
         if (question.type === "MCQ") {
           if (answer.selectedOptionId) {
             const selectedOption = question.options.find(
-              (option) => option.id === answer.selectedOptionId
+              (option) => option.id === answer.selectedOptionId,
             );
             isCorrect = selectedOption?.isCorrect === true;
           } else if (answer.textAnswer?.trim()) {
             const correctOption = question.options.find(
-              (option) => option.isCorrect
+              (option) => option.isCorrect,
             );
             if (correctOption) {
               isCorrect =
@@ -397,7 +397,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       })
       .filter(
         (answer): answer is { answerId: string; isCorrect: boolean } =>
-          answer !== null
+          answer !== null,
       );
 
     const unansweredQuestions = totalQuestions - answeredQuestions;
@@ -407,8 +407,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         ? Math.round((correctAnswers / totalQuestions) * 100)
         : 0;
 
-    const weightedPct =
-      totalWeight > 0 ? earnedWeight / totalWeight : 0;
+    const weightedPct = totalWeight > 0 ? earnedWeight / totalWeight : 0;
 
     const completedAt = new Date();
 
@@ -421,26 +420,24 @@ export async function POST(req: NextRequest, { params }: Params) {
               fullTestSectionSessionId: sectionSession.id,
             },
             data: { isCorrect: answer.isCorrect },
-          })
-        )
+          }),
+        ),
       );
     }
 
     const currentSection = sectionSession.examSection;
     const isModule1 = currentSection.moduleNumber === 1;
 
-    let adaptiveResult:
-      | {
-          variant: "EASY" | "HARD";
-          weightedPct: number;
-          earnedWeight: number;
-          totalWeight: number;
-          correctCount: number;
-          accuracy: number;
-          filledCount: number;
-          nextSectionId: string;
-        }
-      | null = null;
+    let adaptiveResult: {
+      variant: "EASY" | "HARD";
+      weightedPct: number;
+      earnedWeight: number;
+      totalWeight: number;
+      correctCount: number;
+      accuracy: number;
+      filledCount: number;
+      nextSectionId: string;
+    } | null = null;
 
     if (isModule1) {
       const variant: "EASY" | "HARD" =
@@ -456,7 +453,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
       if (module2) {
         const usedQuestionIds = currentSection.questions.map(
-          (q) => q.questionId
+          (q) => q.questionId,
         );
 
         const { selectedCount } = await fillAdaptiveModule2({
@@ -508,15 +505,16 @@ export async function POST(req: NextRequest, { params }: Params) {
         });
 
         if (next) {
-          const nextSectionSession =
-            await tx.fullTestSectionSession.findUnique({
+          const nextSectionSession = await tx.fullTestSectionSession.findUnique(
+            {
               where: {
                 fullTestSessionId_examSectionId: {
                   fullTestSessionId: fullTestSession.id,
                   examSectionId: next.id,
                 },
               },
-            });
+            },
+          );
 
           if (!nextSectionSession) {
             throw new Error("Next section session not found.");
@@ -537,13 +535,19 @@ export async function POST(req: NextRequest, { params }: Params) {
           where: { id: fullTestSession.id },
           data: {
             ...(next ? { currentSectionOrder: next.order } : {}),
+            ...(!next
+              ? {
+                  status: "COMPLETED",
+                  completedAt,
+                }
+              : {}),
             lastActivityAt: completedAt,
           },
         });
 
         return next;
       },
-      { timeout: 15000 }
+      { timeout: 15000 },
     );
 
     return NextResponse.json({
@@ -593,18 +597,16 @@ export async function POST(req: NextRequest, { params }: Params) {
   } catch (error) {
     console.error(
       "POST /api/full-test/sessions/sections/[sectionId]/complete error:",
-      error
+      error,
     );
 
     return NextResponse.json(
       {
         success: false,
         message:
-          error instanceof Error
-            ? error.message
-            : "Failed to complete section",
+          error instanceof Error ? error.message : "Failed to complete section",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -176,13 +176,6 @@
       }
     },
 
-    "testimonials": {
-      "quote1": "StudyBuddy helped me raise my score by 150 points in two months — the AI explanations are gold.",
-      "author1": "Sarah J.",
-      "quote2": "The adaptive plan focused my practice and saved hours.",
-      "author2": "Michael T."
-    },
-
     "contact": {
       "label": "Get in touch",
       "titleLine1": "Have a question?",
@@ -252,45 +245,74 @@
     "stats": {
       "sectionLabel": "Statistics",
       "currentScore": "Current Score",
-      "accuracy": "Accuracy",
+      "practiceAccuracy": "Practice Accuracy",
       "practiceSessions": "Practice Sessions",
-      "studyStreak": "Study Streak",
+      "fullTestSessions": "Full Test Sessions",
 
       "trends": {
         "latestPractice": "Latest practice",
+        "latestFullTest": "Latest full test",
         "noCompletedTests": "No completed tests",
         "correctFraction": "{correct}/{total} correct",
+        "noPracticeData": "Complete a practice to see your accuracy",
         "noData": "No data yet",
         "completedCount": "{count} completed",
-        "noSessions": "No sessions yet",
-        "comingSoon": "Coming soon",
-        "keepPracticing": "Keep practicing!"
+        "noSessions": "No sessions yet"
       }
     },
 
     "recommended": {
       "title": "Recommended Practice",
       "subtitle": "Choose what you want to work on next.",
+      "subtitleWeak": "Focus on your weakest domains first.",
       "startPractice": "Start Practice",
+
       "items": {
         "practiceMath": {
           "title": "Practice Math",
-          "description": "Improve your problem-solving skills."
+          "description": "Improve your problem-solving skills.",
+          "duration": "20 min"
         },
         "practiceReadingWriting": {
           "title": "Practice Reading & Writing",
-          "description": "Strengthen your reading and grammar."
+          "description": "Strengthen your reading and grammar.",
+          "duration": "25 min"
         },
         "takeFullPractice": {
           "title": "Take a Full Practice",
-          "description": "Test your overall SAT performance."
+          "description": "Test your overall SAT performance.",
+          "duration": "45 min"
         }
+      },
+
+      "domainTips": {
+        "craftAndStructure": "Focus on Words in Context & Text Structure. Read 1 SAT passage daily.",
+        "informationAndIdeas": "Practice evidence-based questions. Drill Inference and Command of Evidence.",
+        "standardEnglishConventions": "Review comma rules, subject-verb agreement, and parallel structure.",
+        "expressionOfIdeas": "Practice Rhetorical Synthesis — combining notes into purposeful sentences.",
+        "algebra": "Re-study linear equations & systems. Focus on setting up equations from word problems.",
+        "advancedMath": "Drill quadratic factoring, completing the square, and function transformations.",
+        "geometry": "Review circle theorems, right triangle trig (SOHCAHTOA), and coordinate geometry.",
+        "problemSolvingAndData": "Practice ratio/rate problems and interpreting graphs/tables."
       }
     },
 
     "tasks": {
       "title": "Today's Tasks",
       "subtitle": "Stay consistent with your preparation."
+    },
+
+    "todoList": {
+      "eyebrow": "Study checklist",
+      "title": "To-do list",
+      "progressComplete": "{progress}% complete",
+      "taskCount": "{count, plural, =0 {No tasks} =1 {1 task} other {# tasks}}",
+      "subjectTaskCount": "{count, plural, =0 {0 tasks} =1 {1 task} other {# tasks}}",
+      "selectSubject": "Select Subject",
+      "selectFolder": "Select Folder",
+      "addPlaceholder": "Add a quick task",
+      "addButton": "Add",
+      "noTasks": "No tasks"
     },
 
     "upgradeBanner": {
@@ -388,6 +410,38 @@
       "noAccountPrompt": "Don't have an account? Sign up"
     },
 
+    "verifyEmail": {
+      "success": {
+        "title": "Email Verified!",
+        "description": "Your email has been successfully verified. You can now sign in to your account."
+      },
+      "already": {
+        "title": "Already Verified",
+        "description": "Your email has already been verified. You can sign in normally."
+      },
+      "expired": {
+        "title": "Verification Link Expired",
+        "description": "Your verification link has expired. Please request a new verification email."
+      },
+      "invalid": {
+        "title": "Invalid Verification Link",
+        "description": "The verification link is invalid or has already been used."
+      },
+
+      "buttons": {
+        "signIn": "Sign In",
+        "requestNewLink": "Request New Link",
+        "goHome": "Go Home"
+      },
+
+      "support": {
+        "text": "Need help?",
+        "link": "Contact Support"
+      },
+
+      "loading": "Loading..."
+    },
+
     "errors": {
       "emailRequired": "Email is required",
       "passwordRequired": "Password is required",
@@ -468,5 +522,640 @@
       "genericError": "Something went wrong",
       "gotItButton": "I got it"
     }
+  },
+
+  "practiceReport": {
+    "title": "Practice Report",
+    "subtitle": "Your detailed performance analysis",
+    "backHome": "← Back Home",
+    "loading": "Loading practice report...",
+    "notFound": "Report not found",
+    "goHome": "Go Home",
+
+    "recentPracticeHistory": {
+      "title": "Recent Practice History",
+      "subtitle": "Your 5 most recent practice sessions",
+      "viewAll": "View All",
+      "loading": "Loading history...",
+
+      "emptyTitle": "No practice history yet",
+      "emptyDescription": "Start your first practice session and your results will appear here.",
+
+      "unknownDate": "Unknown date",
+      "correctFraction": "{correct}/{total} correct",
+      "accuracyLabel": "accuracy",
+
+      "subjects": {
+        "SAT_MATH": "SAT Math",
+        "SAT_READING_WRITING": "Reading & Writing"
+      },
+
+      "modes": {
+        "PRACTICE": "Practice",
+        "FULL_TEST": "Full Test",
+        "TARGETED": "Targeted Practice"
+      },
+
+      "time": {
+        "minutes": "{count}m",
+        "hoursMinutes": "{hours}h {minutes}m"
+      }
+    },
+
+    "practiceHistory": {
+      "brand": "StudyBuddy",
+      "title": "Practice History",
+      "subtitle": "Review your practice sessions and track your progress over time.",
+      "loading": "Loading practice history...",
+
+      "summary": {
+        "totalPractices": "Total Practices",
+        "completed": "Completed",
+        "avgAccuracy": "Avg. Accuracy",
+        "avgScore": "Avg. Score"
+      },
+
+      "sessions": {
+        "title": "Practice Sessions",
+        "subtitle": "Your latest practice activity."
+      },
+
+      "list": {
+        "emptyTitle": "No practice history yet",
+        "emptyDescription": "Complete your first practice session to see it here."
+      },
+
+      "card": {
+        "defaultDomain": "Practice Session",
+        "scoreLabel": "Score",
+        "accuracyLabel": "Accuracy",
+        "questionsLabel": "Questions",
+        "correctLabel": "{count} correct",
+        "minutesLabel": "{count} min",
+        "statusLabels": {
+          "done": "Completed",
+          "inProgress": "In Progress",
+          "abandoned": "Abandoned"
+        },
+        "buttons": {
+          "continue": "Continue Practice",
+          "viewDetails": "View Details"
+        }
+      }
+    },
+
+    "summary": {
+      "accuracy": "Accuracy",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "timeSpent": "Time Spent"
+    },
+
+    "overall": {
+      "title": "Overall Performance",
+      "score": "Score"
+    },
+
+    "practiceInfo": {
+      "title": "📊 Practice Information",
+      "subject": "Subject",
+      "mode": "Mode",
+      "answered": "Answered",
+      "unanswered": "Unanswered"
+    },
+
+    "byDifficulty": {
+      "title": "📈 Performance by Difficulty",
+      "correctFraction": "✓ {correct} / {total} correct",
+      "labels": {
+        "EASY": "EASY",
+        "MEDIUM": "MEDIUM",
+        "HARD": "HARD"
+      }
+    },
+
+    "byDomain": {
+      "title": "🎯 Performance by Domain"
+    },
+
+    "questionReview": {
+      "title": "📋 Question Details & Review",
+      "subtitle": "Review each question with all options, your answer, and the correct answer",
+      "showPassage": "📖 Show Passage",
+      "allOptions": "All Options",
+      "yourChoice": "(Your choice)",
+      "correctOption": "✓ Correct",
+      "yourAnswer": "Your Answer",
+      "correctAnswer": "Correct Answer",
+      "explanation": "💡 Explanation",
+      "proTip": "💡 Pro Tip",
+      "questionTypes": {
+        "MCQ": "📝 Multiple Choice",
+        "GRID_IN": "🔢 Grid-in",
+        "TEXT": "📄 Text"
+      }
+    },
+
+    "priorityFocus": {
+      "title": "Priority Focus Areas",
+      "nextStep": "Go to Targeted Practice, select each weak domain above and drill 15–25 questions at Medium then Hard difficulty.",
+      "excellentTitle": "Excellent session!",
+      "excellentDescription": "You scored ≥75% across all domains. Challenge yourself: try Hard difficulty in Targeted Practice or attempt a Full Test.",
+      "tips": {
+        "craftAndStructure": "Focus on Words in Context & Text Structure. Read 1 SAT passage daily, annotate author purpose.",
+        "informationAndIdeas": "Practice evidence-based questions. Drill Inference and Command of Evidence subtopics.",
+        "standardEnglishConventions": "Review comma rules, subject-verb agreement, and parallel structure. Do grammar drills.",
+        "expressionOfIdeas": "Practice Rhetorical Synthesis — combining notes into purposeful sentences.",
+        "algebra": "Re-study linear equations & systems. Focus on setting up equations from word problems.",
+        "advancedMath": "Drill quadratic factoring, completing the square, and function transformations.",
+        "geometry": "Review circle theorems, right triangle trig (SOHCAHTOA), and coordinate geometry.",
+        "problemSolvingAndData": "Practice ratio/rate problems and interpreting graphs/tables. Work on unit conversions."
+      }
+    },
+
+    "domainAdvice": {
+      "title": "Domain-specific strategies",
+
+      "craftAndStructure": {
+        "title": "Craft and Structure",
+        "description": "Understand how authors use words and structure to build meaning.",
+        "strategies": [
+          {
+            "title": "Words in Context",
+            "description": "Use surrounding sentences to infer meaning of unfamiliar words. Eliminate choices that change the tone or scope."
+          },
+          {
+            "title": "Text Structure",
+            "description": "Track how the passage shifts from one idea to the next. Look for contrast words: however, although, yet."
+          },
+          {
+            "title": "Author's Purpose",
+            "description": "Ask: why did the author write this? To inform? To persuade? To critique? Purpose drives correct answers."
+          }
+        ]
+      },
+
+      "informationAndIdeas": {
+        "title": "Information and Ideas",
+        "description": "Locate, interpret, and evaluate information from passages and graphics.",
+        "strategies": [
+          {
+            "title": "Command of Evidence",
+            "description": "For paired-question sets, pick the choice that directly supports your previous answer — not a related fact."
+          },
+          {
+            "title": "Inference",
+            "description": "Correct inferences are supported by text without being directly stated. Avoid conclusions that go too far."
+          },
+          {
+            "title": "Central Ideas",
+            "description": "Identify the main claim and supporting details. Wrong choices often overgeneralize or are too narrow."
+          }
+        ]
+      },
+
+      "standardEnglishConventions": {
+        "title": "Standard English Conventions",
+        "description": "Master grammar, punctuation, and sentence structure rules tested on the SAT.",
+        "strategies": [
+          {
+            "title": "Comma Rules",
+            "description": "Never place a single comma between two independent clauses. Use semicolon, period, or comma + conjunction."
+          },
+          {
+            "title": "Subject-Verb Agreement",
+            "description": "Find the true subject, ignoring prepositional phrases. Singular subjects take singular verbs."
+          },
+          {
+            "title": "Parallel Structure",
+            "description": "Items in a list or comparison must share the same grammatical form (all -ing, all infinitives, etc.)."
+          }
+        ]
+      },
+
+      "expressionOfIdeas": {
+        "title": "Expression of Ideas",
+        "description": "Improve the clarity, focus, and effectiveness of written arguments.",
+        "strategies": [
+          {
+            "title": "Rhetorical Synthesis",
+            "description": "Read the bullet points, then choose the sentence that achieves the stated goal using the most relevant notes."
+          },
+          {
+            "title": "Transitions",
+            "description": "Identify the logical relationship between sentences first. Then pick the transition that matches: contrast, cause, addition, example."
+          },
+          {
+            "title": "Precision",
+            "description": "Choose words that say exactly what the sentence needs — avoid vague or overly dramatic options."
+          }
+        ]
+      },
+
+      "algebra": {
+        "title": "Algebra",
+        "description": "Linear equations, inequalities, and systems — the highest-yield SAT math domain.",
+        "strategies": [
+          {
+            "title": "Set Up Equations",
+            "description": "Translate word problems into equations before solving. Define variables explicitly: let x = what?"
+          },
+          {
+            "title": "Systems of Equations",
+            "description": "Use substitution or elimination. Watch for 'no solution' (parallel) and 'infinite solutions' (same line) cases."
+          },
+          {
+            "title": "Slope & Intercepts",
+            "description": "Slope = rise/run = (y₂−y₁)/(x₂−x₁). y-intercept is value when x = 0. Know both standard and slope-intercept forms."
+          }
+        ]
+      },
+
+      "advancedMath": {
+        "title": "Advanced Math",
+        "description": "Quadratics, exponentials, and function transformations.",
+        "strategies": [
+          {
+            "title": "Quadratic Factoring",
+            "description": "Look for common factors first. For ax² + bx + c, find two numbers that multiply to ac and add to b."
+          },
+          {
+            "title": "Completing the Square",
+            "description": "x² + bx → (x + b/2)² − (b/2)². Useful for finding vertex form and solving without factoring."
+          },
+          {
+            "title": "Function Transformations",
+            "description": "f(x) + k shifts up/down; f(x + h) shifts left/right (opposite of sign); −f(x) reflects over x-axis."
+          }
+        ]
+      },
+
+      "geometry": {
+        "title": "Geometry",
+        "description": "Circles, triangles, and coordinate geometry — mostly formula-driven.",
+        "strategies": [
+          {
+            "title": "Circle Theorems",
+            "description": "A full circle is 360°. Arc length and sector area are fractions of the whole based on central angle."
+          },
+          {
+            "title": "Right Triangle Trig",
+            "description": "SOH CAH TOA: sin = opp/hyp, cos = adj/hyp, tan = opp/adj. Memorize 30-60-90 and 45-45-90 ratios."
+          },
+          {
+            "title": "Coordinate Geometry",
+            "description": "Distance = √((x₂−x₁)² + (y₂−y₁)²). Midpoint = average of coordinates. Slope = rise/run."
+          }
+        ]
+      },
+
+      "problemSolvingAndData": {
+        "title": "Problem Solving and Data Analysis",
+        "description": "Ratios, percentages, rates, and data interpretation.",
+        "strategies": [
+          {
+            "title": "Ratios & Proportions",
+            "description": "Set up proportions with matching units. Cross-multiply to solve. Always label units to avoid mistakes."
+          },
+          {
+            "title": "Unit Conversions",
+            "description": "Use dimensional analysis: multiply by fractions so unwanted units cancel. Track units through the whole problem."
+          },
+          {
+            "title": "Graphs & Tables",
+            "description": "Read axis labels and units first. Look for trends, outliers, and whether the graph shows a rate or a total."
+          }
+        ]
+      }
+    }
+  },
+
+  "fullTestReport": {
+    "title": "Full Test Report",
+    "backHome": "← Back Home",
+    "backToHome": "← Back to Home",
+    "loading": "Loading full test report...",
+    "notFound": "Report not found",
+    "goHome": "Go Home",
+
+    "history": {
+      "brand": "StudyBuddy",
+      "title": "Full Test History",
+      "subtitle": "Review your full test sessions and track your SAT progress over time.",
+      "loading": "Loading full test history...",
+
+      "summary": {
+        "totalTests": "Total Tests",
+        "completed": "Completed",
+        "avgAccuracy": "Avg. Accuracy",
+        "avgScaledScore": "Avg. SAT Score"
+      },
+
+      "sessions": {
+        "title": "Test Sessions",
+        "subtitle": "Your latest full test activity."
+      },
+
+      "list": {
+        "emptyTitle": "No full test history yet",
+        "emptyDescription": "Complete your first full test to see it here."
+      },
+
+      "card": {
+        "metaLine": "Full Test • {count} sections",
+        "scaledScoreLabel": "Scaled Score",
+        "accuracyLabel": "Accuracy",
+        "correctLabel": "Correct",
+        "sectionProgress": "Section {current}/{total}",
+        "correctCount": "{count} correct",
+        "minutesLabel": "{count} min",
+        "statusLabels": {
+          "completed": "Completed",
+          "inProgress": "In Progress",
+          "break": "On Break",
+          "expired": "Expired"
+        },
+        "buttons": {
+          "continue": "Continue Test",
+          "viewReport": "View Report"
+        }
+      }
+    },
+
+    "summary": {
+      "satScore": "SAT Score",
+      "accuracy": "Accuracy",
+      "correct": "Correct",
+      "timeSpent": "Time Spent"
+    },
+
+    "overall": {
+      "title": "Overall Performance",
+      "subtitle": "Your SAT performance across both sections",
+      "satScoreLabel": "SAT Score / {max}",
+      "overallAccuracy": "Overall Accuracy",
+      "readingWriting": "Reading & Writing",
+      "math": "Math",
+      "correctFraction": "{correct}/{total} correct · {accuracy}%",
+      "hardPath": "Hard path",
+      "easyPath": "Easy path"
+    },
+
+    "moduleScores": {
+      "title": "🧩 Module Scores",
+      "subtitle": "Each module's contribution to the section scaled score (200–{max}). M1 + M2 = section score.",
+      "moduleLabel": "Module {number}",
+      "hardBadge": "🔥 HARD",
+      "easyBadge": "🌱 EASY",
+      "correctFraction": "{correct}/{total} correct · {accuracy}%",
+      "notAttempted": "Not attempted",
+      "pts": "pts",
+      "totalBothModules": "Total (both modules)",
+      "howCalculated": "💡 How it's calculated:",
+      "howCalculatedDesc": "Each section scaled score (200–800) uses the official Digital SAT conversion table. Each module's contribution is proportional to its share of correct answers, so M1 + M2 = section score. Total SAT = R&W + Math → 400–1600."
+    },
+
+    "info": {
+      "title": "📊 Full Test Information",
+      "subject": "Subject",
+      "questions": "Questions",
+      "answered": "Answered",
+      "unanswered": "Unanswered",
+      "fullSat": "Full SAT"
+    },
+
+    "bySection": {
+      "title": "📚 Performance by Section",
+      "questionsCount": "{count} questions",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "skipped": "Skipped",
+      "accuracy": "Accuracy",
+      "answeredLabel": "Answered: {answered}/{total}",
+      "timeLabel": "Time: {time}"
+    },
+
+    "byDifficulty": {
+      "title": "📈 Performance by Difficulty",
+      "correctFraction": "✓ {correct} / {total} correct",
+      "labels": {
+        "EASY": "EASY",
+        "MEDIUM": "MEDIUM",
+        "HARD": "HARD"
+      }
+    },
+
+    "byDomain": {
+      "title": "🎯 Performance by Domain",
+      "answeredFraction": "{correct}/{answered} answered ({accuracy}%)",
+      "totalUnanswered": "{total} total · {unanswered} unanswered"
+    },
+
+    "questionReview": {
+      "title": "📋 Question Details & Review",
+      "subtitle": "Review each question with your answer, correct answer, and explanation.",
+      "showPassage": "📖 Show Passage",
+      "allOptions": "All Options",
+      "yourChoice": "(Your choice)",
+      "correctOption": "✓ Correct",
+      "yourAnswer": "Your Answer",
+      "correctAnswer": "Correct Answer",
+      "explanation": "💡 Explanation",
+      "proTip": "💡 Pro Tip",
+      "status": {
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "skipped": "Skipped"
+      },
+      "questionTypes": {
+        "MCQ": "📝 Multiple Choice",
+        "GRID_IN": "🔢 Grid-in",
+        "TEXT": "📄 Text"
+      }
+    }
+  },
+
+  "checkout": {
+    "back": "Back",
+    "stripeBadge": "Stripe Checkout",
+    "title": "Review your subscription",
+    "subtitle": "You'll be redirected to Stripe to securely complete your payment.",
+
+    "planCard": {
+      "priceSuffix": "/ month",
+      "includedTitle": "Included in your subscription",
+      "totalLabel": "Total"
+    },
+
+    "billing": {
+      "title": "Billing",
+      "subtitle": "Review your account before continuing.",
+      "accountLabel": "Account",
+      "securePayment": {
+        "title": "Secure Payment",
+        "description": "Your payment information is securely handled by Stripe. We never store your credit or debit card details."
+      },
+      "whatHappensNext": {
+        "title": "What happens next?",
+        "items": {
+          "redirect": "You will be redirected to Stripe.",
+          "enterPayment": "Enter your payment details.",
+          "startImmediately": "Your subscription starts immediately after payment.",
+          "cancelAnytime": "You can cancel anytime from your account."
+        }
+      }
+    },
+
+    "plans": {
+      "BASIC": {
+        "name": "Basic",
+        "features": [
+          "1 Full SAT Test / month",
+          "Unlimited Practice Questions",
+          "Detailed Explanations"
+        ]
+      },
+      "PREMIUM": {
+        "name": "Premium",
+        "features": [
+          "4 Full SAT Tests / month",
+          "Unlimited Practice",
+          "AI Analytics",
+          "Performance Tracking"
+        ]
+      },
+      "VIP": {
+        "name": "VIP",
+        "features": [
+          "Unlimited SAT Tests",
+          "Unlimited Practice",
+          "AI Insights",
+          "Priority Support",
+          "Custom Practice"
+        ]
+      }
+    },
+
+    "continueButton": "Continue to Stripe • {price}",
+    "loadingFallback": "Loading checkout...",
+
+    "errors": {
+      "notLoggedIn": "Please log in before continuing.",
+      "checkoutFailed": "Unable to start checkout."
+    }
+  },
+  "pricing": {
+    "badge": "SAT Preparation",
+    "title": "Choose your <highlight>SAT plan</highlight>",
+    "subtitle": "Whether you're just starting or aiming for a <score>1500+</score>, choose the plan that fits your preparation journey.",
+
+    "featureChips": {
+      "practiceQuestions": "Practice Questions",
+      "detailedAnalytics": "Detailed Analytics",
+      "satFocused": "SAT Focused"
+    },
+
+    "mostPopular": "Most Popular",
+    "periodSuffix": "/month",
+
+    "buttons": {
+      "getStarted": "Get Started",
+      "choosePlan": "Choose Plan"
+    },
+
+    "cta": {
+      "badge": "Start your preparation today",
+      "title": "Not sure which plan is right for you?",
+      "description": "Start with Free and upgrade whenever you need more practice, detailed analytics, and full-length SAT tests.",
+      "startFree": "Start Learning Free",
+      "explorePractice": "Explore Practice"
+    },
+
+    "tiers": {
+      "FREE": {
+        "name": "Free",
+        "description": "Start practicing and build your SAT foundation completely free.",
+        "features": ["Limited Practice", "Mini Mock Test", "Only Score Report"]
+      },
+      "BASIC": {
+        "name": "Basic",
+        "description": "Everything you need to start serious SAT preparation.",
+        "features": [
+          "1 full test/month",
+          "Access to full practice questions",
+          "Explanations for all questions"
+        ]
+      },
+      "PREMIUM": {
+        "name": "Premium",
+        "description": "Advanced analytics and more tests for ambitious students.",
+        "features": [
+          "4 full tests/month",
+          "Advanced analytics",
+          "Access to full practice questions",
+          "Explanations for all questions"
+        ]
+      },
+      "VIP": {
+        "name": "VIP",
+        "description": "The complete SAT experience with unlimited practice and insights.",
+        "features": [
+          "Unlimited tests/month",
+          "Access to full practice questions",
+          "Advanced analytics",
+          "Customized test creation",
+          "Marking and grading",
+          "Customized feedback"
+        ]
+      }
+    }
+  },
+
+  "resetSmartMemory": {
+    "title": "Smart Memory",
+    "activeBadge": "Active",
+    "description": "Practiced questions are remembered and won't appear again in future practice sessions.",
+    "resetButton": "Reset Memory",
+
+    "modal": {
+      "title": "Reset Smart Memory?",
+      "subtitle": "Your remembered questions will be cleared."
+    },
+
+    "warnings": {
+      "reappearTitle": "Questions will appear again",
+      "reappearDescription": "Previously practiced questions can become available again in future practice sessions."
+    },
+
+    "safety": {
+      "title": "Your history is safe",
+      "description": "Practice history, answers, scores, and results will not be deleted."
+    },
+
+    "success": {
+      "title": "Memory reset successfully",
+      "description": "Previously practiced questions are available again."
+    },
+
+    "buttons": {
+      "cancel": "Cancel",
+      "reset": "Reset Memory",
+      "resetting": "Resetting...",
+      "completed": "Completed"
+    },
+
+    "errors": {
+      "resetFailed": "Failed to reset Smart Memory.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+
+  "notFound": {
+    "code": "404 — PAGE NOT FOUND",
+    "title": "Looks like you're lost!",
+    "description": "The page you're looking for doesn't exist, may have moved, or the URL might be incorrect.",
+    "home": "Back to home",
+    "back": "Go back",
+    "footer": "Don't worry, your learning journey continues."
   }
 }

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verify, decode } from "jsonwebtoken";
+import { verify } from "jsonwebtoken";
+import createIntlMiddleware from "next-intl/middleware";
+
 import { prisma } from "@/app/api/util/prisma";
+import { routing } from "./i18n/routing";
 
 const PUBLIC_ROUTES = [
   "/api/auth/signin",
@@ -13,7 +16,7 @@ const PUBLIC_ROUTES = [
   "/api/auth/reset-password",
 ];
 
-export default async function proxy(req: NextRequest) {
+async function handleApiAuth(req: NextRequest): Promise<NextResponse> {
   const pathname = req.nextUrl.pathname;
 
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
@@ -24,25 +27,20 @@ export default async function proxy(req: NextRequest) {
     const cookieToken = req.cookies.get("token")?.value;
 
     const authorization = req.headers.get("authorization");
-
     const bearerToken = authorization?.startsWith("Bearer ")
       ? authorization.substring(7).trim()
       : undefined;
+
     const token = bearerToken || cookieToken;
 
     if (!token) {
-
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-        },
+        { success: false, error: "Unauthorized" },
         { status: 401 },
       );
     }
 
     const JWT_SECRET = process.env.JWT_SECRET;
-
     if (!JWT_SECRET) {
       throw new Error("JWT_SECRET is missing");
     }
@@ -54,16 +52,14 @@ export default async function proxy(req: NextRequest) {
       role?: string;
       plan?: string;
     };
-    const userId = decoded.userId || decoded.id;
 
+    const userId = decoded.userId || decoded.id;
     if (!userId) {
       throw new Error("Token payload does not contain userId");
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -75,35 +71,26 @@ export default async function proxy(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "User not found",
-        },
+        { success: false, error: "User not found" },
         { status: 401 },
       );
     }
 
     if (!user.isVerified) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Email not verified",
-        },
+        { success: false, error: "Email not verified" },
         { status: 403 },
       );
     }
 
     const requestHeaders = new Headers(req.headers);
-
     requestHeaders.set("x-user-id", user.id);
     requestHeaders.set("x-user-email", user.email);
     requestHeaders.set("x-user-role", user.role);
     requestHeaders.set("x-user-plan", user.subscriptionPlan);
 
     return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
+      request: { headers: requestHeaders },
     });
   } catch (error) {
     console.error("❌ PROXY AUTH ERROR:", error);
@@ -118,8 +105,26 @@ export default async function proxy(req: NextRequest) {
   }
 }
 
+const intlMiddleware = createIntlMiddleware(routing);
+
+const NON_I18N_ROUTES = ["/full-test", "/practice"];
+
+export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith("/api")) {
+    if (pathname.startsWith("/api/admin/import-bank")) {
+      return NextResponse.next();
+    }
+    return handleApiAuth(req);
+  }
+
+  if (NON_I18N_ROUTES.some((r) => pathname.startsWith(r))) {
+    return NextResponse.next();
+  }
+
+  return intlMiddleware(req);
+}
 export const config = {
-  matcher: [
-    "/api/((?!admin/import-bank).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|_vercel|full-test|.*\\..*).*)"],
 };

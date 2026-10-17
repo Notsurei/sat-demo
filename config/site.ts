@@ -1,64 +1,67 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "StudyBuddy",
+  description: "Focused SAT preparation platform.",
+
   navItems: [
     {
-      label: "Home",
+      labelKey: "home",
       href: "/pages/home",
     },
     {
-      label: "Dashboard",
+      labelKey: "dashboard",
       href: "/pages/dashboard",
     },
     {
-      label: "Plans",
+      labelKey: "plans",
       href: "/pages/pricing",
     },
     // {
-    //   label: "Knowledge Review",
+    //   labelKey: "knowledgeReview",
     //   href: "/pages/knowledge-review",
     // },
     // {
-    //   label: "About",
+    //   labelKey: "about",
     //   href: "/about",
     // },
   ],
+
   navMenuItems: [
     {
-      label: "Profile",
+      labelKey: "profile",
       href: "/profile",
     },
     {
-      label: "Dashboard",
+      labelKey: "dashboard",
       href: "/dashboard",
     },
     {
-      label: "Projects",
+      labelKey: "projects",
       href: "/projects",
     },
     {
-      label: "Team",
+      labelKey: "team",
       href: "/team",
     },
     {
-      label: "Calendar",
+      labelKey: "calendar",
       href: "/calendar",
     },
     {
-      label: "Settings",
+      labelKey: "settings",
       href: "/settings",
     },
     {
-      label: "Help & Feedback",
+      labelKey: "helpFeedback",
       href: "/help-feedback",
     },
     {
-      label: "Logout",
+      labelKey: "logout",
       href: "/logout",
     },
   ],
+
   links: {
     github: "https://github.com/heroui-inc/heroui",
     twitter: "https://twitter.com/hero_ui",
@@ -66,4 +69,4 @@ export const siteConfig = {
     discord: "https://discord.gg/9b6yyZKmH4",
     sponsor: "https://patreon.com/jrgarciadev",
   },
-};
+} as const;

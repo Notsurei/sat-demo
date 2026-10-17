@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Button, Card, Chip } from "@heroui/react";
 
@@ -32,6 +33,8 @@ export default function RecentPracticeHistory({
   loading = false,
 }: RecentPracticeHistoryProps) {
   const router = useRouter();
+  // ✅ trỏ vào namespace con trong practiceReport
+  const t = useTranslations("practiceReport.recentPracticeHistory");
 
   const getAccuracy = (practice: PracticeHistory) => {
     if (!practice.totalQuestions) return 0;
@@ -42,38 +45,23 @@ export default function RecentPracticeHistory({
   };
 
   const getSubjectName = (subject: string) => {
-    switch (subject) {
-      case "SAT_MATH":
-        return "SAT Math";
-
-      case "SAT_READING_WRITING":
-        return "Reading & Writing";
-
-      default:
-        return subject;
+    if (subject === "SAT_MATH" || subject === "SAT_READING_WRITING") {
+      return t(`subjects.${subject}`);
     }
+    return subject;
   };
 
   const getModeName = (mode: string) => {
-    switch (mode) {
-      case "PRACTICE":
-        return "Practice";
-
-      case "FULL_TEST":
-        return "Full Test";
-
-      case "TARGETED":
-        return "Targeted Practice";
-
-      default:
-        return mode;
+    if (mode === "PRACTICE" || mode === "FULL_TEST" || mode === "TARGETED") {
+      return t(`modes.${mode}`);
     }
+    return mode;
   };
 
   const formatDate = (date: Date | string | null) => {
-    if (!date) return "Unknown date";
+    if (!date) return t("unknownDate");
 
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -81,16 +69,16 @@ export default function RecentPracticeHistory({
   };
 
   const formatTime = (seconds: number) => {
-    if (!seconds) return "0m";
+    if (!seconds) return t("time.minutes", { count: 0 });
 
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m`;
+      return t("time.hoursMinutes", { hours, minutes });
     }
 
-    return `${minutes}m`;
+    return t("time.minutes", { count: minutes });
   };
 
   return (
@@ -98,11 +86,9 @@ export default function RecentPracticeHistory({
 
       <Card.Header className="flex items-center justify-between border-b border-default-200 px-6 py-5">
         <div>
-          <h2 className="text-lg font-semibold">Recent Practice History</h2>
+          <h2 className="text-lg font-semibold">{t("title")}</h2>
 
-          <p className="mt-1 text-sm text-default-500">
-            Your 5 most recent practice sessions
-          </p>
+          <p className="mt-1 text-sm text-default-500">{t("subtitle")}</p>
         </div>
 
         <Button
@@ -110,7 +96,7 @@ export default function RecentPracticeHistory({
           variant="ghost"
           onPress={() => router.push("/pages/practice-report-history")}
         >
-          View All
+          {t("viewAll")}
           <ArrowRight width={15} />
         </Button>
       </Card.Header>
@@ -118,7 +104,7 @@ export default function RecentPracticeHistory({
       <Card.Content className="p-0">
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <p className="text-sm text-default-400">Loading history...</p>
+            <p className="text-sm text-default-400">{t("loading")}</p>
           </div>
         ) : history.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center px-6 text-center">
@@ -126,11 +112,10 @@ export default function RecentPracticeHistory({
               <PencilToLine width={26} />
             </div>
 
-            <h3 className="font-semibold">No practice history yet</h3>
+            <h3 className="font-semibold">{t("emptyTitle")}</h3>
 
             <p className="mt-1 max-w-sm text-sm text-default-500">
-              Start your first practice session and your results will appear
-              here.
+              {t("emptyDescription")}
             </p>
 
             <div className="mt-5">
@@ -166,10 +151,9 @@ export default function RecentPracticeHistory({
                         flex h-11 w-11 shrink-0
                         items-center justify-center
                         rounded-xl
-                        ${
-                          practice.subject === "SAT_MATH"
-                            ? "bg-blue-100 text-blue-600"
-                            : "bg-violet-100 text-violet-600"
+                        ${practice.subject === "SAT_MATH"
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-violet-100 text-violet-600"
                         }
                       `}
                     >
@@ -202,8 +186,10 @@ export default function RecentPracticeHistory({
                         <span className="h-1 w-1 rounded-full bg-default-300" />
 
                         <span>
-                          {practice.correctAnswers}/{practice.totalQuestions}{" "}
-                          correct
+                          {t("correctFraction", {
+                            correct: practice.correctAnswers,
+                            total: practice.totalQuestions,
+                          })}
                         </span>
 
                         {practice.timeSpent != null && (
@@ -224,19 +210,20 @@ export default function RecentPracticeHistory({
                       <p
                         className={`
                           text-lg font-bold
-                          ${
-                            accuracy >= 80
-                              ? "text-success"
-                              : accuracy >= 60
-                                ? "text-warning"
-                                : "text-danger"
+                          ${accuracy >= 80
+                            ? "text-success"
+                            : accuracy >= 60
+                              ? "text-warning"
+                              : "text-danger"
                           }
                         `}
                       >
                         {accuracy}%
                       </p>
 
-                      <p className="text-[11px] text-default-400">accuracy</p>
+                      <p className="text-[11px] text-default-400">
+                        {t("accuracyLabel")}
+                      </p>
                     </div>
 
                     <div

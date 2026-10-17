@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { Button, Chip, Skeleton } from "@heroui/react";
-import NextLink from "next/link";
 import clsx from "clsx";
-import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import axios from "axios";
 import { ArrowLeftFromLine, Bars, Xmark } from "@gravity-ui/icons";
 
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { siteConfig } from "@/config/site";
 import { Logo } from "@/app/components/icons-list/icons";
 import { useAuthStore } from "@/zustand/auth-store";
 import AuthModal from "../modal-button/auth-modal";
+import LanguageSwitcher from "@/app/components/language-switcher/lang-switcher";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +20,7 @@ export const Navbar = () => {
 
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   const { isAuthenticated, isLoading, user, logout } = useAuthStore();
 
@@ -56,14 +58,16 @@ export const Navbar = () => {
 
   const planLabel =
     user?.subscriptionPlan === "FREE"
-      ? "Free"
-      : user?.subscriptionPlan || "Free";
+      ? t("freePlan")
+      : user?.subscriptionPlan || t("freePlan");
+
+  const displayName = user?.firstName || t("student");
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-primary/15 bg-background/95 shadow-sm backdrop-blur-md">
       <header className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-5 sm:px-6">
         <div className="flex items-center gap-8">
-          <NextLink
+          <Link
             href="/"
             onClick={() => setIsMenuOpen(false)}
             className="group flex items-center gap-2"
@@ -80,16 +84,16 @@ export const Navbar = () => {
               <Logo />
             </div>
 
-            <div className="hidden sm:block">
-              <p className="text-[15px] font-black tracking-tight text-foreground">
-                StudyBuddy
+            <div className="hidden flex-col leading-none sm:flex">
+              <p className="text-base font-bold tracking-tight text-foreground">
+                {t("brand")}
               </p>
 
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">
-                SAT Preparation
+              <p className="mt-1 text-[10.5px] font-medium uppercase leading-[1.6] tracking-[0.14em] text-primary/80">
+                {t("brandTagline")}
               </p>
             </div>
-          </NextLink>
+          </Link>
 
           {!isLoading && isAuthenticated && (
             <ul className="hidden items-center gap-1 lg:flex">
@@ -98,7 +102,7 @@ export const Navbar = () => {
 
                 return (
                   <li key={item.href}>
-                    <NextLink
+                    <Link
                       href={item.href}
                       className={clsx(
                         "group relative rounded-xl px-3.5 py-2 text-sm font-semibold",
@@ -120,7 +124,7 @@ export const Navbar = () => {
                           ],
                       )}
                     >
-                      {item.label}
+                      {t(item.labelKey)}
 
                       <span
                         className={clsx(
@@ -134,7 +138,7 @@ export const Navbar = () => {
                             : "scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-70",
                         )}
                       />
-                    </NextLink>
+                    </Link>
                   </li>
                 );
               })}
@@ -144,6 +148,8 @@ export const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 md:flex">
+            <LanguageSwitcher />
+
             {isLoading ? (
               <div className="flex items-center gap-3">
                 <div className="rounded-xl border border-accent/20 px-3 py-1.5">
@@ -166,7 +172,7 @@ export const Navbar = () => {
                   >
                     <div className="flex items-center gap-2">
                       <p className="max-w-[140px] truncate text-sm font-bold">
-                        {user.firstName || "Student"}
+                        {displayName}
                       </p>
 
                       <Chip
@@ -198,7 +204,7 @@ export const Navbar = () => {
                 >
                   <ArrowLeftFromLine width={16} />
 
-                  {isLogoutLoading ? "Logging out..." : "Logout"}
+                  {isLogoutLoading ? t("loggingOut") : t("logout")}
                 </Button>
               </>
             ) : (
@@ -209,7 +215,7 @@ export const Navbar = () => {
           <button
             type="button"
             aria-expanded={isMenuOpen}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={isMenuOpen ? t("closeMenu") : t("openMenu")}
             onClick={() => setIsMenuOpen((prev) => !prev)}
             className={clsx(
               "flex h-10 w-10 items-center justify-center rounded-xl",
@@ -228,6 +234,13 @@ export const Navbar = () => {
       {isMenuOpen && (
         <div className="border-t border-primary/10 bg-background md:hidden">
           <div className="mx-auto max-w-7xl px-5 py-4">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm font-semibold text-default-500">
+                {t("language")}
+              </span>
+              <LanguageSwitcher />
+            </div>
+
             {isLoading ? (
               <div
                 className={clsx(
@@ -255,7 +268,7 @@ export const Navbar = () => {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-primary">
-                        {user.firstName || "Student"}
+                        {displayName}
                       </p>
 
                       <p className="truncate text-xs text-default-400">
@@ -280,7 +293,7 @@ export const Navbar = () => {
               <ul className="space-y-1">
                 {siteConfig.navItems.map((item) => (
                   <li key={item.href}>
-                    <NextLink
+                    <Link
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
                       className={clsx(
@@ -293,8 +306,8 @@ export const Navbar = () => {
                         "hover:text-primary",
                       )}
                     >
-                      {item.label}
-                    </NextLink>
+                      {t(item.labelKey)}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -302,7 +315,6 @@ export const Navbar = () => {
 
             <div className="mt-4 border-t border-default-200 pt-4">
               {isLoading ? (
-                // Đang load auth → skeleton thay vì nút Logout / Sign in
                 <Skeleton className="h-11 w-full rounded-xl" />
               ) : isAuthenticated ? (
                 <Button
@@ -313,13 +325,10 @@ export const Navbar = () => {
                 >
                   <ArrowLeftFromLine width={16} />
 
-                  {isLogoutLoading ? "Logging out..." : "Logout"}
+                  {isLogoutLoading ? t("loggingOut") : t("logout")}
                 </Button>
               ) : (
-                <div
-                  className="w-full"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <div className="w-full" onClick={() => setIsMenuOpen(false)}>
                   <AuthModal />
                 </div>
               )}

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-
 import {
   Button,
   Label,
@@ -10,102 +9,54 @@ import {
   Card,
   toast,
 } from "@heroui/react";
-
-import { useRouter } from "next/navigation";
-
+import { useTranslations } from "next-intl";
 import axios from "axios";
-
 import { ArrowChevronRight } from "@gravity-ui/icons";
 
 import { usePracticeStore } from "@/zustand/practice-store";
 import { useAuthStore } from "@/zustand/auth-store";
 import { usePracticeConfigStore } from "@/zustand/practice-config";
 
+import { useRouter } from "next/navigation";
 import MultiSelect from "../multiselect/multiselect";
 
-const SUBJECTS = [
-  {
-    id: "SAT_RW",
-    label: "Reading & Writing",
-  },
-  {
-    id: "SAT_MATH",
-    label: "Math",
-  },
-];
+const SUBJECT_KEYS = [
+  { id: "SAT_RW", labelKey: "rw" },
+  { id: "SAT_MATH", labelKey: "math" },
+] as const;
 
-const LEVELS = [
-  {
-    id: "easy",
-    label: "Easy",
-  },
-  {
-    id: "medium",
-    label: "Medium",
-  },
-  {
-    id: "hard",
-    label: "Hard",
-  },
-];
+const LEVEL_KEYS = [
+  { id: "easy", labelKey: "easy" },
+  { id: "medium", labelKey: "medium" },
+  { id: "hard", labelKey: "hard" },
+] as const;
 
-const QUESTION_COUNTS = [
-  {
-    id: "15",
-    label: "15 Questions",
-    plans: ["FREE", "BASIC", "PREMIUM", "VIP"],
-  },
-  {
-    id: "25",
-    label: "25 Questions",
-    plans: ["BASIC", "PREMIUM", "VIP"],
-  },
-  {
-    id: "50",
-    label: "50 Questions",
-    plans: ["PREMIUM", "VIP"],
-  },
-];
+const QUESTION_COUNT_KEYS = [
+  { id: "15", labelKey: "15", plans: ["FREE", "BASIC", "PREMIUM", "VIP"] },
+  { id: "25", labelKey: "25", plans: ["BASIC", "PREMIUM", "VIP"] },
+  { id: "50", labelKey: "50", plans: ["PREMIUM", "VIP"] },
+] as const;
 
 const CATEGORY_OPTIONS = {
   SAT_MATH: [
-    {
-      id: "Algebra",
-      label: "Algebra",
-    },
-    {
-      id: "Advanced Math",
-      label: "Advanced Math",
-    },
+    { id: "Algebra", label: "Algebra" },
+    { id: "Advanced Math", label: "Advanced Math" },
     {
       id: "Problem Solving and Data Analysis",
       label: "Problem Solving and Data Analysis",
     },
-    {
-      id: "Geometry",
-      label: "Geometry",
-    },
+    { id: "Geometry", label: "Geometry" },
   ],
-
   SAT_RW: [
-    {
-      id: "Craft and Structure",
-      label: "Craft and Structure",
-    },
-    {
-      id: "Information and Ideas",
-      label: "Information and Ideas",
-    },
+    { id: "Craft and Structure", label: "Craft and Structure" },
+    { id: "Information and Ideas", label: "Information and Ideas" },
     {
       id: "Standard English Conventions",
       label: "Standard English Conventions",
     },
-    {
-      id: "Expression of Ideas",
-      label: "Expression of Ideas",
-    },
+    { id: "Expression of Ideas", label: "Expression of Ideas" },
   ],
-};
+} as const;
 
 type Subject = "SAT_RW" | "SAT_MATH";
 
@@ -118,6 +69,7 @@ type PracticeCategories = Record<string, string[]>;
 
 export default function PracticeSetUp() {
   const router = useRouter();
+  const t = useTranslations("practiceSetup");
 
   const { user } = useAuthStore();
   const { setConfig } = usePracticeConfigStore();
@@ -133,10 +85,10 @@ export default function PracticeSetUp() {
   const [practiceCategories, setPracticeCategories] =
     React.useState<PracticeCategories>({});
 
-  const [categoriesLoading, setCategoriesLoading] =
-    React.useState(false);
+  const [categoriesLoading, setCategoriesLoading] = React.useState(false);
 
   const userPlan = user?.subscriptionPlan ?? "FREE";
+
   React.useEffect(() => {
     if (!subject) {
       setPracticeCategories({});
@@ -159,11 +111,7 @@ export default function PracticeSetUp() {
           setPracticeCategories({});
         }
       } catch (error) {
-        console.error(
-          "Failed to load practice categories:",
-          error,
-        );
-
+        console.error("Failed to load practice categories:", error);
         setPracticeCategories({});
       } finally {
         setCategoriesLoading(false);
@@ -174,23 +122,17 @@ export default function PracticeSetUp() {
   }, [subject]);
 
   const categoryOptions: CategoryOption[] = React.useMemo(() => {
-    if (!subject) {
-      return [];
-    }
-
-    return CATEGORY_OPTIONS[subject];
+    if (!subject) return [];
+    return [...CATEGORY_OPTIONS[subject]];
   }, [subject]);
 
   const subtopicOptions = React.useMemo(() => {
-    if (categories.length === 0) {
-      return [];
-    }
+    if (categories.length === 0) return [];
 
     const result = new Set<string>();
 
     categories.forEach((category) => {
       const topics = practiceCategories[category] ?? [];
-
       topics.forEach((topic) => {
         result.add(topic);
       });
@@ -210,7 +152,6 @@ export default function PracticeSetUp() {
 
       values.forEach((category) => {
         const topics = practiceCategories[category] ?? [];
-
         topics.forEach((topic) => {
           availableSubtopics.add(topic);
         });
@@ -228,14 +169,13 @@ export default function PracticeSetUp() {
 
   const handleStart = async () => {
     if (!subject) {
-      toast.warning("Please select a subject", {
+      toast.warning(t("toast.subjectRequiredTitle"), {
         actionProps: {
-          children: "OK",
+          children: t("toast.okButton"),
           onPress: () => toast.clear(),
           variant: "tertiary",
         },
-        description:
-          "Cannot start practice without selecting a subject",
+        description: t("toast.subjectRequiredDescription"),
       });
 
       return;
@@ -244,41 +184,25 @@ export default function PracticeSetUp() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(
-        "/api/practice/create",
-        {
-          subject,
+      const { data } = await axios.post("/api/practice/create", {
+        subject,
 
-          domain:
-            categories.length > 0
-              ? categories
-              : undefined,
+        domain: categories.length > 0 ? categories : undefined,
 
-          subtopic:
-            subtopics.length > 0
-              ? subtopics
-              : undefined,
+        subtopic: subtopics.length > 0 ? subtopics : undefined,
 
-          questionCount:
-            count === "all"
-              ? 999
-              : Number(count),
+        questionCount: count === "all" ? 999 : Number(count),
 
-          mode:
-            level.length === 0
+        mode:
+          level.length === 0
+            ? "ALL_LEVEL"
+            : level.includes("all")
               ? "ALL_LEVEL"
-              : level.includes("all")
-                ? "ALL_LEVEL"
-                : level.map((item) =>
-                    item.toUpperCase(),
-                  ),
-        },
-      );
+              : level.map((item) => item.toUpperCase()),
+      });
 
       if (!data.success) {
-        throw new Error(
-          data.error ?? "Failed to create practice",
-        );
+        throw new Error(data.error ?? "Failed to create practice");
       }
 
       setConfig({
@@ -295,24 +219,33 @@ export default function PracticeSetUp() {
 
       router.push(`/practice/${data.practiceId}`);
     } catch (error) {
-      toast.danger("Failed to start practice", {
+      toast.danger(t("toast.startFailedTitle"), {
         actionProps: {
-          children: "I got it",
+          children: t("toast.gotItButton"),
           onPress: () => toast.clear(),
           variant: "tertiary",
         },
 
         description: axios.isAxiosError(error)
-          ? error.response?.data?.error ||
-            "Please try again later"
+          ? error.response?.data?.error || t("toast.startFailedDescription")
           : error instanceof Error
             ? error.message
-            : "Something went wrong",
+            : t("toast.genericError"),
       });
     } finally {
       setLoading(false);
     }
   };
+
+  const subtopicPlaceholder = !subject
+    ? t("placeholders.selectSubjectFirst")
+    : categories.length === 0
+      ? t("placeholders.selectCategoryFirst")
+      : categoriesLoading
+        ? t("placeholders.loadingSubtopics")
+        : subtopicOptions.length === 0
+          ? t("placeholders.noSubtopics")
+          : t("placeholders.selectSubtopics");
 
   return (
     <Card className="border border-default-200 bg-default-50 p-4 shadow-sm dark:bg-default-800 sm:p-6">
@@ -329,10 +262,10 @@ export default function PracticeSetUp() {
                 setCategories([]);
                 setSubtopics([]);
               }}
-              placeholder="Select subject"
+              placeholder={t("placeholders.selectSubject")}
             >
               <Label className="text-sm font-medium">
-                Subject
+                {t("labels.subject")}
               </Label>
 
               <Select.Trigger>
@@ -342,14 +275,13 @@ export default function PracticeSetUp() {
 
               <Select.Popover>
                 <ListBox>
-                  {SUBJECTS.map((item) => (
+                  {SUBJECT_KEYS.map((item) => (
                     <ListBox.Item
                       key={item.id}
                       id={item.id}
-                      textValue={item.label}
+                      textValue={t(`subjects.${item.labelKey}`)}
                     >
-                      {item.label}
-
+                      {t(`subjects.${item.labelKey}`)}
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
                   ))}
@@ -360,7 +292,7 @@ export default function PracticeSetUp() {
 
           <div className="min-w-0">
             <Label className="mb-2 block text-sm font-medium">
-              Categories
+              {t("labels.categories")}
             </Label>
 
             <MultiSelect
@@ -369,8 +301,8 @@ export default function PracticeSetUp() {
               onChange={handleCategoriesChange}
               placeholder={
                 !subject
-                  ? "Select subject first"
-                  : "Select categories"
+                  ? t("placeholders.selectSubjectFirst")
+                  : t("placeholders.selectCategories")
               }
               disabled={!subject || categoriesLoading}
             />
@@ -378,22 +310,14 @@ export default function PracticeSetUp() {
 
           <div className="min-w-0">
             <Label className="mb-2 block text-sm font-medium">
-              Subtopics
+              {t("labels.subtopics")}
             </Label>
 
             <MultiSelect
               options={subtopicOptions}
               value={subtopics}
               onChange={handleSubtopicsChange}
-              placeholder={
-                categories.length === 0
-                  ? "Select category first"
-                  : categoriesLoading
-                    ? "Loading subtopics..."
-                    : subtopicOptions.length === 0
-                      ? "No subtopics"
-                      : "Select subtopics"
-              }
+              placeholder={subtopicPlaceholder}
               disabled={
                 categories.length === 0 ||
                 categoriesLoading ||
@@ -406,16 +330,18 @@ export default function PracticeSetUp() {
         <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="min-w-0">
             <MultiSelect
-              label="Difficulty"
-              placeholder="Select difficulty"
-              options={LEVELS}
+              label={t("labels.difficulty")}
+              placeholder={t("placeholders.selectDifficulty")}
+              options={LEVEL_KEYS.map((l) => ({
+                id: l.id,
+                label: t(`levels.${l.labelKey}`),
+              }))}
               value={level}
               onChange={(values) => {
                 if (values.includes("all")) {
                   setLevel(["all"]);
                   return;
                 }
-
                 setLevel(values);
               }}
             />
@@ -428,10 +354,10 @@ export default function PracticeSetUp() {
               onSelectionChange={(key) => {
                 setCount(key ? String(key) : "15");
               }}
-              placeholder="Questions"
+              placeholder={t("placeholders.questions")}
             >
               <Label className="text-sm font-medium">
-                Questions
+                {t("labels.questions")}
               </Label>
 
               <Select.Trigger>
@@ -441,29 +367,28 @@ export default function PracticeSetUp() {
 
               <Select.Popover>
                 <ListBox>
-                  {QUESTION_COUNTS.map((item) => {
-                    const isAllowed =
-                      item.plans.includes(userPlan);
+                  {QUESTION_COUNT_KEYS.map((item) => {
+                    const isAllowed = (
+                      item.plans as readonly string[]
+                    ).includes(userPlan);
 
                     return (
                       <ListBox.Item
                         key={item.id}
                         id={item.id}
-                        textValue={item.label}
+                        textValue={t(`questionCounts.${item.labelKey}`)}
                         isDisabled={!isAllowed}
                       >
                         <div className="flex w-full items-center justify-between gap-4">
-                          <span>{item.label}</span>
+                          <span>{t(`questionCounts.${item.labelKey}`)}</span>
 
                           {!isAllowed && (
                             <span className="text-xs text-default-400">
-                              🔒 Upgrade
+                              {t("upgrade")}
                             </span>
                           )}
 
-                          {isAllowed && (
-                            <ListBox.ItemIndicator />
-                          )}
+                          {isAllowed && <ListBox.ItemIndicator />}
                         </div>
                       </ListBox.Item>
                     );
@@ -473,7 +398,7 @@ export default function PracticeSetUp() {
             </Select>
           </div>
 
-          <div className="min-w-0 flex justify-end sm:col-span-2 lg:col-span-1">
+          <div className="flex min-w-0 justify-end sm:col-span-2 lg:col-span-1">
             <Button
               variant="primary"
               className="h-12 w-full rounded-full px-8 font-semibold shadow-md transition-all hover:shadow-lg sm:w-auto"
@@ -484,7 +409,7 @@ export default function PracticeSetUp() {
                 <ArrowChevronRight />
               </span>
 
-              {loading ? "Starting..." : "Start"}
+              {loading ? t("startingButton") : t("startButton")}
             </Button>
           </div>
         </div>

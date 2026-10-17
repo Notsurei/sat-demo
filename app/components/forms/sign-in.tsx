@@ -1,7 +1,8 @@
 "use client";
+
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/zustand/auth-store";
+import { useTranslations } from "next-intl";
 import {
   Button,
   FieldError,
@@ -12,10 +13,16 @@ import {
   Spinner,
 } from "@heroui/react";
 import axios from "axios";
+
+import { useAuthStore } from "@/zustand/auth-store";
+
 import { Props } from "./props";
 
 export default function SignIn({ switchMode, onSuccess }: Props) {
   const router = useRouter();
+  const t = useTranslations("auth.signIn");
+  const tErr = useTranslations("auth.errors");
+
   const { login, isAuthenticated, isLoading, setLoading } = useAuthStore();
 
   const [input, setInput] = React.useState({
@@ -40,7 +47,7 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
       const message =
         axios.isAxiosError(err) && err.response?.data?.error
           ? err.response.data.error
-          : "Invalid email or password";
+          : tErr("invalidCredentials");
 
       setErrors((prev) => ({
         ...prev,
@@ -60,8 +67,8 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
       general: "",
     };
 
-    if (!input.email) newErrors.email = "Email is required";
-    if (!input.password) newErrors.password = "Password is required";
+    if (!input.email) newErrors.email = tErr("emailRequired");
+    if (!input.password) newErrors.password = tErr("passwordRequired");
 
     setErrors(newErrors);
 
@@ -108,7 +115,7 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
 
   return (
     <Form
-      className="flex flex-col gap-4 justify-center"
+      className="flex flex-col justify-center gap-4"
       onSubmit={handleSubmit}
     >
       <TextField
@@ -116,12 +123,12 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
         isInvalid={!!errors.email}
         className="flex flex-col gap-1"
       >
-        <Label className="text-foreground">Email</Label>
+        <Label className="text-foreground">{t("emailLabel")}</Label>
         <Input
           value={input.email}
           onChange={(e) => handleChange("email", e.target.value)}
-          placeholder="you@example.com"
-          className="bg-default-100 text-foreground border border-default-200 rounded-xl h-10"
+          placeholder={t("emailPlaceholder")}
+          className="h-10 rounded-xl border border-default-200 bg-default-100 text-foreground"
         />
         {errors.email && <FieldError>{errors.email}</FieldError>}
       </TextField>
@@ -131,49 +138,49 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
         isInvalid={!!errors.password}
         className="flex flex-col gap-1"
       >
-        <Label className="text-foreground">Password</Label>
+        <Label className="text-foreground">{t("passwordLabel")}</Label>
         <Input
           type="password"
           value={input.password}
-          placeholder="Enter your password"
+          placeholder={t("passwordPlaceholder")}
           onChange={(e) => handleChange("password", e.target.value)}
-          className="bg-default-100 text-foreground border border-default-200 rounded-xl h-10"
+          className="h-10 rounded-xl border border-default-200 bg-default-100 text-foreground"
         />
         {errors.password && <FieldError>{errors.password}</FieldError>}
       </TextField>
 
       {errors.general && (
-        <p className="text-danger text-sm text-center">{errors.general}</p>
+        <p className="text-center text-sm text-danger">{errors.general}</p>
       )}
 
       <div className="mt-2 flex flex-col items-center gap-3">
         <Button
           type="submit"
           variant="primary"
-          className="w-full max-w-[320px] text-white font-semibold rounded-2xl h-10"
+          className="h-10 w-full max-w-[320px] rounded-2xl font-semibold text-white"
           isDisabled={isLoading}
         >
-          {isLoading ? <Spinner color="current" /> : "Sign In"}
+          {isLoading ? <Spinner color="current" /> : t("signInButton")}
         </Button>
       </div>
 
-      <div className="text-center text-sm text-default-500 mt-3 space-y-1">
+      <div className="mt-3 space-y-1 text-center text-sm text-default-500">
         <p>
           <button
             type="button"
             onClick={() => switchMode?.("signup")}
-            className="text-primary hover:text-primary-600 transition-colors cursor-pointer hover:text-blue-300"
+            className="cursor-pointer text-primary transition-colors hover:text-primary-600 hover:text-blue-300"
           >
-            Don't have an account? Sign up
+            {t("noAccountPrompt")}
           </button>
         </p>
         <p>
           <button
             type="button"
             onClick={() => switchMode?.("email-forgot-pass")}
-            className="text-default-500 hover:text-default-700 transition-colors cursor-pointer hover:text-blue-300"
+            className="cursor-pointer text-default-500 transition-colors hover:text-default-700 hover:text-blue-300"
           >
-            Forgot password?
+            {t("forgotPasswordPrompt")}
           </button>
         </p>
       </div>
