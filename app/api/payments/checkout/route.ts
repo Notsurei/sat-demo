@@ -1,25 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import DodoPayments from "dodopayments";
 
-const environment =
-  process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
+// ✅ Lazy init — chỉ tạo client khi có request
+function getDodoClient(): DodoPayments {
+  const apiKey = process.env.DODO_API_KEY;
 
-const dodo = new DodoPayments({
-  bearerToken: process.env.DODO_API_KEY,
-  environment,
-});
+  if (!apiKey) {
+    throw new Error(
+      "DODO_API_KEY is missing. Add it to .env.local (dev) hoặc Vercel → Settings → Environment Variables (prod).",
+    );
+  }
 
-const productMap: Record<string, string | undefined> = {
-  BASIC: process.env.DODO_BASIC_PRICE_ID,
-  PREMIUM: process.env.DODO_PREMIUM_PRICE_ID,
-  VIP: process.env.DODO_VIP_PRICE_ID,
-};
+  const environment =
+    process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
+
+  return new DodoPayments({
+    bearerToken: apiKey,
+    environment,
+  });
+}
+
+function getProductMap(): Record<string, string | undefined> {
+  return {
+    BASIC: process.env.DODO_BASIC_PRICE_ID,
+    PREMIUM: process.env.DODO_PREMIUM_PRICE_ID,
+    VIP: process.env.DODO_VIP_PRICE_ID,
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
     const { userId, email, plan } = await req.json();
 
     const normalizedPlan = String(plan ?? "").toUpperCase();
+    const productMap = getProductMap();
     const productId = productMap[normalizedPlan];
 
     if (!userId || !email || !productId) {
@@ -30,6 +44,9 @@ export async function POST(req: NextRequest) {
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+    // ✅ Chỉ khởi tạo SDK tại đây
+    const dodo = getDodoClient();
 
     const session = await dodo.checkoutSessions.create({
       product_cart: [
@@ -45,7 +62,6 @@ export async function POST(req: NextRequest) {
         registeredEmail: email,
       },
 
-      // ✅ Ẩn hoàn toàn phần "Purchasing as business"
       feature_flags: {
         allow_tax_id: false,
         allow_customer_editing_business_name: false,
@@ -68,9 +84,12 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Dodo checkout creation failed:", error);
 
-    return NextResponse.json(
-      { error: "Unable to create checkout session" },
-      { status: 500 },
-    );
+    // ✅ Trả message rõ ràng nếu thiếu env
+    const message =
+      error instanceof Error && error.message.includes("DODO_API_KEY")
+        ? error.message
+        : "Unable to create checkout session";
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
