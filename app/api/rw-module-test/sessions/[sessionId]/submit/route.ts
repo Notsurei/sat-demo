@@ -127,7 +127,6 @@ function computeScaled(
   isHard: boolean,
 ): number {
   if (total === 0) return 200;
-
   const normalizedRaw = Math.round((correct / total) * SAT_RW_MAX_RAW);
   const table = isHard ? RW_SCALE_HARD : RW_SCALE_EASY;
   const scaled = rawToScaled(normalizedRaw, table);
@@ -320,13 +319,19 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
-    const session = await prisma.rwModuleSession.findFirst({
-      where: { id: sessionId, userId },
+    // ✅ FIX: Query RwModuleSectionSession (không phải RwModuleSession)
+    // sessionId trong URL là RwModuleSectionSession.id
+    const sectionSession = await prisma.rwModuleSectionSession.findFirst({
+      where: {
+        id: sessionId,
+        rwModuleSession: { userId }, // verify ownership qua parent
+      },
       select: {
         id: true,
         status: true,
         startedAt: true,
-        examSectionId: true,
+        completedAt: true,
+        examSectionId: true, // ✅ có trên RwModuleSectionSession
 
         examSection: {
           select: {
@@ -354,6 +359,7 @@ export async function POST(request: Request, context: RouteContext) {
         },
 
         answers: {
+          // ✅ có trên RwModuleSectionSession
           select: {
             questionId: true,
             selectedOptionId: true,
@@ -361,17 +367,29 @@ export async function POST(request: Request, context: RouteContext) {
             isCorrect: true,
           },
         },
+
+        rwModuleSession: {
+          select: {
+            id: true,
+            userId: true,
+            examId: true,
+            status: true,
+            startedAt: true,
+            completedAt: true,
+            currentSectionOrder: true,
+          },
+        },
       },
     });
 
-    if (!session) {
+    if (!sectionSession) {
       return NextResponse.json(
         { success: false, message: "Session not found" },
         { status: 404 },
       );
     }
 
-    if (session.examSection.subject !== Subject.SAT_RW) {
+    if (sectionSession.examSection.subject !== Subject.SAT_RW) {
       return NextResponse.json(
         {
           success: false,
@@ -381,22 +399,22 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
-    if (session.status === "COMPLETED") {
+    if (sectionSession.status === "COMPLETED") {
       return NextResponse.json(
         { success: false, message: "This module has already been submitted" },
         { status: 409 },
       );
     }
 
-    if (session.status !== "IN_PROGRESS") {
+    if (sectionSession.status !== "IN_PROGRESS") {
       return NextResponse.json(
         { success: false, message: "This session cannot be submitted" },
         { status: 409 },
       );
     }
 
-    const allAnswers = session.answers;
-    const totalQuestions = session.examSection.questions.length;
+    const allAnswers = sectionSession.answers;
+    const totalQuestions = sectionSession.examSection.questions.length;
 
     const answeredAnswers = allAnswers.filter(
       (a) =>
@@ -415,16 +433,14 @@ export async function POST(request: Request, context: RouteContext) {
     const rawScore = correctAnswers;
 
     const now = new Date();
-    const timeSpent = Math.max(
-      Math.floor((now.getTime() - session.startedAt.getTime()) / 1000),
-      0,
-    );
+    const startMs = sectionSession.startedAt?.getTime() ?? now.getTime();
+    const timeSpent = Math.max(Math.floor((now.getTime() - startMs) / 1000), 0);
 
-    const isM1 = session.examSection.moduleNumber === 1;
+    const isM1 = sectionSession.examSection.moduleNumber === 1;
 
     const currentVariantIsHard =
-      session.examSection.variant === "HARD" ||
-      session.examSection.title.toLowerCase().includes("hard");
+      sectionSession.examSection.variant === "HARD" ||
+      sectionSession.examSection.title.toLowerCase().includes("hard");
 
     const scaledScore = computeScaled(
       correctAnswers,
@@ -437,7 +453,7 @@ export async function POST(request: Request, context: RouteContext) {
       let earned = 0;
       let total = 0;
 
-      session.examSection.questions.forEach((eq) => {
+      sectionSession.examSection.questions.forEach((eq) => {
         const answer = allAnswers.find((a) => a.questionId === eq.questionId);
         if (!answer) return;
 
@@ -451,30 +467,52 @@ export async function POST(request: Request, context: RouteContext) {
 
     const transactionResult = await prisma.$transaction(
       async (tx) => {
-        const updated = await tx.rwModuleSession.update({
-          where: { id: session.id },
+        // ✅ Update section session, không phải module session
+        const updatedSection = await tx.rwModuleSectionSession.update({
+          where: { id: sectionSession.id },
           data: {
             status: "COMPLETED",
             completedAt: now,
             timeSpent,
-            totalCorrect: correctAnswers,
-            totalWrong: wrongAnswers,
-            totalSkipped: skippedAnswers,
-            rawScore,
-            scaledScore,
           },
         });
 
+        // ✅ Update parent module session
+        // scaledScore/rawScore tạm lưu trên parent (vì section không có field score)
+        const parentUpdate: Record<string, unknown> = {
+          scaledScore,
+          rawScore,
+          totalCorrect: correctAnswers,
+          totalWrong: wrongAnswers,
+          totalSkipped: skippedAnswers,
+          lastActivityAt: now,
+        };
+
         if (!isM1) {
-          return { session: updated, adaptive: null };
+          // M2 xong → module COMPLETED
+          parentUpdate.status = "COMPLETED";
+          parentUpdate.completedAt = now;
+        } else {
+          // M1 xong → chuyển sang M2
+          parentUpdate.currentSectionOrder = 2;
         }
 
+        await tx.rwModuleSession.update({
+          where: { id: sectionSession.rwModuleSession.id },
+          data: parentUpdate,
+        });
+
+        if (!isM1) {
+          return { section: updatedSection, adaptive: null };
+        }
+
+        // Adaptive: fill M2
         const variant: "EASY" | "HARD" =
           weightedPct >= ADAPTIVE_CONFIG.weightedThreshold ? "HARD" : "EASY";
 
         let m2Section = await tx.examSection.findFirst({
           where: {
-            examId: session.examSection.examId,
+            examId: sectionSession.examSection.examId,
             subject: Subject.SAT_RW,
             moduleNumber: 2,
           },
@@ -484,9 +522,9 @@ export async function POST(request: Request, context: RouteContext) {
         if (!m2Section) {
           m2Section = await tx.examSection.findFirst({
             where: {
-              examId: session.examSection.examId,
+              examId: sectionSession.examSection.examId,
               subject: Subject.SAT_RW,
-              order: { gt: session.examSection.order },
+              order: { gt: sectionSession.examSection.order },
             },
             orderBy: { order: "asc" },
             select: { id: true },
@@ -496,11 +534,11 @@ export async function POST(request: Request, context: RouteContext) {
 
         if (!m2Section) {
           throw new Error(
-            `M2 section not found for exam ${session.examSection.examId}. Generate route có tạo M2 không?`,
+            `M2 section not found for exam ${sectionSession.examSection.examId}. Generate route có tạo M2 không?`,
           );
         }
 
-        const usedQuestionIds = session.examSection.questions.map(
+        const usedQuestionIds = sectionSession.examSection.questions.map(
           (q) => q.questionId,
         );
 
@@ -520,7 +558,7 @@ export async function POST(request: Request, context: RouteContext) {
         });
 
         return {
-          session: updated,
+          section: updatedSection,
           adaptive: {
             variant,
             weightedPct: Number(weightedPct.toFixed(4)),
@@ -532,7 +570,7 @@ export async function POST(request: Request, context: RouteContext) {
       { maxWait: 10_000, timeout: 20_000 },
     );
 
-    const completedSession = transactionResult.session;
+    const completedSection = transactionResult.section;
     const adaptive = transactionResult.adaptive;
 
     return NextResponse.json(
@@ -541,12 +579,15 @@ export async function POST(request: Request, context: RouteContext) {
         message: "RW module submitted successfully",
 
         data: {
-          sessionId: completedSession.id,
-          examId: session.examSection.examId,
-          examSectionId: session.examSectionId,
-          status: completedSession.status,
+          // ✅ sessionId giờ là parent id, sectionSessionId là của section
+          sessionId: sectionSession.rwModuleSession.id,
+          sectionSessionId: completedSection.id,
 
-          moduleNumber: session.examSection.moduleNumber,
+          examId: sectionSession.examSection.examId,
+          examSectionId: sectionSession.examSectionId,
+          status: completedSection.status,
+
+          moduleNumber: sectionSession.examSection.moduleNumber,
           isLastModule: !isM1,
 
           summary: {
@@ -567,8 +608,8 @@ export async function POST(request: Request, context: RouteContext) {
             scaledScore,
 
             totalTimeSpent: timeSpent,
-            startedAt: session.startedAt,
-            completedAt: completedSession.completedAt,
+            startedAt: sectionSession.startedAt,
+            completedAt: completedSection.completedAt,
           },
 
           adaptive,
