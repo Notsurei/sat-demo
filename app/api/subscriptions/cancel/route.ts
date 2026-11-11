@@ -2,13 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/api/util/prisma";
-import DodoPayments from "dodopayments";
-
-const dodo = new DodoPayments({
-  bearerToken: process.env.DODO_API_KEY!,
-  environment:
-    process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode",
-});
+import { getDodoClient } from "@/app/api/util/dodo";
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +47,21 @@ export async function POST(request: NextRequest) {
           error: "Subscription cannot be canceled. Please contact support.",
         },
         { status: 400 },
+      );
+    }
+
+    // ✅ Lazy init — chỉ tạo client khi thực sự cần
+    let dodo;
+    try {
+      dodo = getDodoClient();
+    } catch (envError) {
+      console.error("[Cancel] Dodo env not configured:", envError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Payment service not configured. Please contact support.",
+        },
+        { status: 500 },
       );
     }
 
