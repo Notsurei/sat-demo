@@ -15,7 +15,7 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
 
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("__Host-auth_token")?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -40,14 +40,11 @@ export async function GET() {
         { status: 500 },
       );
     }
-    const cleanToken = token.startsWith("Bearer ")
-      ? token.slice(7)
-      : token;
+    const cleanToken = token.startsWith("Bearer ") ? token.slice(7) : token;
 
-    const decoded = jwt.verify(
-      cleanToken,
-      JWT_SECRET,
-    ) as TokenPayload;
+    const decoded = jwt.verify(cleanToken, JWT_SECRET, {
+      algorithms: ["HS256"],
+    }) as TokenPayload;
 
     const userId = decoded.userId || decoded.id;
 
@@ -101,14 +98,12 @@ export async function GET() {
       user,
     });
   } catch (error) {
-
-    const errorMessage =
-      error instanceof Error ? error.message : "Invalid token";
+    console.error("[CheckAuth] Error:", error);
 
     return NextResponse.json(
       {
         isAuthenticated: false,
-        error: errorMessage,
+        error: "Invalid token",
       },
       { status: 401 },
     );

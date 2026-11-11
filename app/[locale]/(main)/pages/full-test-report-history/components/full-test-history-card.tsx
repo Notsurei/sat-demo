@@ -11,17 +11,27 @@ import {
   Cup,
 } from "@gravity-ui/icons";
 
+/* Mở rộng để accept cả 2 shape: mapped (totalCorrect) hoặc raw API (correct) */
 interface FullTest {
   id: string;
   examId: string;
-  examTitle: string;
+  examTitle?: string;
+  exam?: { title?: string };
   status: "IN_PROGRESS" | "BREAK" | "COMPLETED" | "EXPIRED";
-  currentSectionOrder: number;
-  totalSections: number;
-  totalQuestions: number;
-  totalCorrect: number;
-  totalWrong: number;
-  totalSkipped: number;
+  currentSectionOrder?: number;
+  totalSections?: number;
+  sections?: unknown[];
+
+  totalQuestions?: number;
+  totalCorrect?: number;
+  correct?: number;
+  totalWrong?: number;
+  incorrect?: number;
+  totalSkipped?: number;
+  unanswered?: number;
+  answered?: number;
+  answeredQuestions?: number;
+
   rawScore?: number | null;
   scaledScore?: number | null;
   totalTimeSpent?: number | null;
@@ -53,10 +63,37 @@ export default function FullTestHistoryCard({
   const t = useTranslations("fullTestReport.history.card");
   const locale = useLocale();
 
-  const accuracy =
-    test.totalQuestions > 0
-      ? Math.round((test.totalCorrect / test.totalQuestions) * 100)
-      : 0;
+  /* ── FIX: đọc cả 2 shape (mapped + raw API) ── */
+  const safeCorrect = Number(test.totalCorrect ?? test.correct ?? 0);
+  const safeWrong = Number(test.totalWrong ?? test.incorrect ?? 0);
+  const safeSkipped = Number(test.totalSkipped ?? test.unanswered ?? 0);
+
+  const safeAnswered = Number(
+    test.answeredQuestions ??
+    test.answered ??
+    safeCorrect + safeWrong,
+  );
+
+  const safeTotal = Number(
+    test.totalQuestions ??
+    (safeCorrect + safeWrong + safeSkipped),
+  );
+
+  const examTitle =
+    test.examTitle ?? test.exam?.title ?? "Full Test";
+
+  const totalSections =
+    test.totalSections ??
+    (Array.isArray(test.sections) ? test.sections.length : 0);
+
+  const currentSectionOrder = test.currentSectionOrder ?? 0;
+
+  const hasData = safeAnswered > 0;
+
+  /* accuracy = correct / answered — đúng SAT */
+  const accuracy = hasData
+    ? Math.round((safeCorrect / safeAnswered) * 100)
+    : 0;
 
   const isCompleted = test.status === "COMPLETED";
   const isInProgress =
@@ -79,7 +116,9 @@ export default function FullTestHistoryCard({
 
   const progressPercent = isCompleted
     ? 100
-    : Math.round((test.currentSectionOrder / test.totalSections) * 100);
+    : totalSections > 0
+      ? Math.round((currentSectionOrder / totalSections) * 100)
+      : 0;
 
   return (
     <Card className="border border-default-200 bg-background shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
@@ -99,11 +138,10 @@ export default function FullTestHistoryCard({
 
             <div className="min-w-0">
               <h3 className="truncate font-semibold leading-tight text-foreground">
-                {test.examTitle}
+                {examTitle}
               </h3>
-
               <p className="truncate text-xs leading-snug text-default-400">
-                {t("metaLine", { count: test.totalSections })}
+                {t("metaLine", { count: totalSections })}
               </p>
             </div>
           </div>
@@ -124,9 +162,10 @@ export default function FullTestHistoryCard({
             <p className="text-xs font-medium leading-snug text-default-400">
               {t("scaledScoreLabel")}
             </p>
-
             <p className="mt-1 text-lg font-bold leading-tight text-foreground">
-              {isCompleted ? (test.scaledScore ?? "--") : "--"}
+              {isCompleted && typeof test.scaledScore === "number"
+                ? test.scaledScore
+                : "--"}
             </p>
           </div>
 
@@ -134,9 +173,8 @@ export default function FullTestHistoryCard({
             <p className="text-xs font-medium leading-snug text-default-400">
               {t("accuracyLabel")}
             </p>
-
             <p className="mt-1 text-lg font-bold leading-tight text-foreground">
-              {accuracy}%
+              {hasData ? `${accuracy}%` : "--"}
             </p>
           </div>
 
@@ -144,21 +182,20 @@ export default function FullTestHistoryCard({
             <p className="text-xs font-medium leading-snug text-default-400">
               {t("correctLabel")}
             </p>
-
             <p className="mt-1 text-lg font-bold leading-tight text-foreground">
-              {test.totalCorrect}/{test.totalQuestions}
+              {safeCorrect}/{hasData ? safeAnswered : safeTotal}
             </p>
           </div>
         </div>
 
-        {/* Progress bar (chỉ hiện khi chưa xong) */}
-        {!isCompleted && !isExpired && (
+        {/* Progress bar */}
+        {!isCompleted && !isExpired && totalSections > 0 && (
           <div className="mt-4">
             <div className="mb-1 flex items-center justify-between text-xs text-default-500">
               <span>
                 {t("sectionProgress", {
-                  current: test.currentSectionOrder,
-                  total: test.totalSections,
+                  current: currentSectionOrder,
+                  total: totalSections,
                 })}
               </span>
               <span>{progressPercent}%</span>
@@ -182,12 +219,13 @@ export default function FullTestHistoryCard({
           {isCompleted && (
             <span className="flex items-center gap-1.5">
               <CircleCheck width={14} />
-              {t("correctCount", { count: test.totalCorrect })}
+              {t("correctCount", { count: safeCorrect })}
             </span>
           )}
 
           {test.totalTimeSpent !== null &&
-            test.totalTimeSpent !== undefined && (
+            test.totalTimeSpent !== undefined &&
+            test.totalTimeSpent > 0 && (
               <span className="flex items-center gap-1.5">
                 <Clock width={14} />
                 {t("minutesLabel", {
@@ -196,7 +234,7 @@ export default function FullTestHistoryCard({
               </span>
             )}
 
-          {isCompleted && test.scaledScore && (
+          {isCompleted && typeof test.scaledScore === "number" && (
             <span className="flex items-center gap-1.5">
               <Cup width={14} />
               {test.scaledScore}
@@ -204,7 +242,6 @@ export default function FullTestHistoryCard({
           )}
         </div>
 
-        {/* Action */}
         <div className="mt-5 border-t border-default-200 pt-4 dark:border-default-700">
           {isInProgress ? (
             <Button

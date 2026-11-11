@@ -4,14 +4,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../../util/prisma";
 
 interface RouteContext {
-  params: Promise<{
-    sessionId: string;
-  }>;
+  params: Promise<{ sessionId: string }>;
 }
 
-/* ------------------------------------------------------------------ */
-/*  CONSTANTS — SAT SCORING                                            */
-/* ------------------------------------------------------------------ */
 const SAT_RW_MAX_RAW = 54;
 const SAT_MATH_MAX_RAW = 44;
 
@@ -117,9 +112,6 @@ const MATH_SCALE_EASY: ReadonlyArray<readonly [number, number]> = [
   [44, 630],
 ];
 
-/* ------------------------------------------------------------------ */
-/*  HELPERS                                                            */
-/* ------------------------------------------------------------------ */
 const normalizeText = (value: string | null | undefined): string =>
   (value ?? "").trim().toLowerCase().replace(/\s+/g, "");
 
@@ -144,7 +136,6 @@ function resolveIsCorrect(
 
   const hasOption = answer.selectedOptionId !== null;
   const hasText = (answer.textAnswer ?? "").trim() !== "";
-
   if (!hasOption && !hasText) return null;
 
   if (answer.isCorrect === true || answer.isCorrect === false) {
@@ -166,7 +157,6 @@ function resolveIsCorrect(
   return normalizeText(answer.textAnswer) === normalizeText(expected);
 }
 
-/** Interpolate raw → scaled trên bảng piecewise linear. */
 function rawToScaled(
   raw: number,
   table: ReadonlyArray<readonly [number, number]>,
@@ -205,7 +195,6 @@ function computeIrtModifier(
   return Math.max(-30, Math.min(30, mod));
 }
 
-/** Detect Hard path từ section title. */
 function detectHardPath(titles: string[]): boolean {
   return titles.some((t) => {
     const s = (t ?? "").toLowerCase();
@@ -213,10 +202,6 @@ function detectHardPath(titles: string[]): boolean {
   });
 }
 
-/**
- * Tính scaled score theo bảng SAT + IRT modifier.
- * Normalize raw về thang chuẩn (54 RW / 44 Math).
- */
 function computeSubjectScaled(
   subject: "RW" | "MATH",
   correct: number,
@@ -246,13 +231,88 @@ function computeSubjectScaled(
   return Math.round(clamped / 10) * 10;
 }
 
-/* ------------------------------------------------------------------ */
-/*  ROUTE                                                              */
-/* ------------------------------------------------------------------ */
+/* ─────────────────────────────────────────────────────────────
+   FALLBACK: tính xấp xỉ timeSpent khi DB có 0 (session cũ)
+   - Section: dùng completedAt - startedAt
+   - Question: dùng answeredAt - previousAnsweredAt (hoặc section.startedAt)
+   ───────────────────────────────────────────────────────────── */
+interface SectionSessionShape {
+  id: string;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  timeSpent: number;
+  answers: Array<{
+    questionId: string;
+    answeredAt: Date | null;
+    timeSpent: number;
+  }>;
+}
+
+function buildQuestionTimeFallback(
+  sections: SectionSessionShape[],
+): Map<string, number> {
+  const fallback = new Map<string, number>();
+
+  for (const section of sections) {
+    const sortedAnswers = section.answers
+      .filter((a) => a.answeredAt !== null)
+      .sort(
+        (a, b) =>
+          new Date(a.answeredAt!).getTime() - new Date(b.answeredAt!).getTime(),
+      );
+
+    let previousTime = section.startedAt
+      ? new Date(section.startedAt).getTime()
+      : null;
+
+    for (const answer of sortedAnswers) {
+      const currentTime = new Date(answer.answeredAt!).getTime();
+
+      /* Nếu DB đã có timeSpent → skip, không cần fallback */
+      if (answer.timeSpent && answer.timeSpent > 0) {
+        previousTime = currentTime;
+        continue;
+      }
+
+      if (previousTime === null) {
+        previousTime = currentTime;
+        continue;
+      }
+
+      const diff = Math.floor((currentTime - previousTime) / 1000);
+
+      /* Cap: 0 < diff < 1h (loại outlier vô lý) */
+      if (diff > 0 && diff < 3600) {
+        fallback.set(answer.questionId, diff);
+      }
+
+      previousTime = currentTime;
+    }
+  }
+
+  return fallback;
+}
+
+function resolveSectionTime(section: SectionSessionShape): number {
+  if (section.timeSpent && section.timeSpent > 0) return section.timeSpent;
+
+  if (section.startedAt && section.completedAt) {
+    return Math.max(
+      0,
+      Math.floor(
+        (new Date(section.completedAt).getTime() -
+          new Date(section.startedAt).getTime()) /
+          1000,
+      ),
+    );
+  }
+
+  return 0;
+}
+
 export async function GET(request: Request, context: RouteContext) {
   try {
     const userId = request.headers.get("x-user-id");
-
     if (!userId) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -261,7 +321,6 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     const { sessionId } = await context.params;
-
     if (!sessionId) {
       return NextResponse.json(
         { success: false, message: "Session ID is required" },
@@ -316,7 +375,6 @@ export async function GET(request: Request, context: RouteContext) {
                   select: {
                     questionId: true,
                     order: true,
-
                     question: {
                       select: {
                         id: true,
@@ -330,7 +388,6 @@ export async function GET(request: Request, context: RouteContext) {
                         correctAnswer: true,
                         correctTextAnswer: true,
                         explanation: true,
-
                         options: {
                           orderBy: { label: "asc" },
                           select: {
@@ -370,6 +427,11 @@ export async function GET(request: Request, context: RouteContext) {
       );
     }
 
+    /* ── Build fallback maps trước khi map questions ── */
+    const questionTimeFallback = buildQuestionTimeFallback(
+      session.sections as SectionSessionShape[],
+    );
+
     const questions = session.sections.flatMap((section) =>
       section.examSection.questions.map((examQuestion) => {
         const question = examQuestion.question;
@@ -405,6 +467,13 @@ export async function GET(request: Request, context: RouteContext) {
               }
             : undefined,
         );
+
+        /* ── timeSpent: ưu tiên DB, fallback từ timestamp ── */
+        const dbTimeSpent = answer?.timeSpent ?? 0;
+        const fallbackTimeSpent =
+          questionTimeFallback.get(examQuestion.questionId) ?? 0;
+        const finalTimeSpent =
+          dbTimeSpent > 0 ? dbTimeSpent : fallbackTimeSpent;
 
         return {
           number: examQuestion.order,
@@ -453,10 +522,9 @@ export async function GET(request: Request, context: RouteContext) {
               },
 
           isCorrect,
-
           isFlagged: answer?.isFlagged ?? false,
           answeredAt: answer?.answeredAt ?? null,
-          timeSpent: answer?.timeSpent ?? 0,
+          timeSpent: finalTimeSpent,
 
           explanation: question.explanation,
           proTips: null,
@@ -465,15 +533,11 @@ export async function GET(request: Request, context: RouteContext) {
     );
 
     const totalQuestions = questions.length;
-
     const answeredQuestions = questions.filter(
       (q) => q.isCorrect !== null,
     ).length;
-
     const correctAnswers = questions.filter((q) => q.isCorrect === true).length;
-
     const wrongAnswers = questions.filter((q) => q.isCorrect === false).length;
-
     const skippedAnswers = totalQuestions - answeredQuestions;
 
     const accuracy =
@@ -487,25 +551,26 @@ export async function GET(request: Request, context: RouteContext) {
       );
 
       const sectionTotal = sectionQuestions.length;
-
       const sectionAnswered = sectionQuestions.filter(
         (q) => q.isCorrect !== null,
       ).length;
-
       const sectionCorrect = sectionQuestions.filter(
         (q) => q.isCorrect === true,
       ).length;
-
       const sectionWrong = sectionQuestions.filter(
         (q) => q.isCorrect === false,
       ).length;
-
       const sectionSkipped = sectionTotal - sectionAnswered;
 
       const sectionAccuracy =
         sectionAnswered > 0
           ? Number(((sectionCorrect / sectionAnswered) * 100).toFixed(2))
           : 0;
+
+      /* ── Section timeSpent: ưu tiên DB, fallback từ timestamp ── */
+      const sectionTimeSpent = resolveSectionTime(
+        section as SectionSessionShape,
+      );
 
       return {
         id: section.id,
@@ -521,7 +586,7 @@ export async function GET(request: Request, context: RouteContext) {
         incorrect: sectionWrong,
         accuracy: sectionAccuracy,
 
-        timeSpent: section.timeSpent,
+        timeSpent: sectionTimeSpent,
         duration: section.examSection.duration,
         durationSeconds: section.examSection.duration * 60,
 
@@ -532,6 +597,27 @@ export async function GET(request: Request, context: RouteContext) {
       };
     });
 
+    /* ── totalTimeSpent: ưu tiên DB, fallback cộng section time ── */
+    const sumSectionTime = sections.reduce(
+      (sum, s) => sum + (s.timeSpent ?? 0),
+      0,
+    );
+    const totalTimeSpent =
+      session.totalTimeSpent && session.totalTimeSpent > 0
+        ? session.totalTimeSpent
+        : sumSectionTime > 0
+          ? sumSectionTime
+          : session.startedAt && session.completedAt
+            ? Math.max(
+                0,
+                Math.floor(
+                  (new Date(session.completedAt).getTime() -
+                    new Date(session.startedAt).getTime()) /
+                    1000,
+                ),
+              )
+            : 0;
+
     const difficultyStats = {
       EASY: { total: 0, correct: 0, accuracy: 0 },
       MEDIUM: { total: 0, correct: 0, accuracy: 0 },
@@ -541,7 +627,6 @@ export async function GET(request: Request, context: RouteContext) {
     questions.forEach((q) => {
       const level = q.difficulty as "EASY" | "MEDIUM" | "HARD" | null;
       if (!level || !(level in difficultyStats)) return;
-
       difficultyStats[level].total++;
       if (q.isCorrect === true) difficultyStats[level].correct++;
     });
@@ -562,11 +647,9 @@ export async function GET(request: Request, context: RouteContext) {
 
     questions.forEach((q) => {
       const domain = q.domain?.trim() || "Other";
-
       if (!domainMap.has(domain)) {
         domainMap.set(domain, { domain, total: 0, answered: 0, correct: 0 });
       }
-
       const stat = domainMap.get(domain)!;
       stat.total++;
       if (q.isCorrect !== null) stat.answered++;
@@ -629,7 +712,6 @@ export async function GET(request: Request, context: RouteContext) {
       rwQuestionsForIrt,
       rwIsHard,
     );
-
     const mathScaled = computeSubjectScaled(
       "MATH",
       mathCorrect,
@@ -656,7 +738,6 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json(
       {
         success: true,
-
         data: {
           session: {
             id: session.id,
@@ -664,11 +745,9 @@ export async function GET(request: Request, context: RouteContext) {
             status: session.status,
             startedAt: session.startedAt,
             completedAt: session.completedAt,
-            totalTimeSpent: session.totalTimeSpent ?? null,
+            totalTimeSpent,
           },
-
           exam: session.exam,
-
           summary: {
             total: totalQuestions,
             answered: answeredQuestions,
@@ -679,7 +758,6 @@ export async function GET(request: Request, context: RouteContext) {
             rawScore: session.rawScore ?? correctAnswers,
             scaledScore: totalScaled,
           },
-
           scores,
           sections,
           difficulty: difficultyStats,
@@ -690,11 +768,7 @@ export async function GET(request: Request, context: RouteContext) {
       { status: 200 },
     );
   } catch (error) {
-    // console.error(
-    //   "GET /api/full-test/sessions/[sessionId]/result error:",
-    //   error,
-    // );
-
+    console.error("GET /result error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch test result" },
       { status: 500 },

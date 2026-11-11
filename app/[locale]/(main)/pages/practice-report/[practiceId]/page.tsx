@@ -12,8 +12,8 @@ import ProgressBar from "@/app/components/progress-bar/progress-bar";
 import MathText from "@/app/components/LaText/MathJax";
 import RetryPracticeButton from "@/app/components/modal-button/retry-practice";
 
-import PriorityFocusAreas from "@/app/components/report/priority_focus_area";
-import DomainAdviceCard from "@/app/components/report/domain_advice_card";
+import PriorityFocusAreas from "@/app/components/report/priority-focus-area";
+import DomainAdviceCard from "@/app/components/report/domain-advice-card";
 
 import { usePracticeTimerStore } from "@/zustand/practice-timer";
 import { useAuthStore } from "@/zustand/auth-store";
@@ -110,7 +110,6 @@ export default function PracticeReportPage() {
   const router = useRouter();
   const practiceId = params?.practiceId;
 
-  // 👇 CHỈ ĐỔI DÒNG NÀY
   const t = useTranslations("practiceReport");
 
   const { checkAuth, isAuthenticated, isLoading } = useAuthStore();

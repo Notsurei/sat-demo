@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const where: any = {
-      bankPurpose: { in: ["PRACTICE", "MIXED"] },
+      bankPurpose: { in: ["PRACTICE"] },
     };
 
     if (subject) {

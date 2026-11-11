@@ -138,6 +138,34 @@ export default function Annotator({
           outline-offset:2px;
           border-radius:12px;
         }
+
+        .annotator-content,
+        .annotator-content p,
+        .annotator-content div,
+        .annotator-content li {
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        }
+
+        .annotator-content span[class*="hl-"] {
+          display: inline;
+          white-space: inherit;
+          padding: 0;
+          margin: 0;
+          line-height: inherit;
+          vertical-align: baseline;
+        }
+
+        .hl-yellow { background: #fef08a; }
+        .hl-blue   { background: #93c5fd; }
+        .hl-green  { background: #86efac; }
+        .hl-pink   { background: #fbcfe8; }
+
+        .annot-btn.active {
+          outline: 2px solid #2563eb;
+          outline-offset: 2px;
+          border-radius: 12px;
+        }
       `}</style>
     </div>
   );

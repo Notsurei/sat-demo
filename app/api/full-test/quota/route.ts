@@ -1,54 +1,47 @@
 "use server";
+
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../util/prisma";
-import jwt from "jsonwebtoken";
+
+import { prisma } from "@/app/api/util/prisma";
 import {
   getFullTestLimit,
   isFullTestUnlimited,
   PLAN_LIMITS,
   type PlanType,
 } from "@/app/api/util/plan-limit";
+import { resolveUserSubscription } from "@/app/api/util/subscription";
 
-export async function GET(req: NextRequest) {
+function getMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    const userId = request.headers.get("x-user-id");
+
+    if (!userId) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 },
       );
     }
 
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-    };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { subscriptionPlan: true },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 },
-      );
-    }
-
-    const plan = user.subscriptionPlan as PlanType;
+    const sub = await resolveUserSubscription(userId);
+    const plan = sub.plan as PlanType;
     const limit = getFullTestLimit(plan);
     const unlimited = isFullTestUnlimited(plan);
 
     const used = await prisma.fullTestSession.count({
       where: {
-        userId: decoded.userId,
+        userId,
         status: { in: ["IN_PROGRESS", "BREAK", "COMPLETED"] },
+        createdAt: { gte: getMonthStart() },
       },
     });
 
-    const remaining = unlimited ? Infinity : Math.max(0, limit - used);
-    const canStart = unlimited || remaining > 0;
+    const remaining = unlimited ? null : Math.max(0, limit - used);
+    const canStart = unlimited || (remaining !== null && remaining > 0);
 
     return NextResponse.json({
       success: true,
@@ -56,14 +49,16 @@ export async function GET(req: NextRequest) {
         plan,
         limit: unlimited ? null : limit,
         used,
-        remaining: unlimited ? null : remaining,
+        remaining,
         unlimited,
         canStart,
-        label: PLAN_LIMITS[plan]?.label ?? "Locked",
+        label:
+          PLAN_LIMITS[plan]?.label ??
+          (unlimited ? "Unlimited" : canStart ? "Available" : "Locked"),
       },
     });
   } catch (error) {
-    console.error("Quota check error:", error);
+    console.error("[FullTestQuota] Error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to check quota" },
       { status: 500 },

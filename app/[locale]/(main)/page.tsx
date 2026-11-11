@@ -144,7 +144,6 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Dark panel */}
             <div className="border-t border-blue-100 bg-slate-950 p-8 text-white sm:p-10 lg:border-l lg:border-t-0 lg:p-14">
               <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-6 backdrop-blur">
                 <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">

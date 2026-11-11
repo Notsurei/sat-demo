@@ -7,14 +7,26 @@ import FullTestHistoryCard from "./full-test-history-card";
 interface FullTest {
   id: string;
   examId: string;
-  examTitle: string;
+
+  examTitle?: string;
+  exam?: { id?: string; title?: string };
+
   status: "IN_PROGRESS" | "BREAK" | "COMPLETED" | "EXPIRED";
-  currentSectionOrder: number;
-  totalSections: number;
-  totalQuestions: number;
-  totalCorrect: number;
-  totalWrong: number;
-  totalSkipped: number;
+  currentSectionOrder?: number;
+  totalSections?: number;
+  sections?: unknown[];
+
+  totalQuestions?: number;
+  totalCorrect?: number;
+  totalWrong?: number;
+  totalSkipped?: number;
+  answeredQuestions?: number;
+
+  correct?: number;
+  incorrect?: number;
+  answered?: number;
+  unanswered?: number;
+
   rawScore?: number | null;
   scaledScore?: number | null;
   totalTimeSpent?: number | null;
@@ -39,7 +51,6 @@ export default function FullTestHistoryList({
         <p className="font-semibold leading-tight text-slate-700">
           {t("emptyTitle")}
         </p>
-
         <p className="mt-1 text-sm leading-relaxed text-slate-400">
           {t("emptyDescription")}
         </p>

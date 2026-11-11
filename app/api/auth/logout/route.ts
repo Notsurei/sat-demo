@@ -1,3 +1,5 @@
+"use server";
+
 import { NextResponse } from "next/server";
 
 export async function POST() {
@@ -6,12 +8,11 @@ export async function POST() {
     message: "Logged out successfully",
   });
 
-  response.cookies.set("token", "", {
+  response.cookies.set("__Host-auth_token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "strict",
     path: "/",
-    expires: new Date(0),
     maxAge: 0,
   });
 

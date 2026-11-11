@@ -20,6 +20,7 @@
     "bcrypt": "^6.0.0",
     "better-react-mathjax": "^3.0.1",
     "clsx": "2.1.1",
+    "dodopayments": "^2.55.0",
     "html-react-parser": "^6.1.5",
     "intl-messageformat": "10.7.16",
     "jsonwebtoken": "^9.0.3",

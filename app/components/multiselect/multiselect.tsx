@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Check, ChevronDown } from "@gravity-ui/icons";
+import { useTranslations } from "next-intl";
 
 type Option = {
   id: string;
@@ -21,7 +22,7 @@ type MultiSelectProps = {
 
 export default function MultiSelect({
   label,
-  placeholder = "Select...",
+  placeholder,
   options,
   value,
   onChange,
@@ -29,6 +30,8 @@ export default function MultiSelect({
   loading = false,
   maxHeight = 210,
 }: MultiSelectProps) {
+  const t = useTranslations("multiSelect");
+
   const [open, setOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [dropdownPosition, setDropdownPosition] = React.useState<"top" | "bottom">("bottom");
@@ -52,17 +55,17 @@ export default function MultiSelect({
   const someSelected = value.length > 0 && !allSelected;
 
   const displayText = React.useMemo(() => {
-    if (loading) return "Loading...";
-    if (value.length === 0) return placeholder;
-    if (allSelected) return "All selected";
+    if (loading) return t("loading");
+    if (value.length === 0) return placeholder ?? t("select");
+    if (allSelected) return t("allSelected");
 
     const selectedLabels = value
       .map((id) => options.find((o) => o.id === id)?.label)
       .filter(Boolean);
 
     if (selectedLabels.length < 2) return selectedLabels.join(" + ");
-    return `${selectedLabels.length} selected`;
-  }, [value, options, placeholder, loading, allSelected]);
+    return t("selectedCount", { count: selectedLabels.length });
+  }, [value, options, placeholder, loading, allSelected, t]);
 
   const calculatePosition = React.useCallback(() => {
     if (!buttonRef.current || !open) return;
@@ -81,7 +84,7 @@ export default function MultiSelect({
 
     const actualHeight = Math.min(estimatedHeight, maxHeight);
 
-    const neededSpace = actualHeight + 16; 
+    const neededSpace = actualHeight + 16;
     const canFitBelow = spaceBelow >= neededSpace;
     const canFitAbove = spaceAbove >= neededSpace;
 
@@ -276,16 +279,18 @@ export default function MultiSelect({
                   allSelected
                     ? "border-primary bg-primary text-primary-foreground"
                     : someSelected
-                    ? "border-primary bg-primary/20"
-                    : "border-default-300",
+                      ? "border-primary bg-primary/20"
+                      : "border-default-300",
                 ].join(" ")}
               >
                 {allSelected && <Check className="size-3.5" />}
                 {someSelected && <span className="h-0.5 w-2.5 rounded-full bg-primary" />}
               </span>
-              <span className="flex-1">{allSelected ? "Deselect all" : "Select all"}</span>
+              <span className="flex-1">
+                {allSelected ? t("deselectAll") : t("selectAll")}
+              </span>
               <span className="text-xs text-default-400">
-                {value.length}/{options.length}
+                {t("fraction", { selected: value.length, total: options.length })}
               </span>
             </button>
           )}
@@ -293,7 +298,7 @@ export default function MultiSelect({
           <div ref={listboxRef} className="flex-1 overflow-y-auto p-1" role="listbox">
             {filteredOptions.length === 0 ? (
               <div className="px-3 py-4 text-center text-sm text-default-400">
-                {searchTerm ? "No matches" : "No options"}
+                {searchTerm ? t("noMatches") : t("noOptions")}
               </div>
             ) : (
               filteredOptions.map((option, index) => {
@@ -333,13 +338,15 @@ export default function MultiSelect({
 
           {value.length > 0 && (
             <div className="flex items-center justify-between border-t border-default-200 px-3 py-2">
-              <span className="text-xs text-default-500">{value.length} selected</span>
+              <span className="text-xs text-default-500">
+                {t("selectedCount", { count: value.length })}
+              </span>
               <button
                 type="button"
                 onClick={clearAll}
                 className="text-xs font-medium text-danger hover:underline cursor-pointer"
               >
-                Clear
+                {t("clear")}
               </button>
             </div>
           )}

@@ -14,7 +14,9 @@ import ProgressBar from "@/app/components/progress-bar/progress-bar";
 import { useAuthStore } from "@/zustand/auth-store";
 import { useRouter } from "@/i18n/navigation";
 
-
+/* ─────────────────────────────────────────────────────────────
+   Types
+   ───────────────────────────────────────────────────────────── */
 interface AnswerDisplay {
   id?: string | null;
   label?: string | null;
@@ -130,8 +132,9 @@ interface FullTestReportData {
   questions: ReportQuestion[];
 }
 
-/* ─── SAT Scale Constants ────────────────────────────────────── */
-
+/* ─────────────────────────────────────────────────────────────
+   Constants — SAT scaling
+   ───────────────────────────────────────────────────────────── */
 const SAT_SECTION_MIN = 200;
 const SAT_SECTION_MAX = 800;
 const SAT_TOTAL_MIN = 400;
@@ -168,8 +171,9 @@ const MATH_SCALE_EASY: ReadonlyArray<readonly [number, number]> = [
   [36, 560], [38, 575], [40, 590], [42, 610], [44, 630],
 ];
 
-/* ─── Helpers ────────────────────────────────────────────────── */
-
+/* ─────────────────────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────────────────────── */
 const isRwSubject = (subject?: string | null) => {
   const s = (subject ?? "").toUpperCase();
   return s === "SAT_RW" || s.includes("RW") || s.includes("READING");
@@ -187,6 +191,13 @@ const isHardPath = (sections: SectionStat[]): boolean => {
   });
 };
 
+const isQuestionAnswered = (q: ReportQuestion): boolean => {
+  if (q.selectedAnswer?.id) return true;
+  if (q.selectedAnswer?.text && q.selectedAnswer.text.trim() !== "") return true;
+  if (q.answeredAt) return true;
+  return false;
+};
+
 interface SectionAggregate {
   total: number;
   correct: number;
@@ -194,11 +205,18 @@ interface SectionAggregate {
   accuracy: number;
 }
 
+/** FIX: recount answered từ questions thay vì tin section.answered từ backend */
 const aggregateSections = (sections: SectionStat[]): SectionAggregate => {
   const total = sections.reduce((sum, s) => sum + s.total, 0);
   const correct = sections.reduce((sum, s) => sum + s.correct, 0);
-  const answered = sections.reduce((sum, s) => sum + s.answered, 0);
-  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  const answered = sections.reduce((sum, s) => {
+    const inSection = (s.questions ?? []).filter(isQuestionAnswered).length;
+    return sum + inSection;
+  }, 0);
+
+  const accuracy =
+    answered > 0 ? Math.round((correct / answered) * 100) : 0;
   return { total, correct, answered, accuracy };
 };
 
@@ -247,7 +265,9 @@ const computeSectionScaled = (
   return Math.round(clamped / 10) * 10;
 };
 
-
+/* ─────────────────────────────────────────────────────────────
+   Page
+   ───────────────────────────────────────────────────────────── */
 export default function FullTestReportPage() {
   const params = useParams<{ testId: string; sessionId: string }>();
   const router = useRouter();
@@ -327,11 +347,20 @@ export default function FullTestReportPage() {
     return `${remainingSeconds}s`;
   };
 
-  const getAnswerText = (answer: AnswerDisplay | null | undefined): string => {
+  /** FIX: lookup từ options nếu answer chỉ có id */
+  const getAnswerText = (
+    answer: AnswerDisplay | null | undefined,
+    options?: OptionDisplay[],
+  ): string => {
     if (!answer) return "—";
     if (answer.text?.trim()) return answer.text;
     if (answer.label) return answer.label;
     if (answer.content) return answer.content;
+
+    if (answer.id && options) {
+      const opt = options.find((o) => o.id === answer.id);
+      if (opt) return `${opt.label}. ${opt.content}`;
+    }
     return "—";
   };
 
@@ -374,6 +403,7 @@ export default function FullTestReportPage() {
     }
   };
 
+  /** FIX: nếu đã trả lời nhưng isCorrect null → "Answered" thay vì "Skipped" */
   const getQuestionStatus = (question: ReportQuestion) => {
     if (question.isCorrect === true) {
       return {
@@ -385,6 +415,12 @@ export default function FullTestReportPage() {
       return {
         label: t("questionReview.status.incorrect"),
         color: "danger" as const,
+      };
+    }
+    if (isQuestionAnswered(question)) {
+      return {
+        label: "Answered",
+        color: "warning" as const,
       };
     }
     return {
@@ -425,12 +461,19 @@ export default function FullTestReportPage() {
     );
   }
 
-  /* ── Derive ───────────────────────────────────────────────── */
-
-  const summary = reportData.summary;
   const questions = reportData.questions;
   const totalTime = reportData.session.totalTimeSpent ?? 0;
-  const accuracyValue = Math.min(100, summary.accuracy ?? 0);
+
+  /* FIX: tính lại answered/correct/skipped từ questions */
+  const answeredQs = questions.filter(isQuestionAnswered);
+  const correctQs = questions.filter((q) => q.isCorrect === true);
+  const wrongQs = questions.filter((q) => q.isCorrect === false);
+  const unansweredQs = questions.filter((q) => !isQuestionAnswered(q));
+
+  const accuracyValue =
+    answeredQs.length > 0
+      ? Math.round((correctQs.length / answeredQs.length) * 100)
+      : 0;
 
   const sortedSections = [...reportData.sections].sort(
     (a, b) => a.order - b.order,
@@ -493,7 +536,7 @@ export default function FullTestReportPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 md:p-8">
       <div className="mx-auto max-w-6xl">
-        {/* HEADER */}
+        {/* Header */}
         <div className="mb-8 flex animate-fade-in flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
             <h1 className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-3xl font-bold text-transparent md:text-5xl">
@@ -513,7 +556,7 @@ export default function FullTestReportPage() {
           </Button>
         </div>
 
-        {/* TOP CARDS */}
+        {/* Summary cards */}
         <div className="mb-8 grid animate-fade-in-up grid-cols-1 gap-4 md:grid-cols-4">
           {[
             {
@@ -534,8 +577,8 @@ export default function FullTestReportPage() {
             },
             {
               label: t("summary.correct"),
-              value: summary.correct,
-              suffix: `/ ${summary.total}`,
+              value: correctQs.length,
+              suffix: `/ ${questions.length}`,
               icon: <Check />,
               className: "from-blue-400 to-blue-600",
               valueClassName: "text-4xl",
@@ -575,7 +618,7 @@ export default function FullTestReportPage() {
           ))}
         </div>
 
-        {/* OVERALL PERFORMANCE */}
+        {/* Overall */}
         <div className="mb-8 animate-fade-in-up rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-6 flex flex-col items-center justify-between gap-6 md:flex-row">
             <div>
@@ -659,7 +702,7 @@ export default function FullTestReportPage() {
           </div>
         </div>
 
-        {/* MODULE SCORES */}
+        {/* Module scores */}
         <div className="mb-8 animate-fade-in-up rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <h2 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">
             {t("moduleScores.title")}
@@ -686,16 +729,8 @@ export default function FullTestReportPage() {
 
               <div className="space-y-3">
                 {[
-                  {
-                    number: 1,
-                    section: rwM1,
-                    scaled: rwM1Scaled,
-                  },
-                  {
-                    number: 2,
-                    section: rwM2,
-                    scaled: rwM2Scaled,
-                  },
+                  { number: 1, section: rwM1, scaled: rwM1Scaled },
+                  { number: 2, section: rwM2, scaled: rwM2Scaled },
                 ].map(({ number, section, scaled }) => (
                   <div
                     key={number}
@@ -844,7 +879,7 @@ export default function FullTestReportPage() {
           </div>
         </div>
 
-        {/* FULL TEST INFORMATION */}
+        {/* FULL TEST INFORMATION — FIX: dùng số đã recount */}
         <div className="mb-8 animate-fade-in-up rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <h2 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white">
             {t("info.title")}
@@ -858,18 +893,18 @@ export default function FullTestReportPage() {
               },
               {
                 label: t("info.questions"),
-                value: summary.total,
+                value: questions.length,
                 className:
                   "bg-purple-50 dark:bg-purple-900/20 border-purple-500",
               },
               {
                 label: t("info.answered"),
-                value: `${summary.answered} / ${summary.total}`,
+                value: `${answeredQs.length} / ${questions.length}`,
                 className: "bg-green-50 dark:bg-green-900/20 border-green-500",
               },
               {
                 label: t("info.unanswered"),
-                value: summary.unanswered,
+                value: unansweredQs.length,
                 className:
                   "bg-orange-50 dark:bg-orange-900/20 border-orange-500",
               },
@@ -889,20 +924,30 @@ export default function FullTestReportPage() {
           </div>
         </div>
 
-        {/* SECTION PERFORMANCE */}
+        {/* By section — FIX: dùng aggregateSections đã recount */}
         <div className="mb-8 animate-fade-in-up rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <h2 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
             {t("bySection.title")}
           </h2>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {reportData.sections.map((section) => {
+            {sortedSections.map((section) => {
               const isRW = isRwSubject(section.subject);
+              const agg = aggregateSections([section]);
+              const incorrectInSection = Math.max(
+                0,
+                agg.answered - agg.correct,
+              );
+              const unansweredInSection = Math.max(
+                0,
+                section.total - agg.answered,
+              );
+
               return (
                 <div
                   key={section.id}
                   className={`rounded-xl border-2 p-5 ${isRW
-                    ? "border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 dark:border-blue-800 dark:from-blue-900/20 dark:to-cyan-900/20"
-                    : "border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:border-purple-800 dark:from-purple-900/20 dark:to-pink-900/20"
+                      ? "border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 dark:border-blue-800 dark:from-blue-900/20 dark:to-cyan-900/20"
+                      : "border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:border-purple-800 dark:from-purple-900/20 dark:to-pink-900/20"
                     }`}
                 >
                   <div className="mb-4 flex items-start justify-between gap-3">
@@ -921,7 +966,7 @@ export default function FullTestReportPage() {
                       size="lg"
                       className="font-bold"
                     >
-                      {section.accuracy}%
+                      {agg.accuracy}%
                     </Chip>
                   </div>
 
@@ -931,7 +976,7 @@ export default function FullTestReportPage() {
                         {t("bySection.correct")}
                       </p>
                       <p className="mt-1 text-lg font-bold text-green-600">
-                        {section.correct}
+                        {agg.correct}
                       </p>
                     </div>
                     <div className="rounded-lg bg-white/70 p-3 dark:bg-gray-900/30">
@@ -939,7 +984,7 @@ export default function FullTestReportPage() {
                         {t("bySection.incorrect")}
                       </p>
                       <p className="mt-1 text-lg font-bold text-red-500">
-                        {section.incorrect}
+                        {incorrectInSection}
                       </p>
                     </div>
                     <div className="rounded-lg bg-white/70 p-3 dark:bg-gray-900/30">
@@ -947,7 +992,7 @@ export default function FullTestReportPage() {
                         {t("bySection.skipped")}
                       </p>
                       <p className="mt-1 text-lg font-bold text-orange-500">
-                        {section.unanswered}
+                        {unansweredInSection}
                       </p>
                     </div>
                   </div>
@@ -958,17 +1003,17 @@ export default function FullTestReportPage() {
                         {t("bySection.accuracy")}
                       </span>
                       <span className="font-bold text-gray-800 dark:text-white">
-                        {section.correct}/{section.answered}
+                        {agg.correct}/{agg.answered}
                       </span>
                     </div>
                     <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                       <div
                         className={`h-full rounded-full bg-gradient-to-r ${isRW
-                          ? "from-blue-400 to-cyan-500"
-                          : "from-purple-400 to-pink-500"
+                            ? "from-blue-400 to-cyan-500"
+                            : "from-purple-400 to-pink-500"
                           } transition-all duration-500`}
                         style={{
-                          width: `${Math.min(100, section.accuracy)}%`,
+                          width: `${Math.min(100, agg.accuracy)}%`,
                         }}
                       />
                     </div>
@@ -977,7 +1022,7 @@ export default function FullTestReportPage() {
                   <div className="mt-4 flex justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>
                       {t("bySection.answeredLabel", {
-                        answered: section.answered,
+                        answered: agg.answered,
                         total: section.total,
                       })}
                     </span>
@@ -993,7 +1038,7 @@ export default function FullTestReportPage() {
           </div>
         </div>
 
-        {/* DIFFICULTY */}
+        {/* By difficulty */}
         <div className="mb-8 animate-fade-in-up rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <h2 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
             {t("byDifficulty.title")}
@@ -1040,10 +1085,10 @@ export default function FullTestReportPage() {
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/50 dark:bg-gray-900/30">
                     <div
                       className={`h-full bg-gradient-to-r ${difficulty === "EASY"
-                        ? "from-green-400 to-emerald-500"
-                        : difficulty === "MEDIUM"
-                          ? "from-yellow-400 to-amber-500"
-                          : "from-red-400 to-pink-500"
+                          ? "from-green-400 to-emerald-500"
+                          : difficulty === "MEDIUM"
+                            ? "from-yellow-400 to-amber-500"
+                            : "from-red-400 to-pink-500"
                         }`}
                       style={{ width: `${Math.min(100, stat.accuracy)}%` }}
                     />
@@ -1054,7 +1099,7 @@ export default function FullTestReportPage() {
           </div>
         </div>
 
-        {/* DOMAIN */}
+        {/* By domain */}
         <div className="mb-8 animate-fade-in-up rounded-2xl border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <h2 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
             {t("byDomain.title")}
@@ -1077,12 +1122,12 @@ export default function FullTestReportPage() {
                 <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   <div
                     className={`h-full bg-gradient-to-r ${domain.accuracy >= 80
-                      ? "from-green-400 to-emerald-500"
-                      : domain.accuracy >= 60
-                        ? "from-blue-400 to-cyan-500"
-                        : domain.accuracy >= 40
-                          ? "from-yellow-400 to-amber-500"
-                          : "from-red-400 to-pink-500"
+                        ? "from-green-400 to-emerald-500"
+                        : domain.accuracy >= 60
+                          ? "from-blue-400 to-cyan-500"
+                          : domain.accuracy >= 40
+                            ? "from-yellow-400 to-amber-500"
+                            : "from-red-400 to-pink-500"
                       } transition-all duration-500 ease-out`}
                     style={{ width: `${Math.min(100, domain.accuracy)}%` }}
                   />
@@ -1098,7 +1143,7 @@ export default function FullTestReportPage() {
           </div>
         </div>
 
-        {/* QUESTION REVIEW */}
+        {/* Question review */}
         <div className="animate-fade-in-up overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4 md:px-8 md:py-6">
             <h2 className="text-2xl font-bold text-white md:text-3xl">
@@ -1111,11 +1156,16 @@ export default function FullTestReportPage() {
 
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {questions.map((question) => {
-              const userAnswerDisplay = getAnswerText(question.selectedAnswer);
+              const userAnswerDisplay = getAnswerText(
+                question.selectedAnswer,
+                question.options,
+              );
               const correctAnswerDisplay = getAnswerText(
                 question.correctAnswer,
+                question.options,
               );
               const status = getQuestionStatus(question);
+              const answered = isQuestionAnswered(question);
 
               return (
                 <div
@@ -1195,6 +1245,8 @@ export default function FullTestReportPage() {
                         <Check className="h-3.5 w-3.5" />
                       ) : question.isCorrect === false ? (
                         <Xmark className="h-3.5 w-3.5" />
+                      ) : answered ? (
+                        <Check className="h-3.5 w-3.5" />
                       ) : (
                         <Clock className="h-3.5 w-3.5" />
                       )}
@@ -1233,12 +1285,12 @@ export default function FullTestReportPage() {
                             <div
                               key={option.id}
                               className={`flex flex-col gap-1 rounded-lg border p-3 text-sm ${isSelected && isCorrect
-                                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
-                                : isSelected && !isCorrect
-                                  ? "border-red-500 bg-red-50 dark:bg-red-900/20"
-                                  : !isSelected && isCorrect
-                                    ? "border-green-300 bg-green-50/50 dark:bg-green-900/10"
-                                    : "border-gray-200 dark:border-gray-700"
+                                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                                  : isSelected && !isCorrect
+                                    ? "border-red-500 bg-red-50 dark:bg-red-900/20"
+                                    : !isSelected && isCorrect
+                                      ? "border-green-300 bg-green-50/50 dark:bg-green-900/10"
+                                      : "border-gray-200 dark:border-gray-700"
                                 }`}
                             >
                               <div className="flex items-start gap-2">
@@ -1272,10 +1324,10 @@ export default function FullTestReportPage() {
                     <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
                       <div
                         className={`rounded-lg border-2 p-3 ${question.isCorrect === true
-                          ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
-                          : question.isCorrect === false
-                            ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
-                            : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
+                            ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
+                            : question.isCorrect === false
+                              ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
+                              : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
                           }`}
                       >
                         <div className="mb-1 flex items-center gap-2">
@@ -1288,7 +1340,10 @@ export default function FullTestReportPage() {
                           {question.isCorrect === false && (
                             <Xmark className="size-4 text-red-600" />
                           )}
-                          {question.isCorrect === null && (
+                          {question.isCorrect === null && answered && (
+                            <Check className="size-4 text-yellow-600" />
+                          )}
+                          {question.isCorrect === null && !answered && (
                             <Clock className="size-4 text-yellow-600" />
                           )}
                         </div>

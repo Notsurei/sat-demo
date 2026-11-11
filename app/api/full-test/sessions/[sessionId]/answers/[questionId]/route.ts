@@ -17,16 +17,15 @@ interface AnswerRequest {
   timeSpent?: number;
 }
 
+const MAX_TIME_MULTIPLIER = 1.5;
+
 export async function PUT(request: Request, context: RouteContext) {
   try {
     const userId = request.headers.get("x-user-id");
 
     if (!userId) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-        },
+        { success: false, message: "Unauthorized" },
         { status: 401 },
       );
     }
@@ -53,7 +52,7 @@ export async function PUT(request: Request, context: RouteContext) {
     const isFlagged =
       typeof body.isFlagged === "boolean" ? body.isFlagged : undefined;
 
-    const timeSpent =
+    const rawTimeSpent =
       typeof body.timeSpent === "number" &&
       Number.isFinite(body.timeSpent) &&
       body.timeSpent >= 0
@@ -61,15 +60,11 @@ export async function PUT(request: Request, context: RouteContext) {
         : undefined;
 
     const session = await prisma.fullTestSession.findFirst({
-      where: {
-        id: sessionId,
-        userId,
-      },
+      where: { id: sessionId, userId },
       select: {
         id: true,
         status: true,
         currentSectionOrder: true,
-
         sections: {
           select: {
             id: true,
@@ -77,13 +72,8 @@ export async function PUT(request: Request, context: RouteContext) {
             status: true,
             startedAt: true,
             remainingTime: true,
-
             examSection: {
-              select: {
-                id: true,
-                order: true,
-                duration: true,
-              },
+              select: { id: true, order: true, duration: true },
             },
           },
         },
@@ -92,20 +82,14 @@ export async function PUT(request: Request, context: RouteContext) {
 
     if (!session) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Session not found",
-        },
+        { success: false, message: "Session not found" },
         { status: 404 },
       );
     }
 
     if (session.status !== "IN_PROGRESS") {
       return NextResponse.json(
-        {
-          success: false,
-          message: "This test session is not active",
-        },
+        { success: false, message: "This test session is not active" },
         { status: 409 },
       );
     }
@@ -116,10 +100,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
     if (!sectionSession) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Current test section not found",
-        },
+        { success: false, message: "Current test section not found" },
         { status: 404 },
       );
     }
@@ -136,10 +117,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
     if (sectionSession.status === "EXPIRED") {
       return NextResponse.json(
-        {
-          success: false,
-          message: "This section has expired",
-        },
+        { success: false, message: "This section has expired" },
         { status: 409 },
       );
     }
@@ -148,9 +126,7 @@ export async function PUT(request: Request, context: RouteContext) {
       const now = new Date();
 
       const activatedSection = await prisma.fullTestSectionSession.update({
-        where: {
-          id: sectionSession.id,
-        },
+        where: { id: sectionSession.id },
         data: {
           status: "IN_PROGRESS",
           startedAt: sectionSession.startedAt ?? now,
@@ -165,13 +141,8 @@ export async function PUT(request: Request, context: RouteContext) {
           status: true,
           startedAt: true,
           remainingTime: true,
-
           examSection: {
-            select: {
-              id: true,
-              order: true,
-              duration: true,
-            },
+            select: { id: true, order: true, duration: true },
           },
         },
       });
@@ -181,11 +152,21 @@ export async function PUT(request: Request, context: RouteContext) {
 
     if (sectionSession.status !== "IN_PROGRESS") {
       return NextResponse.json(
-        {
-          success: false,
-          message: "This section is not active",
-        },
+        { success: false, message: "This section is not active" },
         { status: 409 },
+      );
+    }
+
+    const sectionDurationSec = sectionSession.examSection.duration * 60;
+    const maxAllowedTime = Math.floor(sectionDurationSec * MAX_TIME_MULTIPLIER);
+    const timeSpent =
+      rawTimeSpent !== undefined
+        ? Math.min(rawTimeSpent, maxAllowedTime)
+        : undefined;
+
+    if (rawTimeSpent !== undefined && rawTimeSpent > maxAllowedTime) {
+      console.warn(
+        `[answers] timeSpent capped: raw=${rawTimeSpent} max=${maxAllowedTime} for question ${questionId}`,
       );
     }
 
@@ -196,7 +177,6 @@ export async function PUT(request: Request, context: RouteContext) {
       },
       select: {
         questionId: true,
-
         question: {
           select: {
             id: true,
@@ -233,13 +213,8 @@ export async function PUT(request: Request, context: RouteContext) {
 
       if (selectedOptionId !== null) {
         const option = await prisma.option.findFirst({
-          where: {
-            id: selectedOptionId,
-            questionId: question.id,
-          },
-          select: {
-            id: true,
-          },
+          where: { id: selectedOptionId, questionId: question.id },
+          select: { id: true },
         });
 
         if (!option) {
@@ -257,10 +232,7 @@ export async function PUT(request: Request, context: RouteContext) {
     if (question.type === "GRID_IN") {
       if (selectedOptionId !== null) {
         return NextResponse.json(
-          {
-            success: false,
-            message: "Grid-in questions must use textAnswer",
-          },
+          { success: false, message: "Grid-in questions must use textAnswer" },
           { status: 400 },
         );
       }
@@ -270,22 +242,15 @@ export async function PUT(request: Request, context: RouteContext) {
 
     if (question.type === "MCQ" && selectedOptionId !== null) {
       const correctOption = await prisma.option.findFirst({
-        where: {
-          questionId: question.id,
-          isCorrect: true,
-        },
-        select: {
-          id: true,
-        },
+        where: { questionId: question.id, isCorrect: true },
+        select: { id: true },
       });
-
       isCorrect = correctOption?.id === selectedOptionId;
     }
 
     if (question.type === "GRID_IN" && textAnswer !== null) {
       const correctAnswer =
         question.correctTextAnswer ?? question.correctAnswer;
-
       if (correctAnswer !== null) {
         isCorrect =
           textAnswer.toLowerCase() === correctAnswer.trim().toLowerCase();
@@ -299,11 +264,23 @@ export async function PUT(request: Request, context: RouteContext) {
           questionId: question.id,
         },
       },
-      select: {
-        id: true,
-        answeredAt: true,
-      },
+      select: { id: true, answeredAt: true, timeSpent: true },
     });
+
+    const hasAnswerNow =
+      selectedOptionId !== null ||
+      (textAnswer !== null && textAnswer.trim() !== "");
+
+    const nextAnsweredAt = existingAnswer?.answeredAt
+      ? existingAnswer.answeredAt
+      : hasAnswerNow
+        ? new Date()
+        : null;
+
+    const nextTimeSpent =
+      timeSpent !== undefined
+        ? Math.max(existingAnswer?.timeSpent ?? 0, timeSpent)
+        : undefined;
 
     const answer = await prisma.fullTestAnswer.upsert({
       where: {
@@ -315,42 +292,22 @@ export async function PUT(request: Request, context: RouteContext) {
 
       create: {
         fullTestSectionSessionId: sectionSession.id,
-
         questionId: question.id,
-
         selectedOptionId,
-
         textAnswer,
-
         isCorrect,
-
         isFlagged: isFlagged ?? false,
-
         timeSpent: timeSpent ?? 0,
-
-        answeredAt:
-          selectedOptionId !== null || textAnswer !== null ? new Date() : null,
+        answeredAt: nextAnsweredAt,
       },
 
       update: {
         selectedOptionId,
-
         textAnswer,
-
         isCorrect,
-
-        ...(isFlagged !== undefined && {
-          isFlagged,
-        }),
-
-        ...(timeSpent !== undefined && {
-          timeSpent,
-        }),
-
-        answeredAt:
-          selectedOptionId !== null || textAnswer !== null
-            ? new Date()
-            : (existingAnswer?.answeredAt ?? null),
+        ...(isFlagged !== undefined && { isFlagged }),
+        ...(nextTimeSpent !== undefined && { timeSpent: nextTimeSpent }),
+        answeredAt: nextAnsweredAt,
       },
 
       select: {
@@ -369,21 +326,12 @@ export async function PUT(request: Request, context: RouteContext) {
 
     await prisma.$transaction([
       prisma.fullTestSession.update({
-        where: {
-          id: session.id,
-        },
-        data: {
-          lastActivityAt: now,
-        },
+        where: { id: session.id },
+        data: { lastActivityAt: now },
       }),
-
       prisma.fullTestSectionSession.update({
-        where: {
-          id: sectionSession.id,
-        },
-        data: {
-          lastActivityAt: now,
-        },
+        where: { id: sectionSession.id },
+        data: { lastActivityAt: now },
       }),
     ]);
 
@@ -391,9 +339,7 @@ export async function PUT(request: Request, context: RouteContext) {
       {
         success: true,
         message: "Answer saved successfully",
-        data: {
-          answer,
-        },
+        data: { answer },
       },
       { status: 200 },
     );
@@ -404,10 +350,7 @@ export async function PUT(request: Request, context: RouteContext) {
     );
 
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to save answer",
-      },
+      { success: false, message: "Failed to save answer" },
       { status: 500 },
     );
   }

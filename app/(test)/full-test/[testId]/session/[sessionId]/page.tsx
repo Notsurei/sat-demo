@@ -3,22 +3,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { Button, Modal, Spinner, toast } from "@heroui/react";
+import { Button, toast } from "@heroui/react";
 
-import FullTestHeader from "../../../components/FullTestHeader";
-import FullTestMain from "../../../components/FullTestBody";
-import FullTestFooter from "../../../components/FullTestFooter";
+import FullTestHeader from "@/app/components/test-page/TestHeader";
+import FullTestMain from "@/app/components/test-page/TestBody";
+import FullTestFooter from "@/app/components/test-page/TestFooter";
+import ConfirmModal from "@/app/components/test-page/confirm-modal";
+import TestToolModals from "@/app/components/test-page/test-tools-modal";
+import {
+  TestLoadingState,
+  TestErrorState,
+} from "@/app/components/test-page/test-state-display";
 
 import { useFullTestStore } from "@/zustand/full-test-store";
 import { useFullTestTimerStore } from "@/zustand/full-test-timer";
-import FloatingCalculator from "@/app/components/floating-calculator/floating-calculator";
-import ReferenceSheetModal from "@/app/components/modal-button/reference-sheet-modal";
+import { useTestHeaderAdapter } from "@/config/use-test-header-adapter";
+import type { ApiOption, ConfirmConfig } from "@/types/test-page";
 
-interface ApiOption {
-  id: string;
-  label: string;
-  content: string;
-}
+const API_BASE = "/api/full-test";
 
 interface ApiQuestion {
   number: number;
@@ -44,6 +46,9 @@ interface ApiSection {
   duration: number;
   durationSeconds: number;
   variant?: string | null;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  status?: string;
   questions: ApiQuestion[];
 }
 
@@ -63,13 +68,67 @@ interface ApiSessionPayload {
   sections: ApiSection[];
 }
 
-interface ConfirmConfig {
-  title: string;
-  description?: string;
-  confirmText?: string;
-  cancelText?: string;
-  variant?: "primary" | "danger" | "warning";
-  onConfirm: () => void | Promise<void>;
+interface CompleteResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    sectionSessionId: string;
+    examSectionId: string;
+    section: {
+      id: string;
+      title: string;
+      subject: string;
+      order: number;
+      moduleNumber: number;
+    };
+    status: "COMPLETED";
+    result: {
+      totalQuestions: number;
+      answeredQuestions: number;
+      unansweredQuestions: number;
+      correctAnswers: number;
+      incorrectAnswers: number;
+      percentage: number;
+      earnedWeight: number;
+      totalWeight: number;
+      weightedPct: number;
+    };
+    adaptive: {
+      variant: "EASY" | "HARD";
+      weightedPct: number;
+      earnedWeight: number;
+      totalWeight: number;
+      correctCount: number;
+      accuracy: number;
+      filledCount: number;
+      nextSectionId: string;
+    } | null;
+    nextSection: {
+      id: string;
+      sectionSessionId?: string | null;
+      title: string;
+      subject: string;
+      order: number;
+      variant: string | null;
+    } | null;
+    nextSectionOrder: number | null;
+    breakInfo: {
+      durationSeconds: number;
+      startedAt: string;
+      endsAt: string;
+      nextSectionSessionId: string;
+      nextExamSectionId: string;
+    } | null;
+  };
+}
+
+interface BreakState {
+  endsAtMs: number;
+  durationSeconds: number;
+  nextSectionSessionId: string;
+  nextExamSectionId: string;
+  nextSectionTitle: string;
+  nextSectionOrder: number;
 }
 
 const sortSections = (sections: ApiSection[]) =>
@@ -84,7 +143,7 @@ const buildSectionsForStore = (payload: ApiSessionPayload) =>
       title: s.title,
       duration: Math.round(s.durationSeconds / 60),
       breakAfter: null,
-      variant: null,
+      variant: s.variant ?? null,
     },
     questions: s.questions.map((q) => ({
       question: {
@@ -101,9 +160,18 @@ const buildSectionsForStore = (payload: ApiSessionPayload) =>
     })),
   }));
 
+type Phase = "RW_M1" | "RW_M2" | "MATH_M1" | "MATH_M2";
+
+function phaseFromOrder(order: number): Phase {
+  if (order === 1) return "RW_M1";
+  if (order === 2) return "RW_M2";
+  if (order === 3) return "MATH_M1";
+  return "MATH_M2";
+}
+
 export default function TestTakingPage() {
   const params = useParams<{ testId: string; sessionId: string }>();
-  const { sessionId } = params ?? {};
+  const sessionId = params?.sessionId;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,10 +179,21 @@ export default function TestTakingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showReference, setShowReference] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<ConfirmConfig | null>(
+    null,
+  );
 
-  const [confirmConfig, setConfirmConfig] = useState<ConfirmConfig | null>(null);
+  const [breakState, setBreakState] = useState<BreakState | null>(null);
+  const [breakRemaining, setBreakRemaining] = useState(0);
 
   const hasAutoSubmittedRef = useRef(false);
+
+  const questionStartRef = useRef<number>(Date.now());
+  const prevQuestionIdRef = useRef<string | null>(null);
+  const questionTimeMapRef = useRef<Map<string, number>>(new Map());
+
+  // FIX #2: track pending answers
+  const pendingAnswersRef = useRef<Set<Promise<unknown>>>(new Set());
 
   const {
     modules,
@@ -129,28 +208,56 @@ export default function TestTakingPage() {
     setOptionAnswer,
     setTextAnswer,
     toggleFlagQuestion,
+    goToQuestion,
     flagQuestion,
     reset,
   } = useFullTestStore();
 
   const { remainingTime, isRunning, tick } = useFullTestTimerStore();
 
-  const askConfirm = (config: ConfirmConfig) => {
-    setConfirmConfig(config);
-  };
+  const { answeredSet, flaggedSet } = useTestHeaderAdapter({
+    answers,
+    flaggedQuestions,
+  });
 
-  const handleConfirmAction = async () => {
-    if (!confirmConfig) return;
-    const { onConfirm } = confirmConfig;
-    setConfirmConfig(null);
-    await onConfirm();
-  };
+  const askConfirm = (config: ConfirmConfig) => setConfirmConfig(config);
+
+  const currentModule = modules[currentModuleIndex];
+  const currentQuestions = currentModule?.questions ?? [];
+  const currentQuestion = currentQuestions[currentQuestionIndex];
+  const totalQuestions = currentQuestions.length;
+  const isFirstQuestion = currentQuestionIndex === 0;
+  const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+
+  const unansweredCount = currentQuestions.filter((q) => {
+    const a = answers[q.id];
+    return !a?.optionId && !a?.textAnswer?.trim();
+  }).length;
+
+  const isModuleCompleted = isLastQuestion && unansweredCount === 0;
+
+  /* Track per-question time */
+  useEffect(() => {
+    const prevId = prevQuestionIdRef.current;
+    const newId = currentQuestion?.id ?? null;
+
+    if (prevId && prevId !== newId) {
+      const elapsed = Math.floor(
+        (Date.now() - questionStartRef.current) / 1000,
+      );
+      const acc = questionTimeMapRef.current.get(prevId) ?? 0;
+      questionTimeMapRef.current.set(prevId, acc + elapsed);
+    }
+
+    questionStartRef.current = Date.now();
+    prevQuestionIdRef.current = newId;
+  }, [currentQuestion?.id]);
 
   const fetchSessionPayload = async (): Promise<ApiSessionPayload | null> => {
     if (!sessionId) return null;
     try {
       const res = await axios.get(
-        `/api/full-test/sessions/${sessionId}/result`,
+        `${API_BASE}/sessions/${sessionId}/result`,
         { withCredentials: true },
       );
       if (!res.data?.success) return null;
@@ -161,12 +268,10 @@ export default function TestTakingPage() {
   };
 
   const applyPayload = (payload: ApiSessionPayload) => {
-    const sectionsForStore = buildSectionsForStore(payload);
-
     loadFromSession({
       examId: payload.session.examId,
       title: payload.exam.title,
-      sections: sectionsForStore,
+      sections: buildSectionsForStore(payload),
     });
 
     const store = useFullTestStore.getState();
@@ -184,6 +289,7 @@ export default function TestTakingPage() {
     });
   };
 
+  /* Init */
   useEffect(() => {
     if (!sessionId) return;
     let cancelled = false;
@@ -204,6 +310,40 @@ export default function TestTakingPage() {
 
         applyPayload(payload);
 
+        if (payload.session.status === "BREAK") {
+          const sorted = sortSections(payload.sections);
+
+          const lastCompleted = sorted
+            .filter((s) => s.completedAt)
+            .sort((a, b) => b.order - a.order)[0];
+
+          const nextSection = sorted.find(
+            (s) => s.order === (lastCompleted?.order ?? 0) + 1,
+          );
+
+          if (lastCompleted?.completedAt && nextSection) {
+            const BREAK_SECONDS = 600;
+            const endsAtMs =
+              new Date(lastCompleted.completedAt).getTime() +
+              BREAK_SECONDS * 1000;
+
+            setBreakState({
+              endsAtMs,
+              durationSeconds: BREAK_SECONDS,
+              nextSectionSessionId: nextSection.id,
+              nextExamSectionId: nextSection.sectionId,
+              nextSectionTitle: nextSection.title,
+              nextSectionOrder: nextSection.order,
+            });
+            setBreakRemaining(
+              Math.max(0, Math.floor((endsAtMs - Date.now()) / 1000)),
+            );
+
+            setLoading(false);
+            return;
+          }
+        }
+
         const firstSection = sortSections(payload.sections)[0];
         if (firstSection) {
           const totalSec = firstSection.durationSeconds;
@@ -213,7 +353,7 @@ export default function TestTakingPage() {
           const remaining = Math.max(0, totalSec - elapsed);
 
           useFullTestTimerStore.setState({
-            phase: firstSection.subject === "SAT_MATH" ? "MATH_M1" : "RW_M1",
+            phase: phaseFromOrder(firstSection.order),
             remainingTime: remaining,
             initialTime: totalSec,
             isRunning: true,
@@ -236,31 +376,41 @@ export default function TestTakingPage() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
-
+  /* FIX #5: timer effect — bỏ breakState khỏi deps */
   useEffect(() => {
     if (!isRunning) return;
     const id = window.setInterval(() => tick(), 1000);
     return () => window.clearInterval(id);
   }, [isRunning, tick]);
 
-  const currentModule = modules[currentModuleIndex];
-  const currentQuestions = currentModule?.questions ?? [];
-  const currentQuestion = currentQuestions[currentQuestionIndex];
-  const totalQuestions = currentQuestions.length;
-  const isFirstQuestion = currentQuestionIndex === 0;
-  const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
-
-  const unansweredCount = currentQuestions.filter((q) => {
-    const a = answers[q.id];
-    return !a?.optionId && !a?.textAnswer?.trim();
-  }).length;
-
-  const isModuleCompleted = isLastQuestion && unansweredCount === 0;
-
-
+  /* Break countdown */
   useEffect(() => {
+    if (!breakState) return;
+
+    const tickBreak = () => {
+      const remaining = Math.max(
+        0,
+        Math.floor((breakState.endsAtMs - Date.now()) / 1000),
+      );
+      setBreakRemaining(remaining);
+
+      if (remaining === 0) {
+        void handleStartNextSection();
+      }
+    };
+
+    tickBreak();
+    const id = window.setInterval(tickBreak, 1000);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [breakState]);
+
+  /* Auto complete khi hết giờ */
+  useEffect(() => {
+    if (breakState) return;
     if (
       remainingTime === 0 &&
       !loading &&
@@ -268,11 +418,13 @@ export default function TestTakingPage() {
       !hasAutoSubmittedRef.current
     ) {
       hasAutoSubmittedRef.current = true;
-      toast.warning("Time's up!", { description: "Submitting module..." });
-      void handleSubmitCurrentSection(true);
+      toast.warning("Time's up!", { description: "Completing module..." });
+      void handleCompleteCurrentSection(true);
     }
-  }, [remainingTime, loading, modules.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remainingTime, loading, modules.length, breakState]);
 
+  /* Save answer — có track pending */
   const saveAnswerToServer = async (
     questionId: string,
     payload: {
@@ -282,19 +434,34 @@ export default function TestTakingPage() {
     },
   ) => {
     if (!sessionId) return;
-    try {
-      await axios.post(
-        `/api/full-test/sessions/${sessionId}/answers/${questionId}`,
+
+    const accumulated = questionTimeMapRef.current.get(questionId) ?? 0;
+    const elapsedThisRound =
+      questionId === currentQuestion?.id
+        ? Math.floor((Date.now() - questionStartRef.current) / 1000)
+        : 0;
+    const timeSpent = accumulated + elapsedThisRound;
+
+    const promise = axios
+      .put(
+        `${API_BASE}/sessions/${sessionId}/answers/${questionId}`,
         {
           selectedOptionId: payload.optionId ?? null,
           textAnswer: payload.textAnswer ?? null,
           isFlagged: payload.isFlagged,
+          timeSpent,
         },
         { withCredentials: true },
-      );
-    } catch (err) {
-      console.warn("Save answer failed (ignored):", err);
-    }
+      )
+      .catch((err) => {
+        console.warn("Save answer failed (ignored):", err);
+      })
+      .finally(() => {
+        pendingAnswersRef.current.delete(promise);
+      });
+
+    pendingAnswersRef.current.add(promise);
+    await promise;
   };
 
   const handleOptionSelect = (optionId: string) => {
@@ -323,24 +490,178 @@ export default function TestTakingPage() {
     void saveAnswerToServer(currentQuestion.id, { isFlagged: nextFlag });
   };
 
+  const flushCurrentTextAnswer = async () => {
+    if (!currentQuestion) return;
+    if (currentQuestion.type !== "GRID_IN") return;
 
-  const doSubmitSection = async () => {
-    if (!currentModule || !sessionId) return;
+    const a = answers[currentQuestion.id];
+    const text = a?.textAnswer?.trim();
+    if (!text) return;
+
+    await saveAnswerToServer(currentQuestion.id, { textAnswer: text });
+  };
+
+  const handleNext = () => {
+    void flushCurrentTextAnswer();
+    nextQuestion();
+  };
+
+  const handlePrev = () => {
+    void flushCurrentTextAnswer();
+    prevQuestion();
+  };
+  const handleStartNextSection = async () => {
+    if (!breakState || !sessionId || isSubmitting) return;
 
     try {
       setIsSubmitting(true);
+      await flushCurrentTextAnswer();
 
-      const res = await axios.post(
-        `/api/full-test/sessions/sections/${currentModule.id}/complete`,
+      if (pendingAnswersRef.current.size > 0) {
+        await Promise.allSettled(Array.from(pendingAnswersRef.current));
+      }
+
+      await axios.post(
+        `${API_BASE}/sessions/sections/${breakState.nextSectionSessionId}/start`,
         {},
         { withCredentials: true },
       );
 
-      const nextExamSectionId: string | undefined =
-        res.data?.data?.nextSection?.id;
+      const payload = await fetchSessionPayload();
+      if (!payload) throw new Error("Failed to refresh session");
 
-      if (!nextExamSectionId) {
-        await handleSubmitTest();
+      applyPayload(payload);
+
+      const sorted = sortSections(payload.sections);
+      const idx = sorted.findIndex(
+        (s) => s.sectionId === breakState.nextExamSectionId,
+      );
+      if (idx < 0) throw new Error("Next section not found");
+
+      console.log("[start-next] payload", {
+        idx,
+        titles: sorted.map((s) => `${s.order}:${s.title}`),
+        targetSectionId: breakState.nextExamSectionId,
+      });
+
+      /* FIX #3: SET MODULE + QUESTION TRƯỚC */
+      setCurrentModule(idx);
+      goToQuestion(0);
+
+      questionTimeMapRef.current.clear();
+      prevQuestionIdRef.current = null;
+      questionStartRef.current = Date.now();
+      hasAutoSubmittedRef.current = false;
+
+      const totalSec = sorted[idx].durationSeconds;
+      useFullTestTimerStore.setState({
+        phase: phaseFromOrder(sorted[idx].order),
+        remainingTime: totalSec,
+        initialTime: totalSec,
+        isRunning: true,
+        isPaused: false,
+      });
+
+      const s = useFullTestStore.getState();
+      console.log("[start-next] store state", {
+        currentModuleIndex: s.currentModuleIndex,
+        currentQuestionIndex: s.currentQuestionIndex,
+        expectedIdx: idx,
+      });
+
+      /* FIX #3: clear break CUỐI CÙNG */
+      setBreakState(null);
+      setBreakRemaining(0);
+
+      toast.success(`Starting ${sorted[idx].title}`, {
+        description: "Good luck!",
+      });
+    } catch (err: any) {
+      console.error("Start next section failed:", err);
+      toast.danger("Failed to start next section", {
+        description:
+          err.response?.data?.message || err.message || "Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const doCompleteSection = async () => {
+    if (!currentModule || !sessionId) return;
+
+    await flushCurrentTextAnswer();
+
+    /* FIX #2: await pending answers trước khi complete */
+    if (pendingAnswersRef.current.size > 0) {
+      console.log(
+        `[complete] Chờ ${pendingAnswersRef.current.size} answer request...`,
+      );
+      await Promise.allSettled(Array.from(pendingAnswersRef.current));
+      console.log("[complete] Flush answers xong");
+    }
+
+    /* Flush time câu đang xem */
+    if (currentQuestion?.id) {
+      const elapsed = Math.floor(
+        (Date.now() - questionStartRef.current) / 1000,
+      );
+      const acc = questionTimeMapRef.current.get(currentQuestion.id) ?? 0;
+      questionTimeMapRef.current.set(currentQuestion.id, acc + elapsed);
+      questionStartRef.current = Date.now();
+    }
+
+    const timerStore = useFullTestTimerStore.getState();
+    const wasRunning = timerStore.isRunning;
+    const sectionTimeSpent = Math.max(
+      0,
+      timerStore.initialTime - timerStore.remainingTime,
+    );
+
+    try {
+      setIsSubmitting(true);
+      if (wasRunning) timerStore.pause();
+
+      const res = await axios.post<CompleteResponse>(
+        `${API_BASE}/sessions/sections/${currentModule.id}/complete`,
+        { timeSpent: sectionTimeSpent },
+        { withCredentials: true },
+      );
+
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Complete failed");
+      }
+
+      const { nextSection, adaptive, result, breakInfo } = res.data.data;
+
+      if (!nextSection) {
+        reset();
+        toast.success("Full test completed!", {
+          description: result
+            ? `Correct ${result.correctAnswers}/${result.totalQuestions} (${result.percentage}%)`
+            : undefined,
+        });
+        window.location.href = `/pages/full-test-report/${sessionId}`;
+        return;
+      }
+
+      if (breakInfo) {
+        setBreakState({
+          endsAtMs: new Date(breakInfo.endsAt).getTime(),
+          durationSeconds: breakInfo.durationSeconds,
+          nextSectionSessionId: breakInfo.nextSectionSessionId,
+          nextExamSectionId: breakInfo.nextExamSectionId,
+          nextSectionTitle: nextSection.title,
+          nextSectionOrder: nextSection.order,
+        });
+        setBreakRemaining(
+          Math.max(
+            0,
+            Math.floor(
+              (new Date(breakInfo.endsAt).getTime() - Date.now()) / 1000,
+            ),
+          ),
+        );
         return;
       }
 
@@ -351,81 +672,69 @@ export default function TestTakingPage() {
 
       const sortedSections = sortSections(payload.sections);
       const nextIdx = sortedSections.findIndex(
-        (s) => s.sectionId === nextExamSectionId,
+        (s) => s.sectionId === nextSection.id,
       );
+      if (nextIdx < 0) throw new Error("Next section not found in payload");
 
-      if (nextIdx < 0) throw new Error("Next section index not found");
-
-      const nextSection = sortedSections[nextIdx];
+      const nextFromPayload = sortedSections[nextIdx];
 
       setCurrentModule(nextIdx);
+      goToQuestion(0);
       hasAutoSubmittedRef.current = false;
 
-      const totalSec = nextSection.durationSeconds;
+      questionTimeMapRef.current.clear();
+      prevQuestionIdRef.current = null;
+      questionStartRef.current = Date.now();
+
+      const totalSec = nextFromPayload.durationSeconds;
       useFullTestTimerStore.setState({
-        phase: nextSection.subject === "SAT_MATH" ? "MATH_M1" : "RW_M2",
+        phase: phaseFromOrder(nextFromPayload.order),
         remainingTime: totalSec,
         initialTime: totalSec,
         isRunning: true,
         isPaused: false,
       });
 
-      toast.success(`Starting ${nextSection.title}`, {
-        description: nextSection.variant
-          ? `Adaptive path: ${nextSection.variant}`
+      toast.success(`Starting ${nextFromPayload.title}`, {
+        description: adaptive
+          ? `Adaptive ${adaptive.variant} — ${(
+            adaptive.weightedPct * 100
+          ).toFixed(0)}% weighted (${adaptive.filledCount} questions)`
           : undefined,
       });
     } catch (err: any) {
       console.error("Section complete failed:", err);
-      toast.danger("Failed to submit section", {
+      toast.danger("Failed to complete section", {
         description:
           err.response?.data?.message || err.message || "Please try again.",
       });
+      if (wasRunning) timerStore.resume();
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSubmitCurrentSection = async (auto = false) => {
+  const handleCompleteCurrentSection = async (auto = false) => {
     if (!currentModule || !sessionId) return;
 
     if (auto) {
-      await doSubmitSection();
+      await doCompleteSection();
       return;
     }
 
     const hasUnanswered = unansweredCount > 0;
 
     askConfirm({
-      title: `Submit "${currentModule.title}"?`,
+      title: `Complete "${currentModule.title}"?`,
       description: hasUnanswered
         ? `You still have ${unansweredCount} unanswered question${unansweredCount > 1 ? "s" : ""
-        }. You won't be able to change answers after submitting.`
-        : "You've answered all questions. You won't be able to change answers after submitting.",
-      confirmText: "Submit Module",
+        }. You won't be able to change answers after completing.`
+        : "You've answered all questions. You won't be able to change answers after completing.",
+      confirmText: "Complete Module",
       cancelText: "Keep Working",
       variant: hasUnanswered ? "danger" : "primary",
-      onConfirm: doSubmitSection,
+      onConfirm: doCompleteSection,
     });
-  };
-
-  const handleSubmitTest = async () => {
-    if (!sessionId) return;
-    try {
-      setIsSubmitting(true);
-      await axios.post(
-        `/api/full-test/sessions/${sessionId}/submit`,
-        {},
-        { withCredentials: true },
-      );
-      toast.success("Full test submitted!");
-      window.location.href = `/pages/full-test-report/${sessionId}`;
-    } catch (err: any) {
-      toast.danger("Submit failed", {
-        description: err.response?.data?.message || "Please try again.",
-      });
-      setIsSubmitting(false);
-    }
   };
 
   const handleExit = () => {
@@ -443,32 +752,21 @@ export default function TestTakingPage() {
     });
   };
 
-
-  if (loading) {
+  if (breakState) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-default-50">
-        <Spinner size="lg" />
-        <span className="ml-4 text-default-500">Loading test...</span>
-      </div>
+      <BreakScreen
+        breakState={breakState}
+        breakRemaining={breakRemaining}
+        isSubmitting={isSubmitting}
+        onSkip={handleStartNextSection}
+      />
     );
   }
 
+  if (loading) return <TestLoadingState label="Loading test..." />;
+
   if (error || !currentModule || !currentQuestion) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-default-50 p-6">
-        <div className="text-center">
-          <p className="mb-4 text-lg font-semibold text-danger">
-            ❌ {error || "Session not found"}
-          </p>
-          <button
-            onClick={() => (window.location.href = "/pages/home")}
-            className="rounded-lg bg-primary px-4 py-2 text-white"
-          >
-            Go Home
-          </button>
-        </div>
-      </div>
-    );
+    return <TestErrorState message={error || "Session not found"} />;
   }
 
   return (
@@ -476,13 +774,27 @@ export default function TestTakingPage() {
       <FullTestHeader
         title={currentModule.title}
         totalQuestions={totalQuestions}
+        remainingTime={remainingTime}
+        currentQuestionIndex={currentQuestionIndex}
+        currentModule={{
+          moduleNumber: currentModule.moduleNumber,
+          variant: currentModule.variant,
+          subject: currentModule.subject,
+        }}
+        currentQuestions={currentQuestions}
+        answeredSet={answeredSet}
+        flaggedSet={flaggedSet}
+        goToQuestion={goToQuestion}
         onHome={handleExit}
         onAnnotate={() => setShowAnnotator((v) => !v)}
         onCalculator={() => setShowCalculator((v) => !v)}
         onReference={() => setShowReference((v) => !v)}
+        exitTitle="Exit full test?"
+        exitDescription="Your progress will be saved, but the test won't be submitted. You can resume later from your dashboard."
       />
 
       <FullTestMain
+        questionId={currentQuestion.id}
         passageContent={currentQuestion.passage ?? null}
         showAnnotator={showAnnotator}
         onToggleAnnotator={() => setShowAnnotator((v) => !v)}
@@ -491,11 +803,12 @@ export default function TestTakingPage() {
         prompt={currentQuestion.prompt}
         type={currentQuestion.type === "GRID_IN" ? "GRID_IN" : "MCQ"}
         options={currentQuestion.options}
-        selectedOption={answers[currentQuestion.id]?.optionId}
-        textAnswer={answers[currentQuestion.id]?.textAnswer}
+        selectedOption={answers[currentQuestion.id]?.optionId ?? undefined}
+        textAnswer={answers[currentQuestion.id]?.textAnswer ?? undefined}
         flagged={flaggedQuestions[currentQuestion.id] ?? false}
         onOptionSelect={handleOptionSelect}
         onTextChange={handleTextChange}
+        onTextBlur={handleTextBlur}
         onToggleFlag={handleToggleFlag}
         disabled={isSubmitting}
       />
@@ -503,7 +816,7 @@ export default function TestTakingPage() {
       <FullTestFooter
         onPrev={prevQuestion}
         onNext={nextQuestion}
-        onSubmitSection={() => handleSubmitCurrentSection(false)}
+        onSubmitSection={() => handleCompleteCurrentSection(false)}
         isPrevDisabled={isFirstQuestion}
         isNextDisabled={isLastQuestion}
         isModuleCompleted={isModuleCompleted}
@@ -519,57 +832,120 @@ export default function TestTakingPage() {
         tabIndex={-1}
       />
 
-      {showCalculator && (
-        <FloatingCalculator onClose={() => setShowCalculator(false)} />
-      )}
-
-      <ReferenceSheetModal
-        isOpen={showReference}
-        onOpenChange={setShowReference}
+      <TestToolModals
+        showCalculator={showCalculator}
+        onCalculatorClose={() => setShowCalculator(false)}
+        showReference={showReference}
+        onReferenceChange={setShowReference}
       />
 
-      <Modal
-        isOpen={confirmConfig !== null}
-        onOpenChange={(open) => {
-          if (!open) setConfirmConfig(null);
-        }}
-      >
-        <Modal.Backdrop>
-          <Modal.Container>
-            <Modal.Dialog className="w-[calc(100vw-2rem)] sm:max-w-md">
-              <Modal.Header className="border-b border-default-200">
-                <Modal.Heading className="text-lg font-semibold">
-                  {confirmConfig?.title}
-                </Modal.Heading>
-              </Modal.Header>
-
-              <Modal.Body className="py-4">
-                <p className="text-sm leading-6 text-default-600">
-                  {confirmConfig?.description}
-                </p>
-              </Modal.Body>
-
-              <Modal.Footer className="border-t border-default-200">
-                <div className="flex w-full justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onPress={() => setConfirmConfig(null)}
-                  >
-                    {confirmConfig?.cancelText ?? "Cancel"}
-                  </Button>
-
-                  <Button
-                    variant="primary"
-                    onPress={handleConfirmAction}
-                  >
-                    {confirmConfig?.confirmText ?? "Confirm"}
-                  </Button>
-                </div>
-              </Modal.Footer>
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      <ConfirmModal
+        config={confirmConfig}
+        onClose={() => setConfirmConfig(null)}
+      />
     </div>
+  );
+}
+
+function BreakScreen({
+  breakState,
+  breakRemaining,
+  isSubmitting,
+  onSkip,
+}: {
+  breakState: BreakState;
+  breakRemaining: number;
+  isSubmitting: boolean;
+  onSkip: () => void;
+}) {
+  const frozenRef = React.useRef(breakRemaining);
+
+  React.useEffect(() => {
+    if (!isSubmitting) {
+      frozenRef.current = breakRemaining;
+    }
+  }, [breakRemaining, isSubmitting]);
+
+  const displayRemaining = isSubmitting ? frozenRef.current : breakRemaining;
+
+  const isAutoStarting = breakRemaining <= 0 && !isSubmitting;
+  const busy = isSubmitting || isAutoStarting;
+
+  const formatCountdown = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const progress =
+    breakState.durationSeconds > 0
+      ? Math.min(
+        100,
+        Math.max(
+          0,
+          ((breakState.durationSeconds - displayRemaining) /
+            breakState.durationSeconds) *
+          100,
+        ),
+      )
+      : 0;
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-default-50 px-5 py-10 dark:bg-default-900">
+      <div className="w-full max-w-sm text-center">
+        <div className="mb-6 text-5xl">{busy ? "⏳" : "☕"}</div>
+
+        <h1 className="mb-2 text-2xl font-bold text-foreground">
+          {busy ? "Starting next section…" : "Break time"}
+        </h1>
+
+        <p className="mb-8 text-sm text-default-500">
+          {busy
+            ? "Please wait a moment."
+            : "Relax before starting the next section."}
+        </p>
+
+        <div className="mb-2 font-mono text-7xl font-bold tabular-nums text-foreground">
+          {formatCountdown(displayRemaining)}
+        </div>
+
+        <div className="mb-8 h-1.5 overflow-hidden rounded-full bg-default-200 dark:bg-default-700">
+          <div
+            className={`h-full rounded-full bg-primary ${busy ? "" : "transition-all duration-1000 ease-linear"
+              }`}
+            style={{ width: `${busy ? 100 : progress}%` }}
+          />
+        </div>
+
+        {!busy && (
+          <p className="mb-6 text-sm text-default-500">
+            Next: <span className="font-semibold text-foreground">{breakState.nextSectionTitle}</span>
+          </p>
+        )}
+
+        {/* Skip button */}
+        <Button
+          onPress={onSkip}
+          isDisabled={busy}
+          className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-white disabled:opacity-60"
+          size="lg"
+        >
+          {busy ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Starting…
+            </span>
+          ) : (
+            "Skip break"
+          )}
+        </Button>
+
+        {!busy && (
+          <p className="mt-4 text-xs text-default-400">
+            Starts automatically when timer ends
+          </p>
+        )}
+      </div>
+    </main>
   );
 }

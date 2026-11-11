@@ -155,10 +155,13 @@ export default function PracticeMain({
   };
 
   const renderInput = () => {
-    if (type === "MCQ" && options) {
+    // ✅ Ưu tiên: có options thì render MCQ bất kể field type nói gì
+    const hasOptions = Array.isArray(options) && options.length > 0;
+
+    if (hasOptions) {
       return (
         <div className="space-y-3">
-          {options.map((opt) => {
+          {options!.map((opt) => {
             const isSelected = selectedOption === opt.id;
             const isStruck = struckOptions.has(opt.id);
 
@@ -246,14 +249,17 @@ export default function PracticeMain({
                   <Button
                     size="sm"
                     variant={isStruck ? "danger" : "outline"}
-                    // isDisabled={disabled}
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleStrikeThrough(opt.id);
                     }}
                     className="min-w-[60px]"
                   >
-                    {isStruck ? <Xmark /> : <span className="text-xs line-through">ABC</span>}
+                    {isStruck ? (
+                      <Xmark />
+                    ) : (
+                      <span className="text-xs line-through">ABC</span>
+                    )}
                   </Button>
 
                   <div
@@ -279,7 +285,12 @@ export default function PracticeMain({
       );
     }
 
-    if (type === "GRID_IN") {
+    // ✅ Không có options → phân biệt GRID_IN vs text
+    const normalizedType = String(type ?? "")
+      .toUpperCase()
+      .replace(/-/g, "_");
+
+    if (normalizedType === "GRID_IN") {
       return (
         <div className="max-w-sm space-y-2">
           <Input
@@ -303,6 +314,7 @@ export default function PracticeMain({
       />
     );
   };
+
   return (
     <div className="flex flex-col lg:flex-row flex-1 overflow-hidden max-h-[calc(100vh-100px)]">
       <div
@@ -342,7 +354,7 @@ export default function PracticeMain({
 
         <div className="mb-4 text-lg font-semibold text-foreground">
           <MathText text={prompt} />
-        </div> 
+        </div>
 
         <div className="mb-4">{renderInput()}</div>
 
@@ -367,8 +379,8 @@ export default function PracticeMain({
         {showFeedback && (
           <div
             className={`mb-4 rounded-lg border p-4 ${isCorrect
-              ? "border-success bg-success-100 dark:border-success-600 dark:bg-success-900/30"
-              : "border-danger bg-danger-100 dark:border-danger-600 dark:bg-danger-900/30"
+                ? "border-success bg-success-100 dark:border-success-600 dark:bg-success-900/30"
+                : "border-danger bg-danger-100 dark:border-danger-600 dark:bg-danger-900/30"
               }`}
           >
             <div className="flex items-start justify-between">
@@ -384,7 +396,9 @@ export default function PracticeMain({
                 )}
               </p>
               {timeSpent !== undefined && (
-                <span className="text-sm text-default-500">⏱ {timeSpent}s</span>
+                <span className="text-sm text-default-500">
+                  ⏱ {timeSpent}s
+                </span>
               )}
             </div>
 

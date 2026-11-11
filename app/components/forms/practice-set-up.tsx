@@ -65,9 +65,13 @@ type CategoryOption = {
   label: string;
 };
 
+interface PracticeSetUpProps {
+  onLoadingChange?: (loading: boolean) => void;
+}
+
 type PracticeCategories = Record<string, string[]>;
 
-export default function PracticeSetUp() {
+export default function PracticeSetUp({ onLoadingChange }: PracticeSetUpProps) {
   const router = useRouter();
   const t = useTranslations("practiceSetup");
 
@@ -88,6 +92,10 @@ export default function PracticeSetUp() {
   const [categoriesLoading, setCategoriesLoading] = React.useState(false);
 
   const userPlan = user?.subscriptionPlan ?? "FREE";
+
+  React.useEffect(() => {
+    onLoadingChange?.(loading);
+  }, [loading, onLoadingChange]);
 
   React.useEffect(() => {
     if (!subject) {

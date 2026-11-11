@@ -23,7 +23,8 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
   const t = useTranslations("auth.signIn");
   const tErr = useTranslations("auth.errors");
 
-  const { login, isAuthenticated, isLoading, setLoading } = useAuthStore();
+  const { login, isAuthenticated } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const [input, setInput] = React.useState({
     email: "",
@@ -38,10 +39,10 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
 
   const sendRequest = async () => {
     try {
-      setLoading(true);
       const res = await axios.post("/api/auth/signin", input, {
         withCredentials: true,
       });
+
       return res.data;
     } catch (err: unknown) {
       const message =
@@ -55,8 +56,6 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
       }));
 
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -84,19 +83,32 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isValid = validate();
-    if (!isValid) return;
+    if (!validate()) return;
 
-    const data = await sendRequest();
+    setIsSubmitting(true);
 
-    if (data && data.user) {
-      login(data.user);
+    try {
+      const data = await sendRequest();
 
-      if (onSuccess) {
-        onSuccess();
+      if (!data?.success || !data?.user) {
+        return;
       }
 
+      if (!data.user.isVerified) {
+        setErrors((prev) => ({
+          ...prev,
+          general:
+            tErr("emailNotVerified")
+        }));
+
+        return;
+      }
+      login(data.user);
+
+      onSuccess?.();
       router.replace("/pages/home");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -124,13 +136,17 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
         className="flex flex-col gap-1"
       >
         <Label className="text-foreground">{t("emailLabel")}</Label>
+
         <Input
           value={input.email}
           onChange={(e) => handleChange("email", e.target.value)}
           placeholder={t("emailPlaceholder")}
           className="h-10 rounded-xl border border-default-200 bg-default-100 text-foreground"
         />
-        {errors.email && <FieldError>{errors.email}</FieldError>}
+
+        {errors.email && (
+          <FieldError>{errors.email}</FieldError>
+        )}
       </TextField>
 
       <TextField
@@ -139,6 +155,7 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
         className="flex flex-col gap-1"
       >
         <Label className="text-foreground">{t("passwordLabel")}</Label>
+
         <Input
           type="password"
           value={input.password}
@@ -146,11 +163,16 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
           onChange={(e) => handleChange("password", e.target.value)}
           className="h-10 rounded-xl border border-default-200 bg-default-100 text-foreground"
         />
-        {errors.password && <FieldError>{errors.password}</FieldError>}
+
+        {errors.password && (
+          <FieldError>{errors.password}</FieldError>
+        )}
       </TextField>
 
       {errors.general && (
-        <p className="text-center text-sm text-danger">{errors.general}</p>
+        <p className="text-center text-sm text-danger">
+          {errors.general}
+        </p>
       )}
 
       <div className="mt-2 flex flex-col items-center gap-3">
@@ -158,9 +180,13 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
           type="submit"
           variant="primary"
           className="h-10 w-full max-w-[320px] rounded-2xl font-semibold text-white"
-          isDisabled={isLoading}
+          isDisabled={isSubmitting}
         >
-          {isLoading ? <Spinner color="current" /> : t("signInButton")}
+          {isSubmitting ? (
+            <Spinner color="current" />
+          ) : (
+            t("signInButton")
+          )}
         </Button>
       </div>
 
@@ -174,6 +200,7 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
             {t("noAccountPrompt")}
           </button>
         </p>
+
         <p>
           <button
             type="button"
@@ -181,6 +208,16 @@ export default function SignIn({ switchMode, onSuccess }: Props) {
             className="cursor-pointer text-default-500 transition-colors hover:text-default-700 hover:text-blue-300"
           >
             {t("forgotPasswordPrompt")}
+          </button>
+        </p>
+
+        <p>
+          <button
+            type="button"
+            onClick={() => switchMode?.("resend-verification")}
+            className="cursor-pointer text-default-500 transition-colors hover:text-default-700 hover:text-blue-300"
+          >
+            {t("noVerified")}
           </button>
         </p>
       </div>

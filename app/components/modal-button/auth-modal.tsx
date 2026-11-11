@@ -6,12 +6,19 @@ import { Modal, Button } from "@heroui/react";
 import SignIn from "../forms/sign-in";
 import SignUp from "../forms/sign-up";
 import MailForgotPassword from "../forms/email-forgot-password";
+import ResendVerification from "../forms/resend-verification";
+import {useTranslations} from "next-intl";
 
-export type AuthMode = "signin" | "signup" | "email-forgot-pass";
+export type AuthMode =
+  | "signin"
+  | "signup"
+  | "email-forgot-pass"
+  | "resend-verification";
 
 export default function AuthModal() {
   const [mode, setMode] = React.useState<AuthMode>("signin");
   const [isOpen, setIsOpen] = React.useState(false);
+  const t = useTranslations("auth");
 
   const closeModal = () => {
     setIsOpen(false);
@@ -24,7 +31,7 @@ export default function AuthModal() {
         variant="secondary"
         onPress={() => setIsOpen(true)}
       >
-        Sign In
+        {t("signIn.SignIn")}
       </Button>
 
       <Modal isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -38,6 +45,8 @@ export default function AuthModal() {
                   {mode === "signin" && "Welcome"}
                   {mode === "signup" && "Create account"}
                   {mode === "email-forgot-pass" && "Reset password"}
+                  {mode === "resend-verification" &&
+                    "Verify your email"}
                 </Modal.Heading>
               </Modal.Header>
 
@@ -59,6 +68,13 @@ export default function AuthModal() {
 
                 {mode === "email-forgot-pass" && (
                   <MailForgotPassword
+                    switchMode={setMode}
+                    showFooter
+                  />
+                )}
+
+                {mode === "resend-verification" && (
+                  <ResendVerification
                     switchMode={setMode}
                     showFooter
                   />

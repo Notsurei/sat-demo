@@ -13,19 +13,31 @@ import FullTestHistoryList from "./components/full-test-history-list";
 interface FullTest {
   id: string;
   examId: string;
-  examTitle: string;
+  exam?: { id?: string; title?: string };
+  examTitle?: string;
+
   status: "IN_PROGRESS" | "BREAK" | "COMPLETED" | "EXPIRED";
-  currentSectionOrder: number;
-  totalSections: number;
-  totalQuestions: number;
-  totalCorrect: number;
-  totalWrong: number;
-  totalSkipped: number;
+  currentSectionOrder?: number;
+  totalSections?: number;
+
+  totalQuestions?: number;
+  answered?: number;
+  unanswered?: number;
+  correct?: number;
+  incorrect?: number;
+  accuracy?: number;
+
+  totalCorrect?: number;
+  totalWrong?: number;
+  totalSkipped?: number;
+  answeredQuestions?: number;
+
   rawScore?: number | null;
   scaledScore?: number | null;
   totalTimeSpent?: number | null;
   startedAt: string;
   completedAt?: string | null;
+  sections?: any[];
 }
 
 interface ApiResponse {
@@ -91,24 +103,34 @@ export default function FullTestHistoryPage() {
     (test) => test.status === "COMPLETED",
   );
 
-  const totalQuestions = completedTests.reduce(
-    (sum, test) => sum + test.totalQuestions,
-    0,
-  );
-
-  const totalCorrect = completedTests.reduce(
-    (sum, test) => sum + test.totalCorrect,
-    0,
-  );
+  const perSessionAccuracies = completedTests
+    .map((test) => {
+      const correct = Number(
+        test.correct ?? test.totalCorrect ?? 0,
+      );
+      const wrong = Number(
+        test.incorrect ?? test.totalWrong ?? 0,
+      );
+      const answered = Number(
+        test.answered ?? test.answeredQuestions ?? correct + wrong,
+      );
+      if (answered <= 0) return null;
+      return (correct / answered) * 100;
+    })
+    .filter((v): v is number => v !== null);
 
   const averageAccuracy =
-    totalQuestions > 0
-      ? Math.round((totalCorrect / totalQuestions) * 100)
+    perSessionAccuracies.length > 0
+      ? Math.round(
+        perSessionAccuracies.reduce((s, v) => s + v, 0) /
+        perSessionAccuracies.length,
+      )
       : 0;
 
-  const scoredTests = completedTests.filter(
-    (test) => test.scaledScore !== null && test.scaledScore !== undefined,
-  );
+  const scoredTests = completedTests.filter((test) => {
+    const s = test.scaledScore;
+    return typeof s === "number" && Number.isFinite(s) && s > 0;
+  });
 
   const averageScaledScore =
     scoredTests.length > 0
@@ -137,7 +159,6 @@ export default function FullTestHistoryPage() {
           </p>
         </section>
 
-        {/* Summary */}
         <FullTestHistorySummary
           totalTests={history.length}
           completedTests={completedTests.length}
@@ -157,7 +178,7 @@ export default function FullTestHistoryPage() {
           </div>
 
           <FullTestHistoryList
-            tests={history}
+            tests={history as any}
             onAction={(test) => {
               if (
                 test.status === "IN_PROGRESS" ||

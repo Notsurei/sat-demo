@@ -8,32 +8,56 @@ datasource db {
 }
 
 model User {
-  id                String           @id @default(cuid())
-  firstName         String
-  lastName          String
-  email             String           @unique
-  passwordHash      String
-  role              UserRole         @default(USER)
-  subscriptionPlan  SubscriptionPlan @default(FREE)
-  isVerified        Boolean          @default(false)
-  trialExpiresAt    DateTime?
-  nextBillingDate   DateTime?
-  resetToken        String?
-  resetTokenExpiry  DateTime?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  verifyToken       String?
-  verifyTokenExpiry DateTime?
-  phone             String           @default("")
-  gender            Genders          @default(MALE)
-  stripeCustomerId  String?          @unique
+  id                 String              @id @default(cuid())
+  firstName          String
+  lastName           String
+  email              String              @unique
+  passwordHash       String
+  role               UserRole            @default(USER)
+  subscriptionPlan   SubscriptionPlan    @default(FREE)
+  isVerified         Boolean             @default(false)
+  trialExpiresAt     DateTime?
+  nextBillingDate    DateTime?
+  resetToken         String?
+  resetTokenExpiry   DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  verifyToken        String?
+  verifyTokenExpiry  DateTime?
+  phone              String              @default("")
+  gender             Genders             @default(MALE)
+  stripeCustomerId   String?             @unique
+  subscriptionStatus String?             @default("INACTIVE")
+  subscriptionId     String?             @unique
+  subscriptionEndsAt DateTime?
+  dodoCustomerId     String?             @unique
+  attempts           Attempt[]
+  fullTestSessions   FullTestSession[]
+  payments           Payment[]
+  practices          Practice[]
+  smartMemories      SmartMemory[]
+  subscriptions      Subscription[]
+  mathModuleSessions MathModuleSession[]
+  rwModuleSessions   RwModuleSession[]
+  sessions           UserSession[]
+}
 
-  attempts         Attempt[]
-  fullTestSessions FullTestSession[]
-  payments         Payment[]
-  practices        Practice[]
-  smartMemories    SmartMemory[]
-  subscriptions    Subscription[]
+model UserSession {
+  id            String    @id @default(cuid())
+  userId        String
+  deviceName    String?
+  userAgent     String?
+  ipAddress     String?
+  createdAt     DateTime  @default(now())
+  lastSeenAt    DateTime  @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  revokedReason String?
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
 }
 
 model QuestionBank {
@@ -85,37 +109,39 @@ model QuestionBankModule {
 }
 
 model Exam {
-  id             String            @id @default(cuid())
-  title          String
-  description    String?
-  version        String?
-  duration       Int
-  totalQuestions Int
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  Attempt        Attempt[]
-  sections       ExamSection[]
-  testSessions   FullTestSession[]
-  Section        Section[]
+  id                 String              @id @default(cuid())
+  title              String
+  description        String?
+  version            String?
+  duration           Int
+  totalQuestions     Int
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  Attempt            Attempt[]
+  sections           ExamSection[]
+  testSessions       FullTestSession[]
+  Section            Section[]
+  mathModuleSessions MathModuleSession[]
+  rwModuleSessions   RwModuleSession[]
 }
 
 model ExamSection {
-  id           String  @id @default(cuid())
-  examId       String
-  subject      Subject
-  title        String
-  order        Int
-  duration     Int
-  breakAfter   Int?
-  moduleNumber Int     @default(1)
-  variant      String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  questions ExamQuestion[]
-  exam      Exam                     @relation(fields: [examId], references: [id], onDelete: Cascade)
-  sessions  FullTestSectionSession[]
+  id                        String                     @id @default(cuid())
+  examId                    String
+  subject                   Subject
+  title                     String
+  order                     Int
+  duration                  Int
+  breakAfter                Int?
+  moduleNumber              Int                        @default(1)
+  variant                   String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  questions                 ExamQuestion[]
+  exam                      Exam                       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  sessions                  FullTestSectionSession[]
+  mathModuleSectionSessions MathModuleSectionSession[]
+  rwModuleSectionSessions   RwModuleSectionSession[]
 
   @@unique([examId, order])
   @@index([examId])
@@ -228,31 +254,31 @@ model QuestionGroup {
 }
 
 model Question {
-  id                String       @id @default(cuid())
-  externalId        String?      @unique
+  id                String              @id @default(cuid())
+  externalId        String?             @unique
   prompt            String
   domain            String?
   subtopic          String?
-  difficulty        Difficulty   @default(MEDIUM)
+  difficulty        Difficulty          @default(MEDIUM)
   type              QuestionType
   correctAnswer     String?
   correctTextAnswer String?
   explanation       String?
   order             Int
   bankPurpose       BankPurpose?
-
-  bankModuleId String?
-  groupId      String?
-  passage      String?
-
-  ExamQuestion    ExamQuestion[]
-  FullTestAnswer  FullTestAnswer[]
-  options         Option[]
-  practiceAnswers PracticeAnswer[]
-  bankModule      QuestionBankModule? @relation(fields: [bankModuleId], references: [id])
-  group           QuestionGroup?      @relation(fields: [groupId], references: [id])
-  smartMemories   SmartMemory[]
-  answers         UserAnswer[]
+  bankModuleId      String?
+  groupId           String?
+  passage           String?
+  ExamQuestion      ExamQuestion[]
+  FullTestAnswer    FullTestAnswer[]
+  options           Option[]
+  practiceAnswers   PracticeAnswer[]
+  bankModule        QuestionBankModule? @relation(fields: [bankModuleId], references: [id])
+  group             QuestionGroup?      @relation(fields: [groupId], references: [id])
+  smartMemories     SmartMemory[]
+  answers           UserAnswer[]
+  mathModuleAnswers MathModuleAnswer[]
+  rwModuleAnswers   RwModuleAnswer[]
 
   @@index([bankModuleId, order])
   @@index([domain, subtopic])
@@ -262,15 +288,17 @@ model Question {
 }
 
 model Option {
-  id              String           @id @default(cuid())
-  label           String
-  content         String
-  isCorrect       Boolean          @default(false)
-  questionId      String
-  FullTestAnswer  FullTestAnswer[]
-  question        Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  practiceAnswers PracticeAnswer[]
-  userAnswers     UserAnswer[]
+  id                String             @id @default(cuid())
+  label             String
+  content           String
+  isCorrect         Boolean            @default(false)
+  questionId        String
+  FullTestAnswer    FullTestAnswer[]
+  question          Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  practiceAnswers   PracticeAnswer[]
+  userAnswers       UserAnswer[]
+  mathModuleAnswers MathModuleAnswer[]
+  rwModuleAnswers   RwModuleAnswer[]
 }
 
 model Practice {
@@ -350,6 +378,7 @@ model Subscription {
   plan                 SubscriptionPlan
   createdAt            DateTime           @default(now())
   stripeSubscriptionId String?            @unique
+  dodoSubscriptionId   String?            @unique
   cancelAtPeriodEnd    Boolean            @default(false)
   currentPeriodEnd     DateTime?
   currentPeriodStart   DateTime?
@@ -362,30 +391,33 @@ model Subscription {
 }
 
 model Payment {
-  id                    String           @id @default(cuid())
-  userId                String
-  amount                Int
-  currency              String           @default("USD")
-  status                PaymentStatus    @default(PENDING)
-  plan                  SubscriptionPlan
-  metadata              Json?
-  paidAt                DateTime?
-  createdAt             DateTime         @default(now())
-  cardBrand             String?
-  cardLast4             String?
-  receiptUrl            String?
-  stripeChargeId        String?          @unique
-  stripeInvoiceId       String?          @unique
-  stripePaymentIntentId String?          @unique
-  subscriptionId        String?
-  updatedAt             DateTime         @updatedAt
-  subscription          Subscription?    @relation(fields: [subscriptionId], references: [id])
-  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String           @id @default(cuid())
+  userId             String
+  amount             Int
+  currency           String           @default("USD")
+  status             PaymentStatus    @default(PENDING)
+  plan               SubscriptionPlan
+  metadata           Json?
+  paidAt             DateTime?
+  createdAt          DateTime         @default(now())
+  cardBrand          String?
+  cardLast4          String?
+  receiptUrl         String?
+  dodoPaymentId      String?          @unique
+  dodoSubscriptionId String?
+  dodoCustomerId     String?
+  dodoInvoiceId      String?          @unique
+  dodoRefundId       String?
+  subscriptionId     String?
+  updatedAt          DateTime         @updatedAt
+  subscription       Subscription?    @relation(fields: [subscriptionId], references: [id])
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId])
   @@index([userId])
   @@index([status])
-  @@index([stripePaymentIntentId])
+  @@index([dodoPaymentId])
+  @@index([dodoSubscriptionId])
 }
 
 model SmartMemory {
@@ -399,6 +431,176 @@ model SmartMemory {
   @@unique([userId, questionId])
   @@index([userId])
   @@index([questionId])
+}
+
+model MathModuleSession {
+  id                  String                  @id @default(cuid())
+  userId              String
+  examId              String
+  status              MathModuleSessionStatus @default(IN_PROGRESS)
+  currentSectionOrder Int                     @default(1)
+  startedAt           DateTime                @default(now())
+  completedAt         DateTime?
+  expiresAt           DateTime?
+  lastActivityAt      DateTime                @default(now())
+  timeSpent           Int                     @default(0)
+  totalCorrect        Int?
+  totalSkipped        Int?
+  totalWrong          Int?
+  rawScore            Int?
+  scaledScore         Int?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  user     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam     Exam                       @relation(fields: [examId], references: [id], onDelete: Cascade)
+  sections MathModuleSectionSession[]
+
+  @@index([userId, status])
+  @@index([examId])
+  @@index([userId, startedAt])
+}
+
+model MathModuleSectionSession {
+  id                  String               @id @default(cuid())
+  mathModuleSessionId String
+  examSectionId       String
+  status              SectionSessionStatus @default(NOT_STARTED)
+  startedAt           DateTime?
+  completedAt         DateTime?
+  timeSpent           Int                  @default(0)
+  remainingTime       Int?
+  lastActivityAt      DateTime             @default(now())
+
+  mathModuleSession MathModuleSession  @relation(fields: [mathModuleSessionId], references: [id], onDelete: Cascade)
+  examSection       ExamSection        @relation(fields: [examSectionId], references: [id], onDelete: Cascade)
+  answers           MathModuleAnswer[]
+
+  @@unique([mathModuleSessionId, examSectionId])
+  @@index([mathModuleSessionId])
+  @@index([examSectionId])
+}
+
+model MathModuleAnswer {
+  id                         String    @id @default(cuid())
+  mathModuleSectionSessionId String
+  questionId                 String
+  selectedOptionId           String?
+  textAnswer                 String?
+  isCorrect                  Boolean?
+  timeSpent                  Int       @default(0)
+  isFlagged                  Boolean   @default(false)
+  answeredAt                 DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+
+  mathModuleSectionSession MathModuleSectionSession @relation(fields: [mathModuleSectionSessionId], references: [id], onDelete: Cascade)
+  question                 Question                 @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption           Option?                  @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([mathModuleSectionSessionId, questionId])
+  @@index([mathModuleSectionSessionId])
+  @@index([questionId])
+}
+
+model RwModuleSession {
+  id                  String                @id @default(cuid())
+  userId              String
+  examId              String
+  status              RwModuleSessionStatus @default(IN_PROGRESS)
+  currentSectionOrder Int                   @default(1)
+  startedAt           DateTime              @default(now())
+  completedAt         DateTime?
+  expiresAt           DateTime?
+  lastActivityAt      DateTime              @default(now())
+  timeSpent           Int                   @default(0)
+  totalCorrect        Int?
+  totalSkipped        Int?
+  totalWrong          Int?
+  rawScore            Int?
+  scaledScore         Int?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  user     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam     Exam                     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  sections RwModuleSectionSession[]
+
+  @@index([userId, status])
+  @@index([examId])
+  @@index([userId, startedAt])
+}
+
+model RwModuleSectionSession {
+  id                String               @id @default(cuid())
+  rwModuleSessionId String
+  examSectionId     String
+  status            SectionSessionStatus @default(NOT_STARTED)
+  startedAt         DateTime?
+  completedAt       DateTime?
+  timeSpent         Int                  @default(0)
+  remainingTime     Int?
+  lastActivityAt    DateTime             @default(now())
+  rwModuleSession   RwModuleSession      @relation(fields: [rwModuleSessionId], references: [id], onDelete: Cascade)
+  examSection       ExamSection          @relation(fields: [examSectionId], references: [id], onDelete: Cascade)
+  answers           RwModuleAnswer[]
+
+  @@unique([rwModuleSessionId, examSectionId])
+  @@index([rwModuleSessionId])
+  @@index([examSectionId])
+}
+
+model RwModuleAnswer {
+  id                       String                 @id @default(cuid())
+  rwModuleSectionSessionId String
+  questionId               String
+  selectedOptionId         String?
+  textAnswer               String?
+  isCorrect                Boolean?
+  timeSpent                Int                    @default(0)
+  isFlagged                Boolean                @default(false)
+  answeredAt               DateTime?
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  rwModuleSectionSession   RwModuleSectionSession @relation(fields: [rwModuleSectionSessionId], references: [id], onDelete: Cascade)
+  question                 Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption           Option?                @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([rwModuleSectionSessionId, questionId])
+  @@index([rwModuleSectionSessionId])
+  @@index([questionId])
+}
+
+model DodoWebhookEvent {
+  id          String    @id
+  type        String
+  status      String    @default("PROCESSING")
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum MathModuleSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+  ABANDONED
+}
+
+enum RwModuleSessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
+  ABANDONED
+}
+
+enum SectionSessionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  EXPIRED
 }
 
 enum BankPurpose {

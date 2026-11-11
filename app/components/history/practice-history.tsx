@@ -8,7 +8,7 @@ import { Button, Card, Chip } from "@heroui/react";
 
 import { ArrowRight, BookOpen, Clock, PencilToLine } from "@gravity-ui/icons";
 
-import TestModeModal from "../modal-button/test-mode-modal";
+import TestModeModal from "../forms/test-mode-modal";
 
 interface PracticeHistory {
   id: string;
@@ -33,7 +33,6 @@ export default function RecentPracticeHistory({
   loading = false,
 }: RecentPracticeHistoryProps) {
   const router = useRouter();
-  // ✅ trỏ vào namespace con trong practiceReport
   const t = useTranslations("practiceReport.recentPracticeHistory");
 
   const getAccuracy = (practice: PracticeHistory) => {

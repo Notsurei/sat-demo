@@ -9,6 +9,7 @@ import clsx from "clsx";
 import { Providers } from "@/app/providers";
 import { routing } from "@/i18n/routing";
 import { fontSans, fontMono } from "@/config/fonts";
+import SessionMonitor from "../components/modal-button/session-monitor";
 
 export const metadata: Metadata = {
   title: "StudyBuddy",
@@ -62,12 +63,14 @@ export default async function LocaleLayout({
       suppressHydrationWarning
       className={clsx(fontSans.variable, fontMono.variable)}
     >
-      <body className="min-h-screen bg-white font-sans text-slate-900 antialiased">
+      <body className="min-h-screen bg-white font-sans text-slate-900 antialiased" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
+
           <Providers>
             <MathJaxContext config={mathJaxConfig}>
               {children}
             </MathJaxContext>
+            <SessionMonitor />
           </Providers>
         </NextIntlClientProvider>
       </body>

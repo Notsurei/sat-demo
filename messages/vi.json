@@ -208,6 +208,7 @@
   "nav": {
     "home": "Trang chủ",
     "dashboard": "Thống kê",
+    "subscription": "Lịch sử giao dịch",
     "plans": "Gói học",
     "brand": "StudyBuddy",
     "brandTagline": "Luyện thi SAT",
@@ -323,17 +324,39 @@
     },
 
     "history": {
-      "practiceTab": "Lịch sử luyện tập",
-      "fullTestTab": "Lịch sử thi thử",
-      "tabsAriaLabel": "Các tab lịch sử luyện tập"
+      "practiceTab": "Lịch sử Practice",
+      "fullTestTab": "Lịch sử Full Test",
+      "tabsAriaLabel": "Tab lịch sử practice",
+
+      "fullTestTitle": "Lịch sử Full Test gần đây",
+      "fullTestDescription": "5 bài Full Test gần nhất của bạn",
+
+      "mathModuleTitle": "Lịch sử Math Module gần đây",
+      "mathModuleDescription": "5 bài Math Module gần nhất của bạn",
+
+      "rwModuleTitle": "Lịch sử RW Module gần đây",
+      "rwModuleDescription": "5 bài RW Module gần nhất của bạn",
+
+      "practiceTitle": "Lịch sử Practice gần đây",
+      "practiceDescription": "5 bài Practice gần nhất của bạn",
+
+      "noTestHistory": "Chưa có lịch sử",
+      "noTestHistoryDescription": "Hoàn thành bài đầu tiên để xem kết quả tại đây.",
+      "loading": "Đang tải...",
+      "viewAll": "Xem tất cả",
+      "correct": "đúng",
+      "unanswered": "chưa trả lời",
+      "accuracy": "độ chính xác"
     },
 
     "progressChart": {
       "title": "Tổng quan tiến bộ",
       "subtitle": "Kết quả luyện tập và thi thử gần đây của bạn.",
-      "empty": "Hoàn thành một bài luyện tập hoặc thi thử để xem tiến bộ của bạn.",
+      "empty": "Hoàn thành một bài thi thử để xem tiến bộ của bạn.",
       "practice": "Luyện tập",
-      "fullTest": "Thi thử"
+      "fullTest": "Thi thử",
+      "mathModule": "Math Module",
+      "rwModule": "RW Module"
     }
   },
 
@@ -368,7 +391,12 @@
       "passwordPlaceholder": "Nhập mật khẩu của bạn",
       "signInButton": "Đăng nhập",
       "noAccountPrompt": "Chưa có tài khoản? Đăng ký",
-      "forgotPasswordPrompt": "Quên mật khẩu?"
+      "forgotPasswordPrompt": "Quên mật khẩu?",
+      "SignIn": "Đăng nhập",
+      "noVerified": "Chưa nhận được email xác minh? Gửi lại",
+      "signInSomewhere": "Ai đó đã đăng nhập vào tài khoản này",
+      "signInFromAnotherDevice": "Tài khoản của bạn đã được đăng nhập trên một thiết bị khác. Vì lý do bảo mật, phiên đăng nhập này đã bị đăng xuất.",
+      "signInAgain": "Đăng nhập lại"
     },
 
     "signUp": {
@@ -439,13 +467,22 @@
         "link": "Liên hệ hỗ trợ"
       },
 
+      "resendEmail": {
+        "checkYourEmail": "Kiểm tra email của bạn",
+        "ifNotVerified": "Nếu tài khoản của bạn chưa được xác minh, chúng tôi đã gửi một liên kết xác minh mới đến:",
+        "checkInbox": "Vui lòng kiểm tra hộp thư đến và thư mục Spam.",
+        "backToSignIn": "← Quay lại đăng nhập",
+        "enterEmail": "Nhập địa chỉ email bạn đã dùng để tạo tài khoản."
+      },
+
       "loading": "Đang tải..."
     },
 
     "errors": {
       "emailRequired": "Vui lòng nhập email",
       "passwordRequired": "Vui lòng nhập mật khẩu",
-      "invalidCredentials": "Email hoặc mật khẩu không đúng"
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "emailNotVerified": "Địa chỉ email của bạn chưa được xác minh. Vui lòng xác minh email trước khi đăng nhập."
     },
 
     "signUpErrors": {
@@ -677,7 +714,9 @@
       "title": "Chiến lược theo từng domain",
 
       "craftAndStructure": {
+        "icon": "🎨",
         "title": "Cấu trúc và Ngôn ngữ",
+        "what": "Cách tác giả dùng ngôn ngữ và cấu trúc để tạo nghĩa",
         "description": "Hiểu cách tác giả dùng từ ngữ và cấu trúc để xây dựng ý nghĩa.",
         "strategies": [
           {
@@ -696,7 +735,9 @@
       },
 
       "informationAndIdeas": {
+        "icon": "💡",
         "title": "Thông tin và Ý tưởng",
+        "what": "Đọc hiểu và đánh giá bằng chứng",
         "description": "Định vị, giải thích và đánh giá thông tin từ đoạn văn và biểu đồ.",
         "strategies": [
           {
@@ -715,7 +756,9 @@
       },
 
       "standardEnglishConventions": {
+        "icon": "✍️",
         "title": "Quy tắc Tiếng Anh Chuẩn",
+        "what": "Ngữ pháp, dấu câu và cấu trúc câu",
         "description": "Nắm vững ngữ pháp, dấu câu và cấu trúc câu được kiểm tra trong SAT.",
         "strategies": [
           {
@@ -734,7 +777,9 @@
       },
 
       "expressionOfIdeas": {
+        "icon": "💬",
         "title": "Diễn đạt Ý tưởng",
+        "what": "Cải thiện độ rõ ràng, tập trung và hiệu quả của lập luận",
         "description": "Cải thiện độ rõ ràng, tập trung và hiệu quả của lập luận viết.",
         "strategies": [
           {
@@ -753,7 +798,9 @@
       },
 
       "algebra": {
+        "icon": "🔢",
         "title": "Đại số",
+        "what": "Phương trình, bất đẳng thức và hệ phương trình",
         "description": "Phương trình tuyến tính, bất đẳng thức và hệ phương trình — domain toán SAT có điểm cao nhất.",
         "strategies": [
           {
@@ -772,7 +819,9 @@
       },
 
       "advancedMath": {
+        "icon": "🧮",
         "title": "Toán nâng cao",
+        "what": "Phương trình bậc hai, hàm mũ và biến đổi hàm số",
         "description": "Phương trình bậc hai, hàm mũ và biến đổi hàm số.",
         "strategies": [
           {
@@ -791,7 +840,9 @@
       },
 
       "geometry": {
+        "icon": "📐",
         "title": "Hình học",
+        "what": "Đường tròn, tam giác và hình học tọa độ",
         "description": "Đường tròn, tam giác và hình học tọa độ — chủ yếu dùng công thức.",
         "strategies": [
           {
@@ -810,7 +861,9 @@
       },
 
       "problemSolvingAndData": {
+        "icon": "📊",
         "title": "Giải quyết vấn đề và Phân tích dữ liệu",
+        "what": "Tỷ lệ, phần trăm, tốc độ và đọc hiểu dữ liệu",
         "description": "Tỷ lệ, phần trăm, tốc độ và đọc hiểu dữ liệu.",
         "strategies": [
           {
@@ -975,11 +1028,157 @@
     }
   },
 
+  "moduleReportCommon": {
+    "brand": "StudyBuddy",
+
+    "titles": {
+      "report": {
+        "math": "Báo cáo Math Module",
+        "rw": "Báo cáo Reading & Writing"
+      },
+      "history": {
+        "math": "Lịch sử Math Module",
+        "rw": "Lịch sử Reading & Writing"
+      }
+    },
+
+    "subtitles": {
+      "report": {
+        "math": "Kết quả Math module của bạn",
+        "rw": "Kết quả Reading & Writing của bạn"
+      },
+      "history": {
+        "math": "Xem lại các phiên Math Module và theo dõi tiến bộ.",
+        "rw": "Xem lại các phiên Reading & Writing và theo dõi tiến bộ."
+      }
+    },
+
+    "loading": "Đang tải báo cáo...",
+    "loadingHistory": "Đang tải lịch sử...",
+    "loadFailed": "Không tải được lịch sử. Vui lòng tải lại trang.",
+    "notFound": "Không tìm thấy báo cáo",
+    "goHome": "Về trang chủ",
+    "backHome": "← Quay lại",
+    "backToTop": "Về trang chủ",
+
+    "sessions": {
+      "title": "Các phiên module",
+      "subtitle": "Hoạt động gần đây của bạn."
+    },
+
+    "list": {
+      "emptyTitle": "Chưa có lịch sử",
+      "emptyDescription": "Hoàn thành module đầu tiên để xem tại đây."
+    },
+
+    "card": {
+      "metaLine": "Module {subject}",
+      "scaledScoreLabel": "Điểm",
+      "accuracyLabel": "Độ chính xác",
+      "correctLabel": "Đúng",
+      "sectionProgress": "Phần {current}/{total}",
+      "correctCount": "{count} đúng",
+      "statusLabels": {
+        "completed": "Hoàn thành",
+        "inProgress": "Đang làm",
+        "abandoned": "Bỏ dở",
+        "expired": "Hết hạn"
+      },
+      "buttons": {
+        "continue": "Tiếp tục",
+        "viewReport": "Xem báo cáo"
+      }
+    },
+
+    "summary": {
+      "score": "Điểm",
+      "accuracy": "Độ chính xác",
+      "correct": "Đúng",
+      "timeSpent": "Thời gian"
+    },
+
+    "overall": {
+      "title": "Tổng quan",
+      "subtitle": "Kết quả {subject} của bạn",
+      "scoreLabel": "Điểm SAT / {max}",
+      "accuracy": "Độ chính xác",
+      "correctFraction": "{correct}/{total} đúng · {accuracy}%",
+      "hardPath": "Nhánh khó",
+      "easyPath": "Nhánh dễ"
+    },
+
+    "moduleScores": {
+      "title": "🧩 Điểm từng module",
+      "subtitle": "Đóng góp của mỗi module vào điểm phần (200–{max}). M1 + M2 = điểm phần.",
+      "moduleLabel": "Module {number}",
+      "correctFraction": "{correct}/{total} đúng · {accuracy}%",
+      "pts": "điểm"
+    },
+
+    "info": {
+      "title": "📊 Thông tin module",
+      "subject": "Môn",
+      "questions": "Câu hỏi",
+      "answered": "Đã trả lời",
+      "unanswered": "Chưa trả lời"
+    },
+
+    "bySection": {
+      "title": "📚 Kết quả từng module",
+      "questionsCount": "{count} câu",
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "skipped": "Bỏ qua",
+      "timeLabel": "Thời gian: {time}"
+    },
+
+    "byDifficulty": {
+      "title": "📈 Kết quả theo độ khó",
+      "correctFraction": "✓ {correct} / {total} đúng",
+      "labels": {
+        "EASY": "DỄ",
+        "MEDIUM": "TRUNG BÌNH",
+        "HARD": "KHÓ"
+      }
+    },
+
+    "byDomain": {
+      "title": "🎯 Kết quả theo chủ đề",
+      "answeredFraction": "{correct}/{answered} đã trả lời ({accuracy}%)",
+      "totalUnanswered": "{total} tổng · {unanswered} bỏ qua"
+    },
+
+    "questionReview": {
+      "title": "📋 Chi tiết & xem lại câu hỏi",
+      "subtitle": "Xem lại từng câu với đáp án của bạn và đáp án đúng.",
+      "showPassage": "📖 Xem đoạn văn",
+      "allOptions": "Tất cả lựa chọn",
+      "yourChoice": "(Bạn chọn)",
+      "correctOption": "✓ Đúng",
+      "yourAnswer": "Đáp án của bạn",
+      "correctAnswer": "Đáp án đúng",
+      "explanation": "💡 Giải thích",
+      "proTip": "💡 Mẹo"
+    },
+
+    "status": {
+      "correct": "Đúng",
+      "incorrect": "Sai",
+      "skipped": "Bỏ qua"
+    },
+
+    "questionTypes": {
+      "MCQ": "📝 Trắc nghiệm",
+      "GRID_IN": "🔢 Điền đáp án",
+      "TEXT": "📄 Tự luận"
+    }
+  },
+
   "checkout": {
     "back": "Quay lại",
-    "stripeBadge": "Thanh toán qua Stripe",
+    "paymentBadge": "Thanh toán qua Dodo Payments",
     "title": "Xem lại gói đăng ký của bạn",
-    "subtitle": "Bạn sẽ được chuyển đến Stripe để hoàn tất thanh toán một cách an toàn.",
+    "subtitle": "Bạn sẽ được chuyển đến Dodo Payments để hoàn tất thanh toán một cách an toàn.",
 
     "planCard": {
       "priceSuffix": "/ tháng",
@@ -993,12 +1192,12 @@
       "accountLabel": "Tài khoản",
       "securePayment": {
         "title": "Thanh toán an toàn",
-        "description": "Thông tin thanh toán của bạn được Stripe xử lý an toàn. Chúng tôi không bao giờ lưu trữ chi tiết thẻ tín dụng hoặc thẻ ghi nợ của bạn."
+        "description": "Thông tin thanh toán của bạn được Dodo Payments xử lý an toàn. Chúng tôi không bao giờ lưu trữ chi tiết thẻ tín dụng hoặc thẻ ghi nợ của bạn."
       },
       "whatHappensNext": {
         "title": "Điều gì xảy ra tiếp theo?",
         "items": {
-          "redirect": "Bạn sẽ được chuyển đến Stripe.",
+          "redirect": "Bạn sẽ được chuyển đến Dodo Payments.",
           "enterPayment": "Nhập thông tin thanh toán của bạn.",
           "startImmediately": "Gói đăng ký bắt đầu ngay sau khi thanh toán.",
           "cancelAnytime": "Bạn có thể hủy bất cứ lúc nào từ tài khoản của mình."
@@ -1036,7 +1235,7 @@
       }
     },
 
-    "continueButton": "Tiếp tục đến Stripe • {price}",
+    "continueButton": "Tiếp tục đến Dodo Payments • {price}",
     "loadingFallback": "Đang tải trang thanh toán...",
 
     "errors": {
@@ -1044,6 +1243,7 @@
       "checkoutFailed": "Không thể bắt đầu thanh toán."
     }
   },
+
   "pricing": {
     "badge": "Luyện thi SAT",
     "title": "Chọn <highlight>gói SAT</highlight> của bạn",
@@ -1160,5 +1360,185 @@
     "home": "Về trang chủ",
     "back": "Quay lại",
     "footer": "Đừng lo, hành trình học tập của bạn vẫn tiếp tục."
+  },
+
+  "testModeModal": {
+    "startButton": "📝 Bắt đầu làm bài",
+    "modalTitle": "Chọn chế độ làm bài",
+    "closeButton": "Đóng",
+    "upgradeButton": "Nâng cấp",
+    "gotItButton": "Đã hiểu",
+    "practiceSetupPlaceholder": "Chọn \"Luyện tập theo chủ đề\"",
+
+    "modes": {
+      "rw": {
+        "title": "Reading & Writing",
+        "description": "Chỉ SAT RW — 2 module thích ứng."
+      },
+      "math": {
+        "title": "Math",
+        "description": "Chỉ SAT Math — 2 module thích ứng."
+      },
+      "full": {
+        "title": "Bài thi đầy đủ",
+        "description": "Mô phỏng toàn bộ Digital SAT."
+      },
+      "practice": {
+        "title": "Luyện tập theo chủ đề",
+        "description": "Luyện theo chủ đề và độ khó."
+      }
+    },
+
+    "loading": {
+      "preparingFullTest": "Đang chuẩn bị bài thi...",
+      "preparingMathTest": "Đang chuẩn bị module Math...",
+      "preparingRwTest": "Đang chuẩn bị module RW...",
+      "pleaseWait": "Vui lòng chờ..."
+    },
+
+    "quota": {
+      "locked": "Đã khóa",
+      "unlimited": "∞ {plan}",
+      "remaining": "Còn {remaining}/{limit}",
+      "upgradeToUnlock": "Nâng cấp để mở khóa",
+      "limitReached": "Đã hết lượt — nâng cấp để làm thêm"
+    },
+
+    "toasts": {
+      "fullTestReady": {
+        "title": "Bài thi đã sẵn sàng! Chúc may mắn 🎯",
+        "description": "Đang bắt đầu buổi làm bài..."
+      },
+      "mathTestReady": {
+        "title": "Module Math đã sẵn sàng! Chúc may mắn 🎯",
+        "description": "Đang bắt đầu buổi làm bài..."
+      },
+      "rwTestReady": {
+        "title": "Module RW đã sẵn sàng! Chúc may mắn 🎯",
+        "description": "Đang bắt đầu buổi làm bài..."
+      },
+      "fullTestLimitReached": {
+        "title": "Đã hết lượt làm bài thi đầy đủ",
+        "description": "Vui lòng nâng cấp để làm thêm bài thi đầy đủ."
+      },
+      "mathTestLimitReached": {
+        "title": "Đã hết lượt làm module Math",
+        "description": "Vui lòng nâng cấp để làm thêm module Math."
+      },
+      "rwTestLimitReached": {
+        "title": "Đã hết lượt làm module RW",
+        "description": "Vui lòng nâng cấp để làm thêm module RW."
+      },
+      "resumeFullTest": {
+        "title": "Đang tiếp tục buổi làm bài",
+        "description": "Bạn đang có một buổi thi đầy đủ chưa hoàn thành."
+      },
+      "resumeMathTest": {
+        "title": "Đang tiếp tục buổi làm bài",
+        "description": "Bạn đang có một module Math chưa hoàn thành."
+      },
+      "resumeRwTest": {
+        "title": "Đang tiếp tục buổi làm bài",
+        "description": "Bạn đang có một module RW chưa hoàn thành."
+      },
+      "fullTestLocked": {
+        "title": "Bài thi đầy đủ đã bị khóa",
+        "descriptionFree": "Nâng cấp gói để mở khóa bài thi đầy đủ.",
+        "descriptionLimited": "Bạn đã hết lượt thi đầy đủ. Vui lòng nâng cấp."
+      },
+      "mathTestLocked": {
+        "title": "Module Math đã bị khóa",
+        "descriptionFree": "Nâng cấp gói để mở khóa module Math.",
+        "descriptionLimited": "Bạn đã hết lượt làm module Math. Vui lòng nâng cấp."
+      },
+      "rwTestLocked": {
+        "title": "Module RW đã bị khóa",
+        "descriptionFree": "Nâng cấp gói để mở khóa module RW.",
+        "descriptionLimited": "Bạn đã hết lượt làm module RW. Vui lòng nâng cấp."
+      },
+      "startFullTestFailed": {
+        "title": "Không thể bắt đầu bài thi đầy đủ",
+        "description": "Vui lòng thử lại sau.",
+        "genericDescription": "Đã xảy ra lỗi."
+      },
+      "startMathTestFailed": {
+        "title": "Không thể bắt đầu module Math",
+        "description": "Vui lòng thử lại sau.",
+        "genericDescription": "Đã xảy ra lỗi."
+      },
+      "startRwTestFailed": {
+        "title": "Không thể bắt đầu module RW",
+        "description": "Vui lòng thử lại sau.",
+        "genericDescription": "Đã xảy ra lỗi."
+      }
+    }
+  },
+  "subscription": {
+    "title": "Gói đăng ký & Thanh toán",
+    "subtitle": "Quản lý gói của bạn và xem lịch sử giao dịch",
+
+    "currentPlan": {
+      "plans": {
+        "FREE": "Miễn phí",
+        "BASIC": "Cơ bản",
+        "PREMIUM": "Cao cấp",
+        "VIP": "VIP"
+      },
+      "freeDescription": "Bạn đang dùng gói Miễn phí. Nâng cấp để mở khóa mọi tính năng.",
+      "upgradeButton": "Nâng cấp",
+      "changePlan": "Đổi gói",
+      "cancelButton": "Hủy gói đăng ký",
+      "statusActive": "Đang hoạt động",
+      "statusCanceling": "Đang hủy",
+      "nextBilling": "Gia hạn vào {date}",
+      "cancelAt": "Sẽ hủy vào {date}",
+      "perMonth": "/ tháng",
+
+      "cancelSuccess": "Gói sẽ được hủy vào cuối kỳ hiện tại",
+      "cancelFailed": "Không thể hủy gói",
+
+      "cancelModal": {
+        "title": "Hủy gói đăng ký?",
+        "description": "Bạn sắp hủy gói {plan}.",
+        "keepAccessUntil": "Bạn vẫn sử dụng đầy đủ đến hết {date}.",
+        "keepButton": "Giữ gói",
+        "confirmButton": "Hủy gói"
+      }
+    },
+
+    "paymentHistory": {
+      "title": "Lịch sử thanh toán",
+      "empty": "Chưa có lịch sử thanh toán",
+      "emptyDescription": "Các giao dịch sẽ xuất hiện tại đây sau khi bạn mua gói.",
+      "view": "Xem",
+      "prev": "Trước",
+      "next": "Tiếp",
+      "pageInfo": "Trang {page}/{total}",
+      "columns": {
+        "date": "Ngày",
+        "plan": "Gói",
+        "amount": "Số tiền",
+        "status": "Trạng thái",
+        "receipt": "Hóa đơn"
+      },
+      "status": {
+        "COMPLETED": "Đã thanh toán",
+        "PENDING": "Đang xử lý",
+        "FAILED": "Thất bại",
+        "REFUNDED": "Đã hoàn tiền"
+      }
+    }
+  },
+  "multiSelect": {
+    "select": "Chọn...",
+    "loading": "Đang tải...",
+    "allSelected": "Đã chọn tất cả",
+    "selectedCount": "Đã chọn {count}",
+    "fraction": "{selected}/{total}",
+    "selectAll": "Chọn tất cả",
+    "deselectAll": "Bỏ chọn tất cả",
+    "noMatches": "Không tìm thấy kết quả",
+    "noOptions": "Không có lựa chọn",
+    "clear": "Xóa"
   }
 }

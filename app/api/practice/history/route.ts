@@ -8,7 +8,7 @@ import { prisma } from "@/app/api/util/prisma";
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("__Host-auth_token")?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -20,10 +20,7 @@ export async function GET() {
       );
     }
 
-    const decoded = verify(
-      token,
-      process.env.JWT_SECRET as string,
-    ) as {
+    const decoded = verify(token, process.env.JWT_SECRET as string) as {
       userId: string;
     };
 
@@ -46,10 +43,7 @@ export async function GET() {
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Internal Server Error",
+        error: error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 },
     );

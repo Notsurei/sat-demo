@@ -1,5 +1,4 @@
 export const hintLibrary: Record<string, string[]> = {
-  // ── R&W ──────────────────────────────────────────────────────
   "Words in Context": [
     "💡 <b>Hint 1:</b> Ignore the word/blank for now. Read the entire sentence and identify the overall idea and tone (positive/negative/neutral).",
     "💡 <b>Hint 2:</b> Look for contrast or support signals near the blank: <em>however, although, because, rather than, in fact</em>. These tell you the relationship.",

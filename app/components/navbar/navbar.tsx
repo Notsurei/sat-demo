@@ -5,7 +5,11 @@ import { Button, Chip, Skeleton } from "@heroui/react";
 import clsx from "clsx";
 import { useTranslations } from "next-intl";
 import axios from "axios";
-import { ArrowLeftFromLine, Bars, Xmark } from "@gravity-ui/icons";
+import {
+  ArrowLeftFromLine,
+  Bars,
+  Xmark,
+} from "@gravity-ui/icons";
 
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { siteConfig } from "@/config/site";
@@ -26,19 +30,10 @@ export const Navbar = () => {
 
   const handleLogout = async () => {
     setIsLogoutLoading(true);
-
     try {
-      await axios.post(
-        "/api/auth/logout",
-        {},
-        {
-          withCredentials: true,
-        },
-      );
-
+      await axios.post("/api/auth/logout", {}, { withCredentials: true });
       localStorage.removeItem("token");
       logout();
-
       setIsMenuOpen(false);
       router.replace("/");
     } catch (error) {
@@ -49,10 +44,7 @@ export const Navbar = () => {
   };
 
   const isActive = (href: string) => {
-    if (href === "/") {
-      return pathname === "/";
-    }
-
+    if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
@@ -88,7 +80,6 @@ export const Navbar = () => {
               <p className="text-base font-bold tracking-tight text-foreground">
                 {t("brand")}
               </p>
-
               <p className="mt-1 text-[10.5px] font-medium uppercase leading-[1.6] tracking-[0.14em] text-primary/80">
                 {t("brandTagline")}
               </p>
@@ -99,7 +90,6 @@ export const Navbar = () => {
             <ul className="hidden items-center gap-1 lg:flex">
               {siteConfig.navItems.map((item) => {
                 const active = isActive(item.href);
-
                 return (
                   <li key={item.href}>
                     <Link
@@ -107,7 +97,6 @@ export const Navbar = () => {
                       className={clsx(
                         "group relative rounded-xl px-3.5 py-2 text-sm font-semibold",
                         "transition-all duration-200",
-
                         active
                           ? [
                             "bg-primary",
@@ -125,14 +114,12 @@ export const Navbar = () => {
                       )}
                     >
                       {t(item.labelKey)}
-
                       <span
                         className={clsx(
                           "absolute -bottom-1 left-1/2 h-1 w-6",
                           "-translate-x-1/2 rounded-full",
                           "bg-primary",
                           "transition-all duration-200",
-
                           active
                             ? "scale-100 opacity-100"
                             : "scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-70",
@@ -163,18 +150,39 @@ export const Navbar = () => {
               </div>
             ) : isAuthenticated ? (
               <>
+                {/* <Button
+                  variant="ghost"
+                  size="sm"
+                  isIconOnly
+                  aria-label={t("subscription")}
+                  onPress={() => router.push("/pages/subscription")}
+                  className={clsx(
+                    "rounded-xl text-default-500",
+                    "transition-colors",
+                    "hover:bg-primary/10 hover:text-primary",
+                  )}
+                >
+                  <CreditCard width={18} />
+                </Button> */}
+
                 {user && (
-                  <div
+                  <button
+                    type="button"
+                    onClick={() => router.push("/pages/subscription")}
+                    title={t("subscription")}
                     className={clsx(
                       "rounded-xl border border-accent/20",
                       "px-3 py-1.5",
+                      "text-left",
+                      "transition-all duration-200",
+                      "hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm",
+                      "focus:outline-none focus:ring-2 focus:ring-primary/30",
                     )}
                   >
                     <div className="flex items-center gap-2">
                       <p className="max-w-[140px] truncate text-sm font-bold">
                         {displayName}
                       </p>
-
                       <Chip
                         size="sm"
                         color="accent"
@@ -184,11 +192,10 @@ export const Navbar = () => {
                         {planLabel}
                       </Chip>
                     </div>
-
                     <p className="max-w-[160px] truncate text-[11px] text-default-400">
                       {user.email}
                     </p>
-                  </div>
+                  </button>
                 )}
 
                 <Button
@@ -203,7 +210,6 @@ export const Navbar = () => {
                   )}
                 >
                   <ArrowLeftFromLine width={16} />
-
                   {isLogoutLoading ? t("loggingOut") : t("logout")}
                 </Button>
               </>
@@ -259,10 +265,18 @@ export const Navbar = () => {
             ) : (
               isAuthenticated &&
               user && (
-                <div
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/pages/subscription");
+                  }}
                   className={clsx(
-                    "mb-4 rounded-2xl border border-primary/15",
+                    "mb-4 w-full cursor-pointer rounded-2xl border border-primary/15",
                     "bg-primary/5 px-4 py-3",
+                    "text-left",
+                    "transition-all duration-200",
+                    "hover:border-primary/30 hover:bg-primary/10",
                   )}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -270,12 +284,10 @@ export const Navbar = () => {
                       <p className="truncate text-sm font-bold text-primary">
                         {displayName}
                       </p>
-
                       <p className="truncate text-xs text-default-400">
                         {user.email}
                       </p>
                     </div>
-
                     <Chip
                       size="sm"
                       color="accent"
@@ -285,7 +297,7 @@ export const Navbar = () => {
                       {planLabel}
                     </Chip>
                   </div>
-                </div>
+                </button>
               )
             )}
 
@@ -297,7 +309,7 @@ export const Navbar = () => {
                       href={item.href}
                       onClick={() => setIsMenuOpen(false)}
                       className={clsx(
-                        "block rounded-xl px-4 py-3",
+                        "block cursor-pointer rounded-xl px-4 py-3",
                         "border border-transparent",
                         "text-sm font-semibold text-default-600",
                         "transition-all duration-200",
@@ -321,14 +333,16 @@ export const Navbar = () => {
                   variant="danger-soft"
                   onPress={handleLogout}
                   isDisabled={isLogoutLoading}
-                  className="w-full rounded-xl"
+                  className="w-full cursor-pointer rounded-xl disabled:cursor-not-allowed"
                 >
                   <ArrowLeftFromLine width={16} />
-
                   {isLogoutLoading ? t("loggingOut") : t("logout")}
                 </Button>
               ) : (
-                <div className="w-full" onClick={() => setIsMenuOpen(false)}>
+                <div
+                  className="w-full cursor-pointer"
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <AuthModal />
                 </div>
               )}

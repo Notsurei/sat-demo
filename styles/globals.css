@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-	--font-sans: "font", sans-serif;
-	--font-mono: "monospace", monospace;
+  --font-sans: "font", sans-serif;
+  --font-mono: "monospace", monospace;
 }
 
 html {
@@ -17,4 +17,52 @@ body {
   min-height: 100vh;
   background-color: #ffffff;
   color: #0f172a;
+}
+
+/* OTP Input */
+.otp-input {
+  display: block !important;
+  box-sizing: border-box !important;
+
+  width: 48px !important;
+  height: 52px !important;
+  min-width: 48px !important;
+
+  border: 2px solid #64748b !important;
+  border-radius: 10px !important;
+
+  background: #ffffff !important;
+  background-image: none !important;
+
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+
+  font-family: Arial, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  opacity: 1 !important;
+  caret-color: #2563eb !important;
+  color-scheme: light !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+.otp-input:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2) !important;
+}
+
+.otp-input:-webkit-autofill,
+.otp-input:-webkit-autofill:hover,
+.otp-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #111827 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
 }

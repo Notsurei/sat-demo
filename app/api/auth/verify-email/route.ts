@@ -1,73 +1,77 @@
-"use server";
-
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "crypto";
 import { prisma } from "@/app/api/util/prisma";
 
-import jwt from "jsonwebtoken";
+function redirectWithStatus(request: NextRequest, status: string) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.url;
+  const url = new URL("/pages/verify-email", appUrl);
+  url.searchParams.set("status", status);
+
+  return NextResponse.redirect(url);
+}
 
 export async function GET(request: NextRequest) {
   try {
     const token = request.nextUrl.searchParams.get("token");
 
-    if (!token) {
-      return NextResponse.json(
-        {
-          error: "Token is required",
-        },
-        {
-          status: 400,
-        },
-      );
+    if (!token || !/^[a-f0-9]{64}$/i.test(token)) {
+      return redirectWithStatus(request, "invalid");
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      email: string;
-    };
+    const tokenHash = createHash("sha256").update(token).digest("hex");
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        email: decoded.email,
+        verifyToken: tokenHash,
+      },
+      select: {
+        id: true,
+        isVerified: true,
+        verifyTokenExpiry: true,
       },
     });
 
     if (!user) {
-      return NextResponse.json(
-        {
-          error: "User not found",
-        },
-        {
-          status: 404,
-        },
-      );
+      return redirectWithStatus(request, "invalid");
     }
 
     if (user.isVerified) {
-      return NextResponse.redirect(
-        new URL("/?verified=true", request.url),
-      );
+      return redirectWithStatus(request, "already");
     }
 
-    await prisma.user.update({
+    const now = new Date();
+
+    if (!user.verifyTokenExpiry || user.verifyTokenExpiry <= now) {
+      return redirectWithStatus(request, "expired");
+    }
+
+    const result = await prisma.user.updateMany({
       where: {
-        email: decoded.email,
+        id: user.id,
+        verifyToken: tokenHash,
+        verifyTokenExpiry: {
+          gt: now,
+        },
+        isVerified: false,
       },
       data: {
         isVerified: true,
-
         verifyToken: null,
         verifyTokenExpiry: null,
       },
     });
 
-    return NextResponse.redirect(new URL("/signin?verified=true", request.url));
-  } catch {
+    if (result.count !== 1) {
+      return redirectWithStatus(request, "invalid");
+    }
+
+    return redirectWithStatus(request, "success");
+  } catch (error) {
+    console.error("[VerifyEmail] Unexpected error:", error);
+
     return NextResponse.json(
-      {
-        error: "Invalid or expired token",
-      },
-      {
-        status: 400,
-      },
+      { error: "Verification failed. Please try again." },
+      { status: 500 },
     );
   }
 }

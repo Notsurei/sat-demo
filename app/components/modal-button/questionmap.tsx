@@ -81,7 +81,6 @@ export default function QuestionMapModal({
                 </div>
               </div>
 
-              {/* Questions */}
               <div className="grid grid-cols-5 gap-3 sm:grid-cols-8 md:grid-cols-10">
                 {Array.from({ length: totalQuestions }, (_, index) => {
                   const questionKey = questionIds[index] ?? String(index);
@@ -111,7 +110,6 @@ export default function QuestionMapModal({
                           "dark:text-white",
                         ],
 
-                        // Flagged but unanswered
                         !isAnswered &&
                           isFlagged && [
                             "border-yellow-500",
@@ -121,7 +119,6 @@ export default function QuestionMapModal({
                             "dark:text-yellow-300",
                           ],
 
-                        // Current but unanswered and not flagged
                         !isAnswered &&
                           !isFlagged &&
                           isCurrent && [
@@ -134,7 +131,6 @@ export default function QuestionMapModal({
                             "dark:text-white",
                           ],
 
-                        // Unanswered
                         !isAnswered &&
                           !isFlagged &&
                           !isCurrent && [
@@ -150,21 +146,18 @@ export default function QuestionMapModal({
                     >
                       {index + 1}
 
-                      {/* Flagged marker */}
                       {isFlagged && (
                         <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-yellow-500">
                           <Flag className="h-3 w-3 text-white" />
                         </span>
                       )}
 
-                      {/* Answered marker */}
                       {!isFlagged && isAnswered && (
                         <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-green-500">
                           <Check className="h-3 w-3 text-white" />
                         </span>
                       )}
 
-                      {/* Current marker */}
                       {!isFlagged && !isAnswered && isCurrent && (
                         <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-background bg-orange-500">
                           <span className="h-1.5 w-1.5 rounded-full bg-white" />
@@ -175,7 +168,6 @@ export default function QuestionMapModal({
                 })}
               </div>
 
-              {/* Progress */}
               <div className="mt-5 border-t border-default-200 pt-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-default-500">Progress</span>

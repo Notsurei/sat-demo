@@ -1,41 +1,69 @@
 import { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
 import { UnauthorizedError } from "./permission";
 
 export interface AuthUser {
   id: string;
   role: string;
+  email?: string;
   plan?: string;
 }
 
 export function getUserFromRequest(req: NextRequest): AuthUser {
-  console.log("========== AUTH DEBUG ==========");
+  const cookieToken = req.cookies.get("token")?.value;
 
-  const id = req.headers.get("x-user-id");
-  const role = req.headers.get("x-user-role");
-  const plan = req.headers.get("x-user-plan");
+  const authHeader = req.headers.get("authorization");
+  const bearerToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.substring(7).trim()
+    : undefined;
 
-  console.log("X-USER-ID:", id);
-  console.log("X-USER-ROLE:", role);
-  console.log("X-USER-PLAN:", plan);
+  const token = bearerToken || cookieToken;
 
-  if (!id || !role) {
-    console.log("❌ USER HEADERS NOT FOUND");
-    console.log("================================");
-
+  if (!token) {
     throw new UnauthorizedError("Authentication required");
   }
 
-  console.log("✅ USER FROM PROXY:", {
-    id,
-    role,
-    plan,
-  });
+  const JWT_SECRET = process.env.JWT_SECRET;
+  if (!JWT_SECRET) {
+    console.error("[Auth] JWT_SECRET missing");
+    throw new UnauthorizedError("Server error");
+  }
 
-  console.log("================================");
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET, {
+      algorithms: ["HS256"],
+    }) as {
+      userId?: string;
+      id?: string;
+      email?: string;
+      role?: string;
+      plan?: string;
+    };
 
-  return {
-    id,
-    role,
-    plan: plan ?? undefined,
-  };
+    const userId = decoded.userId || decoded.id;
+    if (!userId || !decoded.role) {
+      throw new UnauthorizedError("Invalid token payload");
+    }
+
+    return {
+      id: userId,
+      role: decoded.role,
+      email: decoded.email,
+      plan: decoded.plan,
+    };
+  } catch (error) {
+    if (error instanceof UnauthorizedError) throw error;
+    throw new UnauthorizedError("Invalid or expired token");
+  }
+}
+
+export async function getAuthenticatedUserId(
+  req: Request,
+): Promise<string | null> {
+  try {
+    const user = getUserFromRequest(req as NextRequest);
+    return user.id;
+  } catch {
+    return null;
+  }
 }

@@ -1,66 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import DodoPayments from "dodopayments";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const environment =
+  process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
+
+const dodo = new DodoPayments({
+  bearerToken: process.env.DODO_API_KEY,
+  environment,
+});
+
+const productMap: Record<string, string | undefined> = {
+  BASIC: process.env.DODO_BASIC_PRICE_ID,
+  PREMIUM: process.env.DODO_PREMIUM_PRICE_ID,
+  VIP: process.env.DODO_VIP_PRICE_ID,
+};
 
 export async function POST(req: NextRequest) {
   try {
     const { userId, email, plan } = await req.json();
+
     const normalizedPlan = String(plan ?? "").toUpperCase();
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const productId = productMap[normalizedPlan];
 
-    const priceMap: Record<string, string> = {
-      BASIC: process.env.STRIPE_BASIC_PRICE_ID!,
-      PREMIUM: process.env.STRIPE_PREMIUM_PRICE_ID!,
-      VIP: process.env.STRIPE_VIP_PRICE_ID!,
-    };
-
-    const priceId = priceMap[normalizedPlan];
-
-    if (!priceId) {
+    if (!userId || !email || !productId) {
       return NextResponse.json(
-        {
-          error: `Unsupported plan: ${plan}`,
-        },
-        {
-          status: 400,
-        },
+        { error: "Invalid user, email, or subscription plan" },
+        { status: 400 },
       );
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-      customer_email: email,
-
-      line_items: [
+    const session = await dodo.checkoutSessions.create({
+      product_cart: [
         {
-          price: priceId,
+          product_id: productId,
           quantity: 1,
         },
       ],
 
       metadata: {
-        userId,
+        userId: String(userId),
         plan: normalizedPlan,
+        registeredEmail: email,
       },
 
-      success_url: `${baseUrl}/payment/success`,
+      // ✅ Ẩn hoàn toàn phần "Purchasing as business"
+      feature_flags: {
+        allow_tax_id: false,
+        allow_customer_editing_business_name: false,
+      },
 
-      cancel_url: `${baseUrl}/payment/cancel`,
+      return_url: `${baseUrl}/payment/success`,
     });
+
+    if (!session.checkout_url) {
+      return NextResponse.json(
+        { error: "Dodo checkout URL was not returned" },
+        { status: 502 },
+      );
+    }
 
     return NextResponse.json({
-      url: session.url,
+      url: session.checkout_url,
+      sessionId: session.session_id,
     });
   } catch (error) {
+    console.error("Dodo checkout creation failed:", error);
+
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Internal Server Error",
-      },
-      {
-        status: 500,
-      },
+      { error: "Unable to create checkout session" },
+      { status: 500 },
     );
   }
 }

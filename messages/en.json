@@ -103,11 +103,13 @@
       "subtitle": "Practice realistic SAT questions, understand your mistakes, and focus on the skills that matter most.",
       "startPracticing": "Start Practicing",
       "explorePlans": "Explore Plans",
+
       "stats": {
         "averagePracticeScore": "Average practice score",
         "averageAccuracy": "Average accuracy",
         "practiceAnytime": "Practice anytime"
       },
+
       "preview": {
         "sessionLabel": "Practice Session",
         "sessionTitle": "Reading & Writing",
@@ -208,6 +210,7 @@
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
+    "subscription": "Subscription",
     "plans": "Plans",
     "brand": "StudyBuddy",
     "brandTagline": "SAT Preparation",
@@ -324,15 +327,37 @@
     "history": {
       "practiceTab": "Practice History",
       "fullTestTab": "Full Test History",
-      "tabsAriaLabel": "Practice history tabs"
+      "tabsAriaLabel": "Practice history tabs",
+
+      "fullTestTitle": "Recent Full Test History",
+      "fullTestDescription": "Your 5 most recent full tests",
+
+      "mathModuleTitle": "Recent Math Module History",
+      "mathModuleDescription": "Your 5 most recent math modules",
+
+      "rwModuleTitle": "Recent RW Module History",
+      "rwModuleDescription": "Your 5 most recent RW modules",
+
+      "practiceTitle": "Recent Practice History",
+      "practiceDescription": "Your 5 most recent practice sessions",
+
+      "noTestHistory": "No test history yet",
+      "noTestHistoryDescription": "Complete your first test and your results will appear here.",
+      "loading": "Loading history...",
+      "viewAll": "View All",
+      "correct": "correct",
+      "unanswered": "unanswered",
+      "accuracy": "accuracy"
     },
 
     "progressChart": {
       "title": "Progress Overview",
       "subtitle": "Your recent Practice and Full Test performance.",
-      "empty": "Complete a Practice or Full Test to see your progress.",
+      "empty": "Complete a Full Test to see your progress.",
       "practice": "Practice",
-      "fullTest": "Full Test"
+      "fullTest": "Full Test",
+      "mathModule": "Math Module",
+      "rwModule": "RW Module"
     }
   },
 
@@ -367,7 +392,12 @@
       "passwordPlaceholder": "Enter your password",
       "signInButton": "Sign In",
       "noAccountPrompt": "Don't have an account? Sign up",
-      "forgotPasswordPrompt": "Forgot password?"
+      "forgotPasswordPrompt": "Forgot password?",
+      "SignIn": "Sign In",
+      "noVerified": "Didn't receive verification email? Resend",
+      "signInSomewhere": "Account signed in elsewhere",
+      "signInFromAnotherDevice": "Your account was signed in on another device. For security, this session has been signed out.",
+      "signInAgain": "Sign in again"
     },
 
     "signUp": {
@@ -439,13 +469,22 @@
         "link": "Contact Support"
       },
 
+      "resendEmail": {
+        "checkYourEmail": "Check Your Email",
+        "ifNotVerified": "If your account is not verified, we've sent a new verification link to:",
+        "checkInbox": "Please check your inbox and Spam folder.",
+        "backToSignIn": "← Back to sign in",
+        "enterEmail": "Enter the email address you used to create your account."
+      },
+
       "loading": "Loading..."
     },
 
     "errors": {
       "emailRequired": "Email is required",
       "passwordRequired": "Password is required",
-      "invalidCredentials": "Invalid email or password"
+      "invalidCredentials": "Invalid email or password",
+      "emailNotVerified": "Your email address has not been verified yet. Please verify your email before signing in."
     },
 
     "signUpErrors": {
@@ -509,7 +548,6 @@
     },
 
     "upgrade": "🔒 Upgrade",
-
     "startButton": "Start",
     "startingButton": "Starting...",
 
@@ -537,10 +575,8 @@
       "subtitle": "Your 5 most recent practice sessions",
       "viewAll": "View All",
       "loading": "Loading history...",
-
       "emptyTitle": "No practice history yet",
       "emptyDescription": "Start your first practice session and your results will appear here.",
-
       "unknownDate": "Unknown date",
       "correctFraction": "{correct}/{total} correct",
       "accuracyLabel": "accuracy",
@@ -677,7 +713,9 @@
       "title": "Domain-specific strategies",
 
       "craftAndStructure": {
+        "icon": "🎨",
         "title": "Craft and Structure",
+        "what": "How authors use language and structure to build meaning",
         "description": "Understand how authors use words and structure to build meaning.",
         "strategies": [
           {
@@ -696,7 +734,9 @@
       },
 
       "informationAndIdeas": {
+        "icon": "💡",
         "title": "Information and Ideas",
+        "what": "Reading comprehension and evidence evaluation",
         "description": "Locate, interpret, and evaluate information from passages and graphics.",
         "strategies": [
           {
@@ -715,7 +755,9 @@
       },
 
       "standardEnglishConventions": {
+        "icon": "✍️",
         "title": "Standard English Conventions",
+        "what": "Grammar, punctuation, and sentence structure rules",
         "description": "Master grammar, punctuation, and sentence structure rules tested on the SAT.",
         "strategies": [
           {
@@ -734,7 +776,9 @@
       },
 
       "expressionOfIdeas": {
+        "icon": "💬",
         "title": "Expression of Ideas",
+        "what": "Improving clarity, focus, and effectiveness of arguments",
         "description": "Improve the clarity, focus, and effectiveness of written arguments.",
         "strategies": [
           {
@@ -753,7 +797,9 @@
       },
 
       "algebra": {
+        "icon": "🔢",
         "title": "Algebra",
+        "what": "Equations, inequalities, and systems of equations",
         "description": "Linear equations, inequalities, and systems — the highest-yield SAT math domain.",
         "strategies": [
           {
@@ -772,7 +818,9 @@
       },
 
       "advancedMath": {
+        "icon": "🧮",
         "title": "Advanced Math",
+        "what": "Quadratics, exponentials, and function transformations",
         "description": "Quadratics, exponentials, and function transformations.",
         "strategies": [
           {
@@ -791,7 +839,9 @@
       },
 
       "geometry": {
+        "icon": "📐",
         "title": "Geometry",
+        "what": "Circles, triangles, and coordinate geometry",
         "description": "Circles, triangles, and coordinate geometry — mostly formula-driven.",
         "strategies": [
           {
@@ -810,7 +860,9 @@
       },
 
       "problemSolvingAndData": {
+        "icon": "📊",
         "title": "Problem Solving and Data Analysis",
+        "what": "Ratios, percentages, rates, and data interpretation",
         "description": "Ratios, percentages, rates, and data interpretation.",
         "strategies": [
           {
@@ -975,11 +1027,157 @@
     }
   },
 
+  "moduleReportCommon": {
+    "brand": "StudyBuddy",
+
+    "titles": {
+      "report": {
+        "math": "Math Module Report",
+        "rw": "Reading & Writing Module Report"
+      },
+      "history": {
+        "math": "Math Module History",
+        "rw": "Reading & Writing Module History"
+      }
+    },
+
+    "subtitles": {
+      "report": {
+        "math": "Your Math module performance",
+        "rw": "Your Reading & Writing module performance"
+      },
+      "history": {
+        "math": "Review your math module sessions and track your progress over time.",
+        "rw": "Review your Reading & Writing module sessions and track your progress over time."
+      }
+    },
+
+    "loading": "Loading report...",
+    "loadingHistory": "Loading module history...",
+    "loadFailed": "Could not load module history. Please refresh the page.",
+    "notFound": "Report not found",
+    "goHome": "Go Home",
+    "backHome": "← Back Home",
+    "backToTop": "Back to Home",
+
+    "sessions": {
+      "title": "Module Sessions",
+      "subtitle": "Your latest module activity."
+    },
+
+    "list": {
+      "emptyTitle": "No module history yet",
+      "emptyDescription": "Complete your first module to see it here."
+    },
+
+    "card": {
+      "metaLine": "{subject} Module",
+      "scaledScoreLabel": "Score",
+      "accuracyLabel": "Accuracy",
+      "correctLabel": "Correct",
+      "sectionProgress": "Section {current}/{total}",
+      "correctCount": "{count} correct",
+      "statusLabels": {
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "abandoned": "Abandoned",
+        "expired": "Expired"
+      },
+      "buttons": {
+        "continue": "Continue Module",
+        "viewReport": "View Report"
+      }
+    },
+
+    "summary": {
+      "score": "Score",
+      "accuracy": "Accuracy",
+      "correct": "Correct",
+      "timeSpent": "Time Spent"
+    },
+
+    "overall": {
+      "title": "Overall Performance",
+      "subtitle": "Your {subject} performance",
+      "scoreLabel": "SAT Score / {max}",
+      "accuracy": "Overall Accuracy",
+      "correctFraction": "{correct}/{total} correct · {accuracy}%",
+      "hardPath": "Hard path",
+      "easyPath": "Easy path"
+    },
+
+    "moduleScores": {
+      "title": "🧩 Module Scores",
+      "subtitle": "Each module's contribution to the section scaled score (200–{max}). M1 + M2 = section score.",
+      "moduleLabel": "Module {number}",
+      "correctFraction": "{correct}/{total} correct · {accuracy}%",
+      "pts": "pts"
+    },
+
+    "info": {
+      "title": "📊 Module Information",
+      "subject": "Subject",
+      "questions": "Questions",
+      "answered": "Answered",
+      "unanswered": "Unanswered"
+    },
+
+    "bySection": {
+      "title": "📚 Performance by Module",
+      "questionsCount": "{count} questions",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "skipped": "Skipped",
+      "timeLabel": "Time: {time}"
+    },
+
+    "byDifficulty": {
+      "title": "📈 Performance by Difficulty",
+      "correctFraction": "✓ {correct} / {total} correct",
+      "labels": {
+        "EASY": "EASY",
+        "MEDIUM": "MEDIUM",
+        "HARD": "HARD"
+      }
+    },
+
+    "byDomain": {
+      "title": "🎯 Performance by Domain",
+      "answeredFraction": "{correct}/{answered} answered ({accuracy}%)",
+      "totalUnanswered": "{total} total · {unanswered} unanswered"
+    },
+
+    "questionReview": {
+      "title": "📋 Question Details & Review",
+      "subtitle": "Review each question with your answer, correct answer, and explanation.",
+      "showPassage": "📖 Show Passage",
+      "allOptions": "All Options",
+      "yourChoice": "(Your choice)",
+      "correctOption": "✓ Correct",
+      "yourAnswer": "Your Answer",
+      "correctAnswer": "Correct Answer",
+      "explanation": "💡 Explanation",
+      "proTip": "💡 Pro Tip"
+    },
+
+    "status": {
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "skipped": "Skipped"
+    },
+
+    "questionTypes": {
+      "MCQ": "📝 Multiple Choice",
+      "GRID_IN": "🔢 Grid-in",
+      "TEXT": "📄 Text"
+    }
+  },
+
   "checkout": {
     "back": "Back",
-    "stripeBadge": "Stripe Checkout",
+    "paymentBadge": "Dodo Payments",
     "title": "Review your subscription",
-    "subtitle": "You'll be redirected to Stripe to securely complete your payment.",
+    "subtitle": "You'll be redirected to Dodo Payments to securely complete your payment.",
 
     "planCard": {
       "priceSuffix": "/ month",
@@ -993,12 +1191,12 @@
       "accountLabel": "Account",
       "securePayment": {
         "title": "Secure Payment",
-        "description": "Your payment information is securely handled by Stripe. We never store your credit or debit card details."
+        "description": "Your payment information is securely handled by Dodo Payments. We never store your credit or debit card details."
       },
       "whatHappensNext": {
         "title": "What happens next?",
         "items": {
-          "redirect": "You will be redirected to Stripe.",
+          "redirect": "You will be redirected to Dodo Payments.",
           "enterPayment": "Enter your payment details.",
           "startImmediately": "Your subscription starts immediately after payment.",
           "cancelAnytime": "You can cancel anytime from your account."
@@ -1036,7 +1234,7 @@
       }
     },
 
-    "continueButton": "Continue to Stripe • {price}",
+    "continueButton": "Continue to Dodo Payments • {price}",
     "loadingFallback": "Loading checkout...",
 
     "errors": {
@@ -1157,5 +1355,186 @@
     "home": "Back to home",
     "back": "Go back",
     "footer": "Don't worry, your learning journey continues."
+  },
+
+  "testModeModal": {
+    "startButton": "📝 Start Test",
+    "modalTitle": "Choose your test mode",
+    "closeButton": "Close",
+    "upgradeButton": "Upgrade",
+    "gotItButton": "I got it",
+    "practiceSetupPlaceholder": "Select \"Targeted Practice\"",
+
+    "modes": {
+      "rw": {
+        "title": "Reading & Writing",
+        "description": "SAT RW only — 2 adaptive modules."
+      },
+      "math": {
+        "title": "Math",
+        "description": "SAT Math only — 2 adaptive modules."
+      },
+      "full": {
+        "title": "Full Test",
+        "description": "Simulate the complete Digital SAT."
+      },
+      "practice": {
+        "title": "Targeted Practice",
+        "description": "Practice by topic and difficulty."
+      }
+    },
+
+    "loading": {
+      "preparingFullTest": "Preparing your test...",
+      "preparingMathTest": "Preparing your math module...",
+      "preparingRwTest": "Preparing your RW module...",
+      "pleaseWait": "Please wait..."
+    },
+
+    "quota": {
+      "locked": "Locked",
+      "unlimited": "∞ {plan}",
+      "remaining": "{remaining}/{limit} left",
+      "upgradeToUnlock": "Upgrade to unlock",
+      "limitReached": "Limit reached — upgrade for more"
+    },
+
+    "toasts": {
+      "fullTestReady": {
+        "title": "Full test ready! Good luck 🎯",
+        "description": "Starting your test session..."
+      },
+      "mathTestReady": {
+        "title": "Math module ready! Good luck 🎯",
+        "description": "Starting your math session..."
+      },
+      "rwTestReady": {
+        "title": "RW module ready! Good luck 🎯",
+        "description": "Starting your RW session..."
+      },
+      "fullTestLimitReached": {
+        "title": "Full test limit reached",
+        "description": "Please upgrade for more full test attempts."
+      },
+      "mathTestLimitReached": {
+        "title": "Math module limit reached",
+        "description": "Please upgrade for more math modules."
+      },
+      "rwTestLimitReached": {
+        "title": "RW module limit reached",
+        "description": "Please upgrade for more RW modules."
+      },
+      "resumeFullTest": {
+        "title": "Resuming existing session",
+        "description": "You already have an active full test session."
+      },
+      "resumeMathTest": {
+        "title": "Resuming existing session",
+        "description": "You already have an active math module."
+      },
+      "resumeRwTest": {
+        "title": "Resuming existing session",
+        "description": "You already have an active RW module."
+      },
+      "fullTestLocked": {
+        "title": "Full Test Locked",
+        "descriptionFree": "Upgrade your plan to unlock full tests.",
+        "descriptionLimited": "You've reached your full test limit. Please upgrade."
+      },
+      "mathTestLocked": {
+        "title": "Math Module Locked",
+        "descriptionFree": "Upgrade your plan to unlock math modules.",
+        "descriptionLimited": "You've reached your math module limit. Please upgrade."
+      },
+      "rwTestLocked": {
+        "title": "RW Module Locked",
+        "descriptionFree": "Upgrade your plan to unlock RW modules.",
+        "descriptionLimited": "You've reached your RW module limit. Please upgrade."
+      },
+      "startFullTestFailed": {
+        "title": "Failed to start full test",
+        "description": "Please try again later.",
+        "genericDescription": "Something went wrong."
+      },
+      "startMathTestFailed": {
+        "title": "Failed to start math module",
+        "description": "Please try again later.",
+        "genericDescription": "Something went wrong."
+      },
+      "startRwTestFailed": {
+        "title": "Failed to start RW module",
+        "description": "Please try again later.",
+        "genericDescription": "Something went wrong."
+      }
+    }
+  },
+
+  "subscription": {
+    "title": "Subscription & Billing",
+    "subtitle": "Manage your plan and view payment history",
+
+    "currentPlan": {
+      "plans": {
+        "FREE": "Free",
+        "BASIC": "Basic",
+        "PREMIUM": "Premium",
+        "VIP": "VIP"
+      },
+
+      "freeDescription": "You're on the Free plan. Upgrade to unlock all features.",
+      "upgradeButton": "Upgrade",
+      "changePlan": "Change Plan",
+      "cancelButton": "Cancel Subscription",
+      "statusActive": "Active",
+      "statusCanceling": "Canceling",
+      "nextBilling": "Next billing on {date}",
+      "cancelAt": "Will cancel on {date}",
+      "perMonth": "/ month",
+      "cancelSuccess": "Subscription will be canceled at the end of the period",
+      "cancelFailed": "Failed to cancel subscription",
+
+      "cancelModal": {
+        "title": "Cancel your subscription?",
+        "description": "You're about to cancel your {plan} subscription.",
+        "keepAccessUntil": "You'll keep full access until {date}.",
+        "keepButton": "Keep Plan",
+        "confirmButton": "Yes, Cancel"
+      }
+    },
+
+    "paymentHistory": {
+      "title": "Payment History",
+      "empty": "No payment history",
+      "emptyDescription": "Payments will appear here after your first purchase.",
+      "view": "View",
+      "prev": "Previous",
+      "next": "Next",
+      "pageInfo": "Page {page} of {total}",
+      "columns": {
+        "date": "Date",
+        "plan": "Plan",
+        "amount": "Amount",
+        "status": "Status",
+        "receipt": "Receipt"
+      },
+      "status": {
+        "COMPLETED": "Paid",
+        "PENDING": "Pending",
+        "FAILED": "Failed",
+        "REFUNDED": "Refunded"
+      }
+    }
+  },
+  "multiSelect": {
+    "select": "Select...",
+    "loading": "Loading...",
+    "allSelected": "All selected",
+    "selectedCount": "{count} selected",
+    "fraction": "{selected}/{total}",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "noMatches": "No matches",
+    "noOptions": "No options",
+    "clear": "Clear"
   }
 }

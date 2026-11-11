@@ -12,7 +12,10 @@ import {
 } from "@gravity-ui/icons";
 
 import { PracticeHistory } from "../hooks/use-dashboard-data";
-import { FullTestHistory } from "../../full-test-report-history/components/type";
+import type {
+  TestHistory as FullTestHistory,
+  TestSectionReport,
+} from "@/app/components/history/type";
 
 interface DashboardStatsProps {
   history?: PracticeHistory[];
@@ -60,20 +63,22 @@ const computeFullTestScaledScore = (ft: FullTestHistory): number | null => {
     return ft.mathScore + ft.readingWritingScore;
   }
 
-  const rwSections =
-    ft.sections?.filter(
-      (s) =>
-        s.subject?.toUpperCase().includes("RW") ||
-        s.subject?.toUpperCase().includes("READING"),
-    ) ?? [];
-  const mathSections =
-    ft.sections?.filter((s) => s.subject?.toUpperCase().includes("MATH")) ?? [];
+  const sections: TestSectionReport[] = ft.sections ?? [];
+
+  const rwSections = sections.filter(
+    (s) =>
+      s.subject?.toUpperCase().includes("RW") ||
+      s.subject?.toUpperCase().includes("READING"),
+  );
+  const mathSections = sections.filter((s) =>
+    s.subject?.toUpperCase().includes("MATH"),
+  );
 
   const computeSectionScaled = (
-    sections: typeof ft.sections,
+    secs: TestSectionReport[],
   ): number | null => {
-    const total = sections.reduce((sum, s) => sum + (s.totalQuestions || 0), 0);
-    const correct = sections.reduce(
+    const total = secs.reduce((sum, s) => sum + (s.totalQuestions || 0), 0);
+    const correct = secs.reduce(
       (sum, s) => sum + (s.correctAnswers || 0),
       0,
     );
@@ -91,7 +96,7 @@ const computeFullTestScaledScore = (ft: FullTestHistory): number | null => {
   if (mathScaled !== null) return mathScaled;
 
   const totalQ = ft.totalQuestions || 0;
-  const totalCorrect = ft.correct || 0;
+  const totalCorrect = ft.totalCorrect || 0;
   if (totalQ === 0) return null;
   return Math.round(400 + (totalCorrect / totalQ) * 1200);
 };
@@ -172,9 +177,9 @@ export default function DashboardStats({
         trend:
           practiceTotalQuestions > 0
             ? t("trends.correctFraction", {
-                correct: practiceTotalCorrect,
-                total: practiceTotalQuestions,
-              })
+              correct: practiceTotalCorrect,
+              total: practiceTotalQuestions,
+            })
             : t("trends.noPracticeData"),
         icon: <ChartColumnStacked className="h-6 w-6" />,
         iconClass: "bg-success/10 text-success",
@@ -186,8 +191,8 @@ export default function DashboardStats({
         trend:
           safeHistory.length > 0
             ? t("trends.completedCount", {
-                count: completedPractices.length,
-              })
+              count: completedPractices.length,
+            })
             : t("trends.noSessions"),
         icon: <PencilToLine className="h-6 w-6" />,
         iconClass: "bg-primary/10 text-primary",
@@ -199,8 +204,8 @@ export default function DashboardStats({
         trend:
           safeFullTestHistory.length > 0
             ? t("trends.completedCount", {
-                count: completedFullTests.length,
-              })
+              count: completedFullTests.length,
+            })
             : t("trends.noSessions"),
         icon: <FileText className="h-6 w-6" />,
         iconClass: "bg-secondary/10 text-secondary",

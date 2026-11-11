@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import axios from "axios";
+import { useTranslations } from "next-intl";
 import {
   Button,
   FieldError,
@@ -10,9 +12,8 @@ import {
   Label,
   Select,
   ListBox,
+  toast,
 } from "@heroui/react";
-import { useTranslations } from "next-intl";
-import axios from "axios";
 import {
   parsePhoneNumber,
   isValidPhoneNumber,
@@ -24,12 +25,9 @@ import { useRouter } from "@/i18n/navigation";
 
 import { Props } from "./props";
 
-
 const COUNTRY_CODES = [
   { key: "VN", label: "🇻🇳 +84", code: "+84" },
   { key: "US", label: "🇺🇸 +1", code: "+1" },
-  // { key: "JP", label: "🇯🇵 +81", code: "+81" },
-  // { key: "KR", label: "🇰🇷 +82", code: "+82" },
 ] as const;
 
 const GENDER_OPTION_KEYS = [
@@ -95,29 +93,29 @@ export default function SignUp({ switchMode }: Props) {
       general: "",
     };
 
-    if (!input.firstName) newErrors.firstName = tErr("firstNameRequired");
-    if (!input.lastName) newErrors.lastName = tErr("lastNameRequired");
+    if (!input.firstName.trim())
+      newErrors.firstName = tErr("firstNameRequired");
+    if (!input.lastName.trim())
+      newErrors.lastName = tErr("lastNameRequired");
 
-    // ✅ Xác thực số điện thoại bằng libphonenumber-js
-    if (!input.phone) {
+    if (!input.phone.trim()) {
       newErrors.phone = tErr("phoneRequired");
     } else {
       const formattedPhone = normalizePhone(selectedCountryKey, input.phone);
-
       if (!formattedPhone || !isValidPhoneNumber(formattedPhone)) {
         newErrors.phone = tErr("phoneInvalid");
       }
     }
 
-    if (!input.email) {
+    if (!input.email.trim()) {
       newErrors.email = tErr("emailRequired");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim())) {
       newErrors.email = tErr("emailInvalid");
     }
 
     if (!input.password) {
       newErrors.password = tErr("passwordRequired");
-    } else if (input.password.length < 6) {
+    } else if (input.password.length < 8) {
       newErrors.password = tErr("passwordMinLength");
     }
 
@@ -130,7 +128,6 @@ export default function SignUp({ switchMode }: Props) {
     if (!input.gender) newErrors.gender = tErr("genderRequired");
 
     setErrors(newErrors);
-
     return Object.values(newErrors).every((err) => !err);
   };
 
@@ -144,56 +141,114 @@ export default function SignUp({ switchMode }: Props) {
     const formattedPhone = normalizePhone(selectedCountryKey, input.phone);
 
     try {
-      const res = await axios.post("/api/auth/signup", {
-        firstName: input.firstName,
-        lastName: input.lastName,
-        phone: formattedPhone,
-        email: input.email,
-        password: input.password,
-        gender: input.gender,
-      });
+      const res = await axios.post(
+        "/api/auth/signup",
+        {
+          firstName: input.firstName.trim(),
+          lastName: input.lastName.trim(),
+          phone: formattedPhone,
+          email: input.email.trim(),
+          password: input.password,
+          gender: input.gender,
+        },
+        { validateStatus: (s) => s < 500 },
+      );
 
-      return res.data;
-    } catch (err: any) {
-      const message = err?.response?.data?.error || tErr("signupFailed");
-
-      setErrors((prev) => ({ ...prev, general: message }));
-
-      return null;
+      return { ok: true as const, data: res.data, status: res.status };
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const message = err.response?.data?.error ?? tErr("signupFailed");
+        setErrors((prev) => ({ ...prev, general: message }));
+      } else {
+        setErrors((prev) => ({ ...prev, general: tErr("signupFailed") }));
+      }
+      return { ok: false as const };
     }
+  };
+
+  const resetForm = () => {
+    setInput({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      gender: "",
+    });
+    setErrors({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      gender: "",
+      general: "",
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isValid = validate();
-    if (!isValid) return;
+    if (!validate()) return;
 
     setIsLoading(true);
-    const data = await sendRequest();
+    const result = await sendRequest();
     setIsLoading(false);
 
-    if (data) {
-      if (switchMode) {
-        switchMode("signin");
+    if (!result.ok) return;
+
+    if (result.status === 201 || result.status === 202) {
+      const emailSubmitted = input.email.trim();
+
+      if (result.data?.emailSent === false) {
+        toast.warning(
+          `Account created, but we couldn't send the verification email to ${emailSubmitted}. Please try signing in to request a new one.`,
+        );
       } else {
-        router.push("/signin");
+        toast.success(
+          `Registration successful! We sent a verification link to ${emailSubmitted}. Check your inbox (and spam folder) to activate your account.`,
+        );
       }
+
+      resetForm();
+
+      setTimeout(() => {
+        if (switchMode) {
+          switchMode("signin");
+        } else {
+          router.push("/pages/signin?registered=1");
+        }
+      }, 1800);
+
+      return;
     }
+
+    if (result.status === 400) {
+      const msg =
+        result.data?.details?.[0]?.message ??
+        result.data?.error ??
+        tErr("signupFailed");
+      setErrors((prev) => ({ ...prev, general: msg }));
+      return;
+    }
+
+    setErrors((prev) => ({ ...prev, general: tErr("signupFailed") }));
   };
 
   const halfFields = [
-    {
-      name: "firstName" as const,
-      label: t("fields.firstNameLabel"),
-      type: "text",
-      placeholder: t("fields.firstNamePlaceholder"),
-    },
     {
       name: "lastName" as const,
       label: t("fields.lastNameLabel"),
       type: "text",
       placeholder: t("fields.lastNamePlaceholder"),
+    },
+    {
+      name: "firstName" as const,
+      label: t("fields.firstNameLabel"),
+      type: "text",
+      placeholder: t("fields.firstNamePlaceholder"),
     },
     {
       name: "password" as const,
@@ -233,7 +288,9 @@ export default function SignUp({ switchMode }: Props) {
               className="h-11 rounded-xl"
             />
 
-            {errors[field.name] && <FieldError>{errors[field.name]}</FieldError>}
+            {errors[field.name] && (
+              <FieldError>{errors[field.name]}</FieldError>
+            )}
           </TextField>
         ))}
       </div>
@@ -366,14 +423,16 @@ export default function SignUp({ switchMode }: Props) {
               className="h-11 rounded-xl"
             />
 
-            {errors[field.name] && <FieldError>{errors[field.name]}</FieldError>}
+            {errors[field.name] && (
+              <FieldError>{errors[field.name]}</FieldError>
+            )}
           </TextField>
         ))}
       </div>
 
       {errors.general && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3">
-          <p className="text-center text-sm text-red-400">{errors.general}</p>
+          <p className="text-center text-sm text-red-500">{errors.general}</p>
         </div>
       )}
 
@@ -390,7 +449,7 @@ export default function SignUp({ switchMode }: Props) {
           <button
             type="button"
             onClick={() => switchMode?.("signin")}
-            className="cursor-pointer text-primary transition-colors hover:text-primary-600 hover:text-blue-300"
+            className="cursor-pointer text-primary transition-colors hover:text-blue-300"
           >
             {t("haveAccountPrompt")}
           </button>
@@ -399,7 +458,7 @@ export default function SignUp({ switchMode }: Props) {
           <button
             type="button"
             onClick={() => switchMode?.("email-forgot-pass")}
-            className="cursor-pointer text-default-500 transition-colors hover:text-default-700 hover:text-blue-300"
+            className="cursor-pointer text-default-500 transition-colors hover:text-blue-300"
           >
             {t("forgotPasswordPrompt")}
           </button>

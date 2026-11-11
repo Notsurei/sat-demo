@@ -14,6 +14,29 @@ import ReferenceSheetModal from "@/app/components/modal-button/reference-sheet-m
 import KnowledgeModal from "@/app/components/modal-button/knowledge-modal";
 import { Button, toast } from "@heroui/react";
 
+type QuestionType = "MCQ" | "GRID_IN" | "text";
+
+const isMcqQuestion = (q: {
+  type?: string | null;
+  options?: unknown[] | null;
+}): boolean => {
+  if (Array.isArray(q.options) && q.options.length > 0) return true;
+  return String(q.type ?? "").toUpperCase() === "MCQ";
+};
+
+const resolveQuestionType = (q: {
+  type?: string | null;
+  options?: unknown[] | null;
+}): QuestionType => {
+  const raw = String(q.type ?? "").toUpperCase().replace(/-/g, "_");
+  if (raw === "MCQ") return "MCQ";
+  if (raw === "GRID_IN") return "GRID_IN";
+  if (raw === "TEXT") return "text";
+
+  if (Array.isArray(q.options) && q.options.length > 0) return "MCQ";
+  return "text";
+};
+
 export default function PracticeScreen() {
   const router = useRouter();
 
@@ -69,7 +92,7 @@ export default function PracticeScreen() {
 
   const total = questions.length;
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
-  
+
   React.useEffect(() => {
     checkAuth();
   }, []);
@@ -160,6 +183,21 @@ export default function PracticeScreen() {
     setTimeOutReached(false);
   }, [loading, currentQ?.id]);
 
+  // Debug tạm — xoá sau khi xác định được nguồn bug type
+  React.useEffect(() => {
+    if (!currentQ) return;
+    console.log("[currentQ]", {
+      id: currentQ.id,
+      type: currentQ.type,
+      hasOptions: Array.isArray(currentQ.options)
+        ? currentQ.options.length
+        : "not-array",
+      correctOptionId: currentQ.correctOptionId,
+      correctAnswer: currentQ.correctAnswer,
+      correctTextAnswer: currentQ.correctTextAnswer,
+    });
+  }, [currentQ?.id]);
+
   const handleOptionSelect = (optionId: string) => {
     if (!currentQ || showFeedback) return;
 
@@ -186,7 +224,7 @@ export default function PracticeScreen() {
 
     let correct = false;
 
-    if (currentQ.type === "MCQ") {
+    if (isMcqQuestion(currentQ)) {
       if (currentQ.correctOptionId) {
         correct = selectedOption === currentQ.correctOptionId;
       } else if (currentQ.correctAnswer && currentQ.options) {
@@ -351,11 +389,12 @@ export default function PracticeScreen() {
     );
   }
 
-  const type = currentQ.type || "multiple-choice";
+  // ✅ Suy ra type từ dữ liệu thực (options ưu tiên hơn field type)
+  const type: QuestionType = resolveQuestionType(currentQ);
 
   let correctDisplay: string | undefined;
 
-  if (currentQ.type === "MCQ") {
+  if (isMcqQuestion(currentQ)) {
     if (currentQ.correctOptionId) {
       const found = currentQ.options?.find(
         (option) => option.id === currentQ.correctOptionId,
@@ -375,8 +414,9 @@ export default function PracticeScreen() {
     ? "Great job! 🎉"
     : `Correct answer: ${correctDisplay || "N/A"}`;
 
-  const canCheck =
-    currentQ.type === "MCQ" ? !!selectedOption : !!textAnswer.trim();
+  const canCheck = isMcqQuestion(currentQ)
+    ? !!selectedOption
+    : !!textAnswer.trim();
 
   const subjectNameMap: Record<string, string> = {
     SAT_MATH: "Math",
@@ -397,11 +437,19 @@ export default function PracticeScreen() {
         subject={subject}
         category={category}
         subtopic={subtopic}
-        onHome={() => router.push('/')}
-        onAnnotate={() => { setShowAnnotator(true) }}
-        onCalculator={() => { setShowCalculator(true) }}
-        onReference={() => { setShowReference(true) }}
-        onKnowledgeReview={() => { setShowKnowledge(true) }}
+        onHome={() => router.push("/")}
+        onAnnotate={() => {
+          setShowAnnotator(true);
+        }}
+        onCalculator={() => {
+          setShowCalculator(true);
+        }}
+        onReference={() => {
+          setShowReference(true);
+        }}
+        onKnowledgeReview={() => {
+          setShowKnowledge(true);
+        }}
       />
 
       <PracticeMain

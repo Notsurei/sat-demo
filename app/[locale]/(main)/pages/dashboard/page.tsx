@@ -10,12 +10,13 @@ import DashboardHistory from "./components/dashboard-history";
 import DashboardTasks from "./components/dashboard-task";
 import RecommendedPractice from "./components/recommended-practice";
 import DashboardUpgradeBanner from "./components/dashboard-upgrade-banner";
-
+import { useTranslations} from 'next-intl'
 import { useDashboardData } from "./hooks/use-dashboard-data";
 import DashboardProgressChart from "./components/dashboard-progress-chart";
 
 export default function Dashboard() {
   const router = useRouter();
+  const t = useTranslations('dashboard');
 
   const { user, isAuthenticated, isLoading, checkAuth } = useAuthStore();
 
@@ -33,13 +34,22 @@ export default function Dashboard() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  const { practiceHistory, fullTestHistory, practiceLoading, fullTestLoading } =
-    useDashboardData(isAuthenticated, isLoading);
+  const {
+    practiceHistory,
+    fullTestHistory,
+    mathOnlyHistory,
+    rwOnlyHistory,
+
+    practiceLoading,
+    fullTestLoading,
+    mathOnlyLoading,
+    rwOnlyLoading,
+  } = useDashboardData(isAuthenticated, isLoading);
 
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-default-500">Loading your dashboard...</p>
+        <p className="text-sm text-default-500">{t("loading")}</p>
       </main>
     );
   }
@@ -66,6 +76,8 @@ export default function Dashboard() {
         <DashboardProgressChart
           practiceHistory={practiceHistory}
           fullTestHistory={fullTestHistory}
+          mathTestHistory={mathOnlyHistory}
+          rwTestHistory={rwOnlyHistory}
         />
 
         <div className="space-y-6">
@@ -76,8 +88,12 @@ export default function Dashboard() {
               <DashboardHistory
                 practiceHistory={practiceHistory}
                 fullTestHistory={fullTestHistory}
+                mathTestHistory={mathOnlyHistory}
+                rwTestHistory={rwOnlyHistory}
                 practiceLoading={practiceLoading}
                 fullTestLoading={fullTestLoading}
+                mathTestLoading={mathOnlyLoading}
+                rwTestLoading={rwOnlyLoading}
               />
             </div>
 

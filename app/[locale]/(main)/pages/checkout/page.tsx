@@ -19,8 +19,7 @@ const PLAN_META = {
 
 type PlanKey = keyof typeof PLAN_META;
 
-const isPlanKey = (value: string): value is PlanKey =>
-  value in PLAN_META;
+const isPlanKey = (value: string): value is PlanKey => value in PLAN_META;
 
 function CheckoutContent() {
   const router = useRouter();
@@ -71,7 +70,8 @@ function CheckoutContent() {
         </Button>
 
         <div className="mt-8">
-          <Chip color="default">{t("stripeBadge")}</Chip>
+          {/* ✅ Đổi badge từ "Stripe Checkout" → "Dodo Payments" */}
+          <Chip color="default">{t("paymentBadge")}</Chip>
 
           <h1 className="mt-4 text-4xl font-bold">{t("title")}</h1>
 

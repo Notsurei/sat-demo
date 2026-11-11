@@ -22,23 +22,28 @@ const STATUS_CONFIG: Record<
   {
     icon: React.ReactNode;
     iconClass: string;
+    iconBgClass: string;
   }
 > = {
   success: {
-    icon: <Check width={56} height={56} />,
-    iconClass: "text-success",
+    icon: <Check width={48} height={48} />,
+    iconClass: "text-emerald-600",
+    iconBgClass: "bg-emerald-50 ring-emerald-100",
   },
   already: {
-    icon: <CircleInfo width={56} height={56} />,
-    iconClass: "text-primary",
+    icon: <CircleInfo width={48} height={48} />,
+    iconClass: "text-blue-600",
+    iconBgClass: "bg-blue-50 ring-blue-100",
   },
   expired: {
-    icon: <Clock width={56} height={56} />,
-    iconClass: "text-warning",
+    icon: <Clock width={48} height={48} />,
+    iconClass: "text-amber-600",
+    iconBgClass: "bg-amber-50 ring-amber-100",
   },
   invalid: {
-    icon: <XmarkShape width={56} height={56} />,
-    iconClass: "text-danger",
+    icon: <XmarkShape width={48} height={48} />,
+    iconClass: "text-red-600",
+    iconBgClass: "bg-red-50 ring-red-100",
   },
 };
 
@@ -56,39 +61,85 @@ function VerifyContent() {
   const config = STATUS_CONFIG[status];
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#0f172a] to-black px-6">
-      <Card className="w-full max-w-md border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-6">
+      <Card className="w-full max-w-md border border-slate-200 bg-white shadow-xl">
         <Card.Header className="p-8 text-center">
-          <div className={`mb-4 flex justify-center ${config.iconClass}`}>
-            {config.icon}
+          <div className="mb-5 flex justify-center">
+            <div
+              className={`flex h-20 w-20 items-center justify-center rounded-full ring-8 ${config.iconBgClass} ${config.iconClass}`}
+            >
+              {config.icon}
+            </div>
           </div>
 
-          <h1 className="text-2xl font-bold leading-tight text-white md:text-3xl">
+          <h1 className="text-2xl font-bold leading-tight text-slate-900 md:text-3xl">
             {t(`${status}.title`)}
           </h1>
 
-          <p className="mt-3 text-sm leading-relaxed text-gray-400 md:text-base">
+          <p className="mt-3 text-sm leading-relaxed text-slate-600 md:text-base">
             {t(`${status}.description`)}
           </p>
 
-          {status === "expired" && (
-            <div className="mt-6 flex flex-col gap-3">
+          <div className="mt-8 flex flex-col gap-3">
+            {status === "success" && (
               <Link href="/">
                 <Button
                   variant="primary"
-                  className="w-full text-gray-300 transition-colors hover:text-white"
+                  className="w-full font-semibold text-white"
                 >
-                  {t("buttons.goHome")}
+                  {t("buttons.signIn")}
                 </Button>
               </Link>
-            </div>
-          )}
+            )}
 
-          <p className="mt-6 text-xs text-gray-500">
+            {status === "already" && (
+              <Link href="/">
+                <Button
+                  variant="primary"
+                  className="w-full font-semibold text-white"
+                >
+                  {t("buttons.signIn")}
+                </Button>
+              </Link>
+            )}
+
+            {status === "expired" && (
+              <>
+                <Link href="/pages/signin">
+                  <Button
+                    variant="primary"
+                    className="w-full font-semibold text-white"
+                  >
+                    {t("buttons.requestNewLink")}
+                  </Button>
+                </Link>
+                <Link href="/">
+                  <Button variant="outline" className="w-full font-medium">
+                    {t("buttons.goHome")}
+                  </Button>
+                </Link>
+              </>
+            )}
+
+            {status === "invalid" && (
+              <>
+                <Link href="/pages/signin">
+                  <Button
+                    variant="primary"
+                    className="w-full font-semibold text-white"
+                  >
+                    {t("buttons.goHome")}
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          <p className="mt-8 text-xs text-slate-500">
             {t("support.text")}{" "}
             <Link
               href="/contact"
-              className="text-blue-400 transition-colors hover:text-blue-300"
+              className="font-medium text-blue-600 transition-colors hover:text-blue-700"
             >
               {t("support.link")}
             </Link>
@@ -105,8 +156,8 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-[#0f172a] to-black">
-          <div className="text-white">{t("loading")}</div>
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100">
+          <div className="text-slate-600">{t("loading")}</div>
         </main>
       }
     >

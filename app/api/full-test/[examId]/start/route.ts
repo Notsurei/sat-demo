@@ -15,10 +15,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (!userId) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-        },
+        { success: false, message: "Unauthorized" },
         { status: 401 },
       );
     }
@@ -27,27 +24,20 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (!examId) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Exam ID is required",
-        },
+        { success: false, message: "Exam ID is required" },
         { status: 400 },
       );
     }
 
     const exam = await prisma.exam.findUnique({
-      where: {
-        id: examId,
-      },
+      where: { id: examId },
       select: {
         id: true,
         title: true,
         duration: true,
         totalQuestions: true,
         sections: {
-          orderBy: {
-            order: "asc",
-          },
+          orderBy: { order: "asc" },
           select: {
             id: true,
             subject: true,
@@ -62,39 +52,26 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (!exam) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Exam not found",
-        },
+        { success: false, message: "Exam not found" },
         { status: 404 },
       );
     }
 
     if (exam.sections.length === 0) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "This exam has no sections",
-        },
+        { success: false, message: "This exam has no sections" },
         { status: 400 },
       );
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        id: true,
-      },
+      where: { id: userId },
+      select: { id: true },
     });
 
     if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "User not found",
-        },
+        { success: false, message: "User not found" },
         { status: 401 },
       );
     }
@@ -103,7 +80,7 @@ export async function POST(request: Request, context: RouteContext) {
       where: {
         userId: user.id,
         examId,
-        status: "IN_PROGRESS",
+        status: { in: ["IN_PROGRESS", "BREAK"] },
       },
       select: {
         id: true,
@@ -116,7 +93,10 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json(
         {
           success: false,
-          message: "You already have an active full test session",
+          message:
+            existingSession.status === "BREAK"
+              ? "You have a session on break. Please finish the break first."
+              : "You already have an active full test session",
           data: {
             sessionId: existingSession.id,
             status: existingSession.status,
@@ -192,10 +172,7 @@ export async function POST(request: Request, context: RouteContext) {
     console.error("POST /api/full-test/[examId]/start error:", error);
 
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to start full test",
-      },
+      { success: false, message: "Failed to start full test" },
       { status: 500 },
     );
   }

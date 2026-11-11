@@ -13,6 +13,7 @@ export const siteConfig = {
       labelKey: "dashboard",
       href: "/pages/dashboard",
     },
+    { href: "/pages/subscription", labelKey: "subscription" },
     {
       labelKey: "plans",
       href: "/pages/pricing",

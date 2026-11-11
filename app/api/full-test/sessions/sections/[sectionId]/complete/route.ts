@@ -47,6 +47,158 @@ const ADAPTIVE_CONFIG = {
   MAX_PER_SUBTOPIC: 2,
 } as const;
 
+/* ─────────────────────────────────────────────────────────────
+   SAT SCALING TABLES
+   ───────────────────────────────────────────────────────────── */
+const SAT_RW_MAX_RAW = 54;
+const SAT_MATH_MAX_RAW = 44;
+
+const RW_SCALE_HARD: ReadonlyArray<readonly [number, number]> = [
+  [0, 200],
+  [3, 230],
+  [6, 260],
+  [9, 290],
+  [12, 320],
+  [15, 360],
+  [18, 390],
+  [21, 420],
+  [24, 460],
+  [27, 490],
+  [30, 520],
+  [33, 550],
+  [36, 580],
+  [39, 610],
+  [42, 640],
+  [44, 660],
+  [46, 680],
+  [48, 710],
+  [50, 740],
+  [52, 770],
+  [53, 790],
+  [54, 800],
+];
+
+const RW_SCALE_EASY: ReadonlyArray<readonly [number, number]> = [
+  [0, 200],
+  [3, 220],
+  [6, 250],
+  [9, 270],
+  [12, 300],
+  [15, 330],
+  [18, 360],
+  [21, 390],
+  [24, 410],
+  [27, 430],
+  [30, 450],
+  [33, 470],
+  [36, 490],
+  [39, 510],
+  [42, 530],
+  [44, 550],
+  [46, 570],
+  [48, 590],
+  [50, 610],
+  [52, 630],
+  [54, 650],
+];
+
+const MATH_SCALE_HARD: ReadonlyArray<readonly [number, number]> = [
+  [0, 200],
+  [2, 230],
+  [4, 260],
+  [6, 290],
+  [8, 320],
+  [10, 350],
+  [12, 380],
+  [14, 410],
+  [16, 440],
+  [18, 470],
+  [20, 500],
+  [22, 530],
+  [24, 560],
+  [26, 590],
+  [28, 620],
+  [30, 650],
+  [32, 680],
+  [34, 710],
+  [36, 740],
+  [38, 760],
+  [40, 780],
+  [42, 790],
+  [43, 795],
+  [44, 800],
+];
+
+const MATH_SCALE_EASY: ReadonlyArray<readonly [number, number]> = [
+  [0, 200],
+  [2, 220],
+  [4, 240],
+  [6, 260],
+  [8, 280],
+  [10, 300],
+  [12, 325],
+  [14, 350],
+  [16, 375],
+  [18, 400],
+  [20, 420],
+  [22, 445],
+  [24, 465],
+  [26, 480],
+  [28, 500],
+  [30, 515],
+  [32, 530],
+  [34, 545],
+  [36, 560],
+  [38, 575],
+  [40, 590],
+  [42, 610],
+  [44, 630],
+];
+
+function rawToScaled(
+  raw: number,
+  table: ReadonlyArray<readonly [number, number]>,
+): number {
+  if (raw <= table[0][0]) return table[0][1];
+  const last = table[table.length - 1];
+  if (raw >= last[0]) return last[1];
+
+  for (let i = 1; i < table.length; i++) {
+    if (raw <= table[i][0]) {
+      const [x0, y0] = table[i - 1];
+      const [x1, y1] = table[i];
+      const t = (raw - x0) / (x1 - x0);
+      return Math.round(y0 + t * (y1 - y0));
+    }
+  }
+  return last[1];
+}
+
+function computeSubjectScaled(
+  subject: "RW" | "MATH",
+  correct: number,
+  total: number,
+  isHard: boolean,
+): number {
+  if (total === 0) return 200;
+
+  const maxRaw = subject === "RW" ? SAT_RW_MAX_RAW : SAT_MATH_MAX_RAW;
+  const normalizedRaw =
+    total === maxRaw ? correct : Math.round((correct / total) * maxRaw);
+
+  const table =
+    subject === "RW"
+      ? isHard
+        ? RW_SCALE_HARD
+        : RW_SCALE_EASY
+      : isHard
+        ? MATH_SCALE_HARD
+        : MATH_SCALE_EASY;
+
+  const scaled = rawToScaled(normalizedRaw, table);
+  return Math.round(Math.max(200, Math.min(800, scaled)) / 10) * 10;
+}
+
 interface QuestionStub {
   id: string;
   difficulty: string;
@@ -54,12 +206,28 @@ interface QuestionStub {
   subtopic: string | null;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   AUTH
+   ───────────────────────────────────────────────────────────── */
 function getUserIdFromRequest(req: NextRequest): string | null {
+  const headerUserId = req.headers.get("x-user-id");
+  if (headerUserId) return headerUserId;
+
   const token = req.cookies.get("token")?.value;
-  if (!token) return null;
+  if (!token) {
+    console.warn(
+      "[/complete] No x-user-id header and no 'token' cookie. " +
+        "Cookies present:",
+      req.cookies.getAll().map((c) => c.name),
+    );
+    return null;
+  }
 
   const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET is not configured");
+  if (!secret) {
+    console.error("[/complete] JWT_SECRET is not configured");
+    return null;
+  }
 
   try {
     const decoded = jwt.verify(token, secret);
@@ -72,11 +240,15 @@ function getUserIdFromRequest(req: NextRequest): string | null {
       return (decoded as JwtPayload).userId;
     }
     return null;
-  } catch {
+  } catch (err) {
+    console.warn("[/complete] JWT verify failed:", err);
     return null;
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   HELPERS
+   ───────────────────────────────────────────────────────────── */
 function normalizeAnswer(value: unknown): string {
   if (value === null || value === undefined) return "";
   return String(value).trim().toLowerCase();
@@ -269,6 +441,9 @@ async function fillAdaptiveModule2(params: {
   return { selectedCount: sorted.length, variant };
 }
 
+/* ─────────────────────────────────────────────────────────────
+   POST handler
+   ───────────────────────────────────────────────────────────── */
 export async function POST(req: NextRequest, { params }: Params) {
   try {
     const { sectionId } = await params;
@@ -280,6 +455,12 @@ export async function POST(req: NextRequest, { params }: Params) {
         { status: 401 },
       );
     }
+
+    const body = await req.json().catch(() => ({}));
+    const clientTimeSpent =
+      typeof body.timeSpent === "number" && body.timeSpent >= 0
+        ? Math.floor(body.timeSpent)
+        : undefined;
 
     const sectionSession = await prisma.fullTestSectionSession.findFirst({
       where: {
@@ -333,6 +514,7 @@ export async function POST(req: NextRequest, { params }: Params) {
           examSectionId: sectionSession.examSectionId,
           status: "COMPLETED",
           adaptive: null,
+          breakInfo: null,
         },
       });
     }
@@ -476,6 +658,18 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
+    /* ─────────────────────────────────────────────────────────
+       Transaction
+       ───────────────────────────────────────────────────────── */
+    let nextSectionSessionId: string | null = null;
+    let breakInfo: {
+      durationSeconds: number;
+      startedAt: string;
+      endsAt: string;
+      nextSectionSessionId: string;
+      nextExamSectionId: string;
+    } | null = null;
+
     const nextSection = await prisma.$transaction(
       async (tx) => {
         const next = await tx.examSection.findFirst({
@@ -494,6 +688,17 @@ export async function POST(req: NextRequest, { params }: Params) {
           },
         });
 
+        const serverSectionTime = sectionSession.startedAt
+          ? Math.max(
+              Math.floor(
+                (completedAt.getTime() - sectionSession.startedAt.getTime()) /
+                  1000,
+              ),
+              0,
+            )
+          : 0;
+        const sectionTimeSpent = clientTimeSpent ?? serverSectionTime;
+
         await tx.fullTestSectionSession.update({
           where: { id: sectionSession.id },
           data: {
@@ -501,6 +706,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             completedAt,
             lastActivityAt: completedAt,
             remainingTime: 0,
+            timeSpent: sectionTimeSpent,
           },
         });
 
@@ -513,11 +719,42 @@ export async function POST(req: NextRequest, { params }: Params) {
                   examSectionId: next.id,
                 },
               },
+              select: { id: true, startedAt: true },
             },
           );
 
           if (!nextSectionSession) {
             throw new Error("Next section session not found.");
+          }
+
+          nextSectionSessionId = nextSectionSession.id;
+
+          const hasBreak = (currentSection.breakAfter ?? 0) > 0;
+
+          if (hasBreak) {
+            const breakDurationSec = (currentSection.breakAfter ?? 0) * 60;
+            const endsAt = new Date(
+              completedAt.getTime() + breakDurationSec * 1000,
+            );
+
+            await tx.fullTestSession.update({
+              where: { id: fullTestSession.id },
+              data: {
+                status: "BREAK",
+                currentSectionOrder: next.order,
+                lastActivityAt: completedAt,
+              },
+            });
+
+            breakInfo = {
+              durationSeconds: breakDurationSec,
+              startedAt: completedAt.toISOString(),
+              endsAt: endsAt.toISOString(),
+              nextSectionSessionId: nextSectionSession.id,
+              nextExamSectionId: next.id,
+            };
+
+            return next;
           }
 
           await tx.fullTestSectionSession.update({
@@ -529,23 +766,153 @@ export async function POST(req: NextRequest, { params }: Params) {
               remainingTime: next.duration * 60,
             },
           });
+
+          await tx.fullTestSession.update({
+            where: { id: fullTestSession.id },
+            data: {
+              currentSectionOrder: next.order,
+              lastActivityAt: completedAt,
+            },
+          });
+
+          return next;
         }
+
+        /* ─── Module CUỐI: aggregate toàn bộ + compute scaledScore ─── */
+        const allSections = await tx.fullTestSectionSession.findMany({
+          where: { fullTestSessionId: fullTestSession.id },
+          select: {
+            timeSpent: true,
+            examSection: {
+              select: {
+                subject: true,
+                title: true,
+                questions: { select: { questionId: true } },
+              },
+            },
+            answers: {
+              select: {
+                selectedOptionId: true,
+                textAnswer: true,
+                isCorrect: true,
+                timeSpent: true,
+              },
+            },
+          },
+        });
+
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        let totalAnswered = 0;
+        let totalQuestionsAll = 0;
+        let sumSectionTime = 0;
+
+        /* NEW: raw per subject */
+        let rwCorrect = 0;
+        let rwTotal = 0;
+        let mathCorrect = 0;
+        let mathTotal = 0;
+        let rwIsHard = false;
+        let mathIsHard = false;
+
+        for (const s of allSections) {
+          const isRW = s.examSection.subject === Subject.SAT_RW;
+          const sectionQ = s.examSection.questions.length;
+
+          totalQuestionsAll += sectionQ;
+          sumSectionTime += s.timeSpent ?? 0;
+
+          if (isRW) {
+            rwTotal += sectionQ;
+            if ((s.examSection.title ?? "").toLowerCase().includes("hard")) {
+              rwIsHard = true;
+            }
+          } else {
+            mathTotal += sectionQ;
+            if ((s.examSection.title ?? "").toLowerCase().includes("hard")) {
+              mathIsHard = true;
+            }
+          }
+
+          for (const a of s.answers) {
+            const isAns =
+              a.selectedOptionId !== null ||
+              (a.textAnswer !== null && a.textAnswer.trim() !== "");
+
+            if (isAns) totalAnswered++;
+            if (a.isCorrect === true) {
+              totalCorrect++;
+              if (isRW) rwCorrect++;
+              else mathCorrect++;
+            } else if (a.isCorrect === false) {
+              totalWrong++;
+            }
+          }
+        }
+
+        /* Compute scaledScore */
+        const rwScaled = computeSubjectScaled(
+          "RW",
+          rwCorrect,
+          rwTotal,
+          rwIsHard,
+        );
+        const mathScaled = computeSubjectScaled(
+          "MATH",
+          mathCorrect,
+          mathTotal,
+          mathIsHard,
+        );
+        const scaledScore = rwScaled + mathScaled;
+
+        const totalSkipped = Math.max(totalQuestionsAll - totalAnswered, 0);
+
+        const wallClock = Math.max(
+          Math.floor(
+            (completedAt.getTime() - fullTestSession.startedAt.getTime()) /
+              1000,
+          ),
+          0,
+        );
+        const totalTimeSpent = sumSectionTime > 0 ? sumSectionTime : wallClock;
 
         await tx.fullTestSession.update({
           where: { id: fullTestSession.id },
           data: {
-            ...(next ? { currentSectionOrder: next.order } : {}),
-            ...(!next
-              ? {
-                  status: "COMPLETED",
-                  completedAt,
-                }
-              : {}),
+            status: "COMPLETED",
+            completedAt,
             lastActivityAt: completedAt,
+
+            totalCorrect,
+            totalWrong,
+            totalSkipped,
+            rawScore: totalCorrect,
+            totalTimeSpent,
+            scaledScore,
           },
         });
 
-        return next;
+        console.info("[FullTest] Completed & aggregated", {
+          fullTestSessionId: fullTestSession.id,
+          totalQuestions: totalQuestionsAll,
+          totalAnswered,
+          totalCorrect,
+          totalWrong,
+          totalSkipped,
+          rawScore: totalCorrect,
+          rwCorrect,
+          rwTotal,
+          mathCorrect,
+          mathTotal,
+          rwScaled,
+          mathScaled,
+          scaledScore,
+          sumSectionTime,
+          wallClock,
+          totalTimeSpent,
+        });
+
+        return null;
       },
       { timeout: 15000 },
     );
@@ -584,6 +951,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         nextSection: nextSection
           ? {
               id: nextSection.id,
+              sectionSessionId: nextSectionSessionId,
               title: nextSection.title,
               subject: nextSection.subject,
               order: nextSection.order,
@@ -592,6 +960,8 @@ export async function POST(req: NextRequest, { params }: Params) {
           : null,
 
         nextSectionOrder: nextSection?.order ?? null,
+
+        breakInfo,
       },
     });
   } catch (error) {

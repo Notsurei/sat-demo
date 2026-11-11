@@ -4,7 +4,7 @@ import { Button, Chip } from "@heroui/react";
 import { useTranslations } from "next-intl";
 
 import KnowledgeModal from "@/app/components/modal-button/knowledge-modal";
-import TestModeModal from "@/app/components/modal-button/test-mode-modal";
+import TestModeModal from "@/app/components/forms/test-mode-modal";
 
 interface DashboardHeaderProps {
   firstName?: string | null;

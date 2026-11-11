@@ -2,12 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../util/prisma";
 import { transporter } from "../../util/mailer";
-
-function getRandomInt(min: number, max: number) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import { randomInt } from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -22,16 +17,20 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { message: "If an account exists, instructions were sent." },
-        { status: 200 },
-      );
+      return NextResponse.json({
+        success: true,
+        message: "If an account exists, instructions were sent.",
+      });
     }
-    const generatedToken: string = getRandomInt(100000, 999999).toString();
-    const tokenExpiry = new Date(Date.now() + 3600000);
-    const resetLink = `http://localhost:3000/pages/email-reset-password`;
 
-    const updatedUser = await prisma.user.update({
+    const generatedToken = randomInt(100000, 1000000).toString();
+    const tokenExpiry = new Date(Date.now() + 3600000);
+
+    // const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = "http://localhost:3000";
+    const resetLink = `${appUrl}/pages/email-reset-password`;
+
+    await prisma.user.update({
       where: { email },
       data: {
         resetToken: generatedToken,
@@ -97,16 +96,13 @@ export async function POST(request: Request) {
     await transporter.sendMail(mailOption);
 
     return NextResponse.json({
+      success: true,
       message: "Email sent",
-      data: {
-        resetToken: updatedUser.resetToken,
-        resetTokenExpiry: updatedUser.resetTokenExpiry,
-      },
     });
-  } catch (error: any) {
-    console.error("Forgot password error:", error);
+  } catch (error) {
+    console.error("[ForgotPassword] Error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to process request" },
+      { error: "Something went wrong. Please try again." },
       { status: 500 },
     );
   }

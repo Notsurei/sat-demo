@@ -1,14 +1,15 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/app/api/util/prisma";
-import { headers } from "next/headers";
 import { Subject } from "@prisma/client";
+
+import { prisma } from "@/app/api/util/prisma";
 import {
   getFullTestLimit,
   isFullTestUnlimited,
   type PlanType,
 } from "@/app/api/util/plan-limit";
+import { resolveUserSubscription } from "@/app/api/util/subscription";
 
 const SAT_CONFIG = {
   RW: {
@@ -50,6 +51,11 @@ interface QuestionStub {
   difficulty: string;
   domain: string | null;
   subtopic: string | null;
+}
+
+function getMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
 }
 
 function shuffle<T>(items: T[]): T[] {
@@ -128,7 +134,6 @@ function selectByBlueprint(
     }
   }
 
-  // Backfill
   if (selected.length < targetCount) {
     const usedIds = new Set(selected.map((q) => q.id));
     const leftovers = shuffle(pool.filter((q) => !usedIds.has(q.id)));
@@ -182,8 +187,7 @@ export async function POST(request: NextRequest) {
         ? body.title.trim()
         : `SAT Full Test ${Date.now()}`;
 
-    const h = await headers();
-    const userId = h.get("x-user-id");
+    const userId = request.headers.get("x-user-id");
 
     if (!userId) {
       return NextResponse.json(
@@ -192,19 +196,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { subscriptionPlan: true },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 404 },
-      );
-    }
-
-    const plan = user.subscriptionPlan as PlanType;
+    const sub = await resolveUserSubscription(userId);
+    const plan = sub.plan as PlanType;
     const limit = getFullTestLimit(plan);
     const unlimited = isFullTestUnlimited(plan);
 
@@ -213,6 +206,7 @@ export async function POST(request: NextRequest) {
         where: {
           userId,
           status: { in: ["IN_PROGRESS", "BREAK", "COMPLETED"] },
+          createdAt: { gte: getMonthStart() },
         },
       });
 
@@ -220,12 +214,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
+            code: "QUOTA_EXCEEDED",
             error:
               plan === "FREE"
                 ? "Full test is not available on your plan. Please upgrade."
-                : `You've reached your limit (${limit} attempts). Please upgrade for more.`,
-            code: "QUOTA_EXCEEDED",
-            data: { plan, limit, used },
+                : `You've reached your limit (${limit} attempts this month). Please upgrade for more.`,
+            message:
+              plan === "FREE"
+                ? "Upgrade your plan to unlock full tests."
+                : `You've used ${used}/${limit} full tests this month. Upgrade for more attempts.`,
+            data: { plan, limit, used, remaining: 0 },
           },
           { status: 403 },
         );
@@ -406,19 +404,16 @@ export async function POST(request: NextRequest) {
           duration: exam.duration,
           sections: sectionsPayload,
         },
-        title: exam.title,
-        totalQuestions: exam.totalQuestions,
-        duration: exam.duration,
-        sections: sectionsPayload,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("GENERATE FULL TEST ERROR:", error);
+    console.error("[GenerateFullTest] Error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Internal Server Error",
+        error:
+          error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 },
     );
