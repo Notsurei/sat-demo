@@ -183,13 +183,11 @@ export async function POST(request: NextRequest) {
           createdAt: { gte: getMonthStart() },
         },
         select: {
-          examSection: { select: { examId: true } },
+          examId: true, // ✅ sửa: examId có sẵn trên RwModuleSession
         },
       });
 
-      const distinctExamIds = new Set(
-        rwSessions.map((s) => s.examSection.examId),
-      );
+      const distinctExamIds = new Set(rwSessions.map((s) => s.examId));
       const used = distinctExamIds.size;
 
       if (used >= limit) {

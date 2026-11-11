@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/app/api/util/prisma";
 import {
-  getMathTestLimit,
-  isMathTestUnlimited,
+  getRwTestLimit,
+  isRwTestUnlimited,
   type PlanType,
 } from "@/app/api/util/plan-limit";
 import { resolveUserSubscription } from "@/app/api/util/subscription";
@@ -28,24 +28,24 @@ export async function GET(request: NextRequest) {
 
     const sub = await resolveUserSubscription(userId);
     const plan = sub.plan as PlanType;
-    const limit = getMathTestLimit(plan);
-    const unlimited = isMathTestUnlimited(plan);
+    const limit = getRwTestLimit(plan);
+    const unlimited = isRwTestUnlimited(plan);
 
     let used = 0;
 
     if (!unlimited) {
-      const sessions = await prisma.mathModuleSession.findMany({
+      const sessions = await prisma.rwModuleSession.findMany({
         where: {
           userId,
           status: { in: ["IN_PROGRESS", "COMPLETED", "EXPIRED"] },
           createdAt: { gte: getMonthStart() },
         },
         select: {
-          examSection: { select: { examId: true } },
+          examId: true, // ✅ RwModuleSession có examId trực tiếp
         },
       });
 
-      used = new Set(sessions.map((s) => s.examSection.examId)).size;
+      used = new Set(sessions.map((s) => s.examId)).size;
     }
 
     const remaining = unlimited ? null : Math.max(0, limit - used);
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[MathModuleQuota] Error:", error);
+    console.error("[RwModuleQuota] Error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to check quota" },
       { status: 500 },

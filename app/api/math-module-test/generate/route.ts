@@ -171,13 +171,11 @@ export async function POST(request: NextRequest) {
           createdAt: { gte: getMonthStart() },
         },
         select: {
-          examSection: { select: { examId: true } },
+          examId: true, // ✅ sửa: examId có sẵn trên MathModuleSession
         },
       });
 
-      const distinctExamIds = new Set(
-        mathSessions.map((s) => s.examSection.examId),
-      );
+      const distinctExamIds = new Set(mathSessions.map((s) => s.examId));
       const used = distinctExamIds.size;
 
       if (used >= limit) {
